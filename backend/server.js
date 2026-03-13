@@ -1,10 +1,14 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import { google } from "googleapis";
 import { createClient } from "@supabase/supabase-js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import googleCalendarRoutes, {
+  criarEventoAgendamento,
+  criarEventoVisita,
+  deletarEventoAgendamento,
+} from "./google-calendar.js";
 
 dotenv.config();
 
@@ -21,17 +25,9 @@ const supabase = createClient(
 );
 
 /* ===============================
-   GOOGLE CALENDAR
+   GOOGLE CALENDAR ROUTES
 =================================*/
-const auth = new google.auth.GoogleAuth({
-  credentials: {
-    client_email: process.env.GOOGLE_CLIENT_EMAIL,
-    private_key: process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, "\n"),
-  },
-  scopes: ["https://www.googleapis.com/auth/calendar"],
-});
-
-const calendar = google.calendar({ version: "v3", auth });
+app.use(googleCalendarRoutes);
 
 /* ===============================
    AUTH
@@ -61,8 +57,9 @@ app.post("/api/login", async (req, res) => {
     .eq("email", email)
     .single();
 
-  if (error || !user)
+  if (error || !user) {
     return res.status(401).json({ error: "Usuário não encontrado" });
+  }
 
   const valid = await bcrypt.compare(password, user.password);
   if (!valid) return res.status(401).json({ error: "Senha inválida" });
@@ -72,33 +69,6 @@ app.post("/api/login", async (req, res) => {
   });
 
   res.json({ token, user });
-});
-
-/* ===============================
-   GOOGLE CALENDAR
-=================================*/
-
-app.get("/api/google-calendar", async (req, res) => {
-  try {
-    const response = await calendar.events.list({
-      calendarId: process.env.GOOGLE_CALENDAR_ID,
-      timeMin: new Date().toISOString(),
-      singleEvents: true,
-      orderBy: "startTime",
-    });
-
-    const eventos = response.data.items;
-
-    const datasOcupadas = eventos.map((evento) => {
-      const data = evento.start.dateTime || evento.start.date;
-      return data.split("T")[0];
-    });
-
-    res.json({ datasOcupadas });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Erro ao buscar Google Calendar" });
-  }
 });
 
 /* ===============================
@@ -112,37 +82,11 @@ app.post("/api/agendamentos", async (req, res) => {
   }
 
   try {
-
-    // calcular horário final (4h depois)
-    const inicio = new Date(data_evento);
-    const fim = new Date(inicio);
-    fim.setHours(fim.getHours() + 4);
-
-    const event = {
-      summary: `Fest Haus - ${servico}`,
-      description: mensagem || "",
-      start: {
-        dateTime: data_evento,
-        timeZone: "America/Sao_Paulo",
-      },
-      end: {
-        dateTime: fim.toISOString(),
-        timeZone: "America/Sao_Paulo",
-      },
-    };
-
-    /* ==========================
-       Criar no Google Calendar
-    ========================== */
-
-    const googleResponse = await calendar.events.insert({
-      calendarId: process.env.GOOGLE_CALENDAR_ID,
-      resource: event,
+    const googleEvent = await criarEventoAgendamento({
+      servico,
+      data_evento,
+      mensagem,
     });
-
-    /* ==========================
-       Salvar no banco
-    ========================== */
 
     const { data, error } = await supabase
       .from("agendamentos")
@@ -152,8 +96,8 @@ app.post("/api/agendamentos", async (req, res) => {
           servico,
           data_evento,
           mensagem,
-          google_event_id: googleResponse.data.id,
-          status: "em_processo"
+          google_event_id: googleEvent.id,
+          status: "em_processo",
         },
       ])
       .select();
@@ -161,12 +105,12 @@ app.post("/api/agendamentos", async (req, res) => {
     if (error) throw error;
 
     res.status(201).json(data[0]);
-
   } catch (err) {
     console.error("Erro ao criar agendamento:", err);
     res.status(500).json({ error: "Erro ao criar agendamento" });
   }
 });
+
 /* 🔵 LISTAR TODOS */
 app.get("/api/agendamentos", async (req, res) => {
   const { data, error } = await supabase
@@ -192,9 +136,7 @@ app.get("/api/agendamentos/usuario/:usuario_id", async (req, res) => {
 
     if (error) throw error;
 
-    // 👇 É AQUI
     res.json(data);
-
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Erro ao buscar agendamentos" });
@@ -220,24 +162,32 @@ app.get("/api/agendamentos/:id", async (req, res) => {
 app.delete("/api/agendamentos/:id", async (req, res) => {
   const { id } = req.params;
 
-  const { data: agendamento } = await supabase
-    .from("agendamentos")
-    .select("*")
-    .eq("id", id)
-    .single();
+  try {
+    const { data: agendamento, error: erroBusca } = await supabase
+      .from("agendamentos")
+      .select("*")
+      .eq("id", id)
+      .single();
 
-  if (agendamento?.google_event_id) {
-    await calendar.events.delete({
-      calendarId: process.env.GOOGLE_CALENDAR_ID,
-      eventId: agendamento.google_event_id,
-    });
+    if (erroBusca) throw erroBusca;
+
+    if (agendamento?.google_event_id) {
+      await deletarEventoAgendamento(agendamento.google_event_id);
+    }
+
+    const { error: erroDelete } = await supabase
+      .from("agendamentos")
+      .delete()
+      .eq("id", id);
+
+    if (erroDelete) throw erroDelete;
+
+    res.json({ message: "Agendamento deletado" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Erro ao deletar agendamento" });
   }
-
-  await supabase.from("agendamentos").delete().eq("id", id);
-
-  res.json({ message: "Agendamento deletado" });
 });
-
 /* ===============================
    ORÇAMENTOS
 =================================*/
@@ -302,19 +252,62 @@ app.delete("/api/orcamentos/:id", async (req, res) => {
 });
 
 /* ===============================
-   SERVER
+   VISITAS
 =================================*/
 
-app.get("/", (req, res) => {
-  res.send("Fest Haus API rodando 🚀");
+app.post("/api/visitas", async (req, res) => {
+  try {
+    const { usuario_id, data_visita, mensagem } = req.body;
+
+    const googleEvent = await criarEventoVisita({
+      data_visita,
+      mensagem,
+    });
+
+    const { data, error } = await supabase
+      .from("visitas")
+      .insert([
+        {
+          usuario_id,
+          data_visita,
+          mensagem,
+          google_event_id: googleEvent.id,
+          status: "em_processo",
+        },
+      ])
+      .select();
+
+    if (error) throw error;
+
+    res.status(201).json(data[0]);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Erro ao criar visita" });
+  }
 });
 
-app.listen(3001, () => {
-  console.log("Backend rodando na porta 3001");
+app.get("/api/visitas/usuario/:usuario_id", async (req, res) => {
+  try {
+    const { usuario_id } = req.params;
+
+    const { data, error } = await supabase
+      .from("visitas")
+      .select("*")
+      .eq("usuario_id", usuario_id)
+      .order("data_visita", { ascending: true });
+
+    if (error) throw error;
+
+    res.json(data);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Erro ao buscar visitas" });
+  }
 });
 
-
-// agendamento aceitar admin
+/* ===============================
+   APROVAÇÕES
+=================================*/
 
 app.put("/api/agendamentos/:id/aprovar", async (req, res) => {
   const { id } = req.params;
@@ -327,4 +320,34 @@ app.put("/api/agendamentos/:id/aprovar", async (req, res) => {
   if (error) return res.status(500).json(error);
 
   res.json({ message: "Agendamento aprovado" });
+});
+
+app.put("/api/visitas/:id/aprovar", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const { error } = await supabase
+      .from("visitas")
+      .update({ status: "aprovado" })
+      .eq("id", id);
+
+    if (error) throw error;
+
+    res.json({ message: "Visita aprovada" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Erro ao aprovar visita" });
+  }
+});
+
+/* ===============================
+   SERVER
+=================================*/
+
+app.get("/", (req, res) => {
+  res.send("Fest Haus API rodando 🚀");
+});
+
+app.listen(3001, () => {
+  console.log("Backend rodando na porta 3001");
 });

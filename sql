@@ -97,3 +97,16 @@ create table agendamentos (
 );
 ALTER TABLE agendamentos
 ADD COLUMN status VARCHAR(20) NOT NULL DEFAULT 'em_processo';
+
+CREATE TABLE public.visitas (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  usuario_id uuid NOT NULL,
+  data_visita timestamp NOT NULL,
+  mensagem text,
+  status varchar(20) NOT NULL DEFAULT 'em_processo',
+  google_event_id text,
+  created_at timestamp DEFAULT now()
+);
+
+CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+alter table usuarios add column is_admin boolean default false;
