@@ -1,0 +1,750 @@
+/* =========================================
+   RESET
+========================================= */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+/* =========================================
+   VARIÁVEIS - MODO CLARO
+========================================= */
+
+:root {
+
+    /* fundo */
+
+    --cor-fundo: #ffffff;
+    --cor-fundo-secundario: #f5f5f5;
+
+    /* texto */
+
+    --cor-texto: #111111;
+    --cor-texto-secundario: #555555;
+
+    /* primária */
+
+    --cor-primaria: #7c3aed;
+    --cor-primaria-hover: #6d28d9;
+
+    /* whatsapp */
+
+    --cor-whatsapp: #25D366;
+    --cor-whatsapp-hover: #1ebe5d;
+
+    /* borda */
+
+    --cor-borda: #dddddd;
+
+    /* header */
+
+    --cor-header: #310c38;
+    --cor-header-texto: #cc9e3e;
+
+    /* sombra */
+
+    --sombra: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+
+    /* botão apresentação */
+
+    --cor-botao-apresentacao-bg: linear-gradient(135deg, #310c38, #240b36);
+    --cor-botao-apresentacao-texto: #fdd57e;
+    --cor-botao-apresentacao-borda: #cc9e3e;
+    --cor-botao-apresentacao-hover: linear-gradient(135deg, #240b36, #310c38);
+
+    /* botão whatsapp estilo apresentação */
+
+    --cor-botao-whatsapp-bg: linear-gradient(135deg, #25D366, #1ebe5d);
+    --cor-botao-whatsapp-texto: #ffffff;
+    --cor-botao-whatsapp-borda: #25D366;
+    --cor-botao-whatsapp-hover: linear-gradient(135deg, #1ebe5d, #25D366);
+
+}
+
+/* =========================================
+   VARIÁVEIS - MODO ESCURO AUTOMÁTICO
+========================================= */
+
+@media (prefers-color-scheme: dark) {
+
+    :root {
+
+        --cor-fundo: #121212;
+        --cor-fundo-secundario: #1e1e1e;
+
+        --cor-texto: #ffffff;
+        --cor-texto-secundario: #bbbbbb;
+
+        --cor-primaria: #9f67ff;
+        --cor-primaria-hover: #8b5cf6;
+
+        --cor-whatsapp: #25D366;
+        --cor-whatsapp-hover: #1ebe5d;
+
+        --cor-borda: #333333;
+
+        --cor-header: #240b36;
+        --cor-header-texto: #fdd57e;
+
+        --sombra: 0 2px 8px rgba(0, 0, 0, 0.4);
+
+        --cor-botao-apresentacao-bg: linear-gradient(135deg, #240b36, #310c38);
+        --cor-botao-apresentacao-texto: #fdd57e;
+        --cor-botao-apresentacao-borda: #fdd57e;
+        --cor-botao-apresentacao-hover: linear-gradient(135deg, #310c38, #240b36);
+
+
+
+        --cor-botao-whatsapp-bg: linear-gradient(135deg, #1ebe5d, #25D366);
+        --cor-botao-whatsapp-texto: #ffffff;
+        --cor-botao-whatsapp-borda: #25D366;
+        --cor-botao-whatsapp-hover: linear-gradient(135deg, #25D366, #1ebe5d);
+
+    }
+
+}
+
+/* =========================================
+   BODY
+========================================= */
+
+body {
+
+    font-family:
+
+        system-ui,
+        -apple-system,
+        Segoe UI,
+        Roboto,
+        Ubuntu,
+        sans-serif;
+
+    background-color: var(--cor-fundo);
+
+    color: var(--cor-texto);
+
+    transition: background-color 0.3s, color 0.3s;
+
+}
+
+/* =========================================
+   SEÇÕES PADRÃO
+========================================= */
+
+.section {
+
+    padding: 60px 20px;
+
+    display: flex;
+    flex-direction: column;
+
+    align-items: center;
+
+    text-align: center;
+
+}
+
+/* =========================================
+   GRID PADRÃO
+========================================= */
+
+.grid {
+
+    display: flex;
+
+    flex-wrap: wrap;
+
+    gap: 20px;
+
+    justify-content: center;
+
+    margin-top: 20px;
+
+}
+
+/* =========================================
+   CARD PADRÃO
+========================================= */
+
+.card {
+
+    background-color: var(--cor-fundo-secundario);
+
+    padding: 20px;
+
+    border-radius: 10px;
+
+    box-shadow: var(--sombra);
+
+    width: 220px;
+
+}
+
+/* =========================================
+   IMAGEM PADRÃO DO SISTEMA
+========================================= */
+
+.img-200 {
+
+    width: 200px;
+
+    height: auto;
+
+    object-fit: cover;
+
+    border-radius: 10px;
+
+    background-color: var(--cor-fundo-secundario);
+
+}
+
+/* =========================================
+   LOGO DO SISTEMA
+========================================= */
+
+.img-logo {
+
+    width: 200px;
+
+    height: 200px;
+
+    object-fit: contain;
+    border-radius: 50%;
+    /* deixa em círculo */
+    object-fit: cover;
+    /* evita distorção */
+    cursor: pointer;
+    /* opcional, se for clicável */
+
+}
+
+/* =========================================
+   BOTÃO WHATSAPP 
+========================================= */
+
+.btn-whatsapp {
+
+    background: var(--cor-botao-whatsapp-bg);
+
+    color: var(--cor-botao-whatsapp-texto);
+
+    border: 2px solid var(--cor-botao-whatsapp-borda);
+
+    padding: 14px 32px;
+
+    border-radius: 12px;
+
+    font-size: 18px;
+
+    font-weight: bold;
+
+    text-decoration: none;
+
+    cursor: pointer;
+
+    transition: all 0.3s ease;
+
+    box-shadow: var(--sombra);
+
+    display: inline-block;
+
+}
+
+.btn-whatsapp:hover {
+
+    background: var(--cor-botao-whatsapp-hover);
+
+    transform: translateY(-3px) scale(1.04);
+
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+
+}
+
+.btn-whatsapp:active {
+
+    transform: scale(0.98);
+
+}
+
+/* =========================================
+   BOTÃO INSTAGRAM
+========================================= */
+
+.btn-instagram {
+
+    background: linear-gradient(45deg,
+            #f09433,
+            #e6683c,
+            #dc2743,
+            #cc2366,
+            #bc1888);
+
+    color: white;
+
+    padding: 14px 28px;
+
+    border-radius: 12px;
+
+    font-size: 18px;
+
+    font-weight: bold;
+
+    text-decoration: none;
+
+    border: none;
+
+    cursor: pointer;
+
+    transition: all 0.3s ease;
+
+    box-shadow: var(--sombra);
+
+}
+
+.btn-instagram:hover {
+
+    transform: translateY(-2px) scale(1.05);
+
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
+
+    filter: brightness(1.1);
+
+}
+
+.btn-instagram:active {
+
+    transform: scale(0.98);
+
+}
+
+
+/* =========================================
+   BOTÃO FACEBOOK
+========================================= */
+
+.btn-facebook {
+
+    background-color: #1877f2;
+
+    color: white;
+
+    padding: 14px 28px;
+
+    border-radius: 12px;
+
+    font-size: 18px;
+
+    font-weight: bold;
+
+    text-decoration: none;
+
+    border: none;
+
+    cursor: pointer;
+
+    transition: all 0.3s ease;
+
+    box-shadow: var(--sombra);
+
+}
+
+.btn-facebook:hover {
+
+    background-color: #166fe5;
+
+    transform: translateY(-2px) scale(1.05);
+
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
+
+}
+
+.btn-facebook:active {
+
+    transform: scale(0.98);
+
+}
+
+
+
+/* =========================================
+   HEADER
+========================================= */
+
+.header {
+
+    display: grid;
+
+    grid-template-columns: 1fr auto 1fr;
+
+    align-items: center;
+
+    padding: 15px 30px;
+
+    background-color: var(--cor-header);
+
+    color: var(--cor-header-texto);
+
+    box-shadow: var(--sombra);
+
+}
+
+/* =========================================
+   HEADER BRAND
+========================================= */
+
+.header-brand {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+
+    text-decoration: none;
+
+    color: var(--cor-header-texto);
+
+}
+
+/* título */
+
+.header-title {
+
+    font-size: 22px;
+
+    font-weight: bold;
+
+    color: var(--cor-header-texto);
+
+}
+
+/* logo */
+
+.header-logo {
+
+    width: 55px;
+
+    height: 55px;
+
+    object-fit: contain;
+
+    border-radius: 50%;
+    /* deixa em círculo */
+    object-fit: cover;
+    /* evita distorção */
+    cursor: pointer;
+    /* opcional, se for clicável */
+
+}
+
+/* navegação */
+
+.header-nav {
+
+    display: flex;
+
+    justify-content: center;
+
+    gap: 40px;
+
+}
+
+/* links */
+
+.header-nav a,
+.header-right a {
+
+    font-size: 18px;
+
+    font-weight: 600;
+
+    color: var(--cor-header-texto);
+
+    text-decoration: none;
+
+    transition: 0.3s;
+
+}
+
+.header-nav a:hover,
+.header-right a:hover {
+
+    opacity: 0.8;
+
+    transform: translateY(-1px);
+
+}
+
+/* lado direito */
+
+.header-right {
+
+    display: flex;
+
+    justify-content: flex-end;
+
+    gap: 40px;
+
+
+}
+
+/* =========================================
+   BOTÕES PADRÃO
+========================================= */
+
+button {
+
+    background-color: var(--cor-primaria);
+
+    color: white;
+
+    border: none;
+
+    padding: 10px 18px;
+
+    border-radius: 6px;
+
+    cursor: pointer;
+
+    font-size: 16px;
+
+    transition: 0.3s;
+
+}
+
+button:hover {
+
+    background-color: var(--cor-primaria-hover);
+
+}
+
+/* =========================================
+   MODO MANUAL
+========================================= */
+
+.light {
+
+    --cor-fundo: #ffffff;
+    --cor-fundo-secundario: #f5f5f5;
+
+    --cor-texto: #111111;
+    --cor-texto-secundario: #555555;
+
+    --cor-header: #310c38;
+    --cor-header-texto: #cc9e3e;
+
+    --cor-botao-apresentacao-bg: linear-gradient(135deg, #310c38, #240b36);
+    --cor-botao-apresentacao-texto: #cc9e3e;
+    --cor-botao-apresentacao-borda: #cc9e3e;
+    --cor-botao-apresentacao-hover: linear-gradient(135deg, #240b36, #310c38);
+
+    --cor-botao-whatsapp-bg: linear-gradient(135deg, #25D366, #1ebe5d);
+    --cor-botao-whatsapp-texto: #ffffff;
+    --cor-botao-whatsapp-borda: #25D366;
+    --cor-botao-whatsapp-hover: linear-gradient(135deg, #1ebe5d, #25D366);
+
+
+}
+
+.dark {
+
+    --cor-fundo: #121212;
+    --cor-fundo-secundario: #1e1e1e;
+
+    --cor-texto: #ffffff;
+    --cor-texto-secundario: #bbbbbb;
+
+    --cor-header: #240b36;
+    --cor-header-texto: #fdd57e;
+
+    --cor-botao-apresentacao-bg: linear-gradient(135deg, #240b36, #310c38);
+    --cor-botao-apresentacao-texto: #fdd57e;
+    --cor-botao-apresentacao-borda: #fdd57e;
+    --cor-botao-apresentacao-hover: linear-gradient(135deg, #310c38, #240b36);
+
+
+    --cor-botao-whatsapp-bg: linear-gradient(135deg, #1ebe5d, #25D366);
+    --cor-botao-whatsapp-texto: #ffffff;
+    --cor-botao-whatsapp-borda: #25D366;
+    --cor-botao-whatsapp-hover: linear-gradient(135deg, #25D366, #1ebe5d);
+
+}
+
+/* botão tema */
+
+.btn-tema {
+
+    background: transparent;
+
+    border: 2px solid var(--cor-header-texto);
+
+    color: var(--cor-header-texto);
+
+    padding: 6px 12px;
+
+    border-radius: 8px;
+
+    cursor: pointer;
+
+    font-size: 18px;
+
+    transition: 0.3s;
+
+}
+
+.btn-tema:hover {
+
+    background-color: var(--cor-header-texto);
+
+    color: var(--cor-header);
+
+}
+
+/* =========================================
+   BOTÃO APRESENTAÇÃO
+========================================= */
+
+.btn-apresentacao {
+
+    background: var(--cor-botao-apresentacao-bg);
+
+    color: var(--cor-botao-apresentacao-texto);
+
+    border: 2px solid var(--cor-botao-apresentacao-borda);
+
+    padding: 14px 32px;
+
+    border-radius: 12px;
+
+    font-size: 18px;
+
+    font-weight: bold;
+
+    cursor: pointer;
+
+    transition: all 0.3s ease;
+
+    box-shadow: var(--sombra);
+
+}
+
+.btn-apresentacao:hover {
+
+    background: var(--cor-botao-apresentacao-hover);
+
+    transform: translateY(-3px) scale(1.04);
+
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+
+}
+
+.btn-apresentacao:active {
+
+    transform: scale(0.98);
+
+}
+
+
+.agendamento-card {
+  max-width: 500px;
+  margin: 0 auto 40px auto;
+}
+
+.title {
+  margin-bottom: 20px;
+  color: var(--primary-color);
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 15px;
+}
+
+.input {
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  transition: 0.2s;
+}
+
+.input:focus {
+  border-color: var(--primary-color);
+  outline: none;
+}
+
+.btn-primary {
+  background: var(--primary-color);
+  color: white;
+  padding: 12px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.btn-primary:hover {
+  opacity: 0.85;
+}
+
+.calendar-container {
+  margin-top: 40px;
+}
+
+.agendamentos-grid {
+  gap: 20px;
+}
+
+.agendamento-item {
+  transition: 0.2s;
+}
+
+.agendamento-item:hover {
+  transform: translateY(-4px);
+}
+
+.data {
+  font-weight: bold;
+  color: var(--primary-color);
+}
+
+.empty-text {
+  opacity: 0.6;
+}
+
+.status {
+  font-weight: bold;
+}
+
+.status.aprovado {
+  color: green;
+}
+
+.status.em_processo {
+  color: orange;
+}
+
+
+/* ADMIN */
+
+.btn-admin-header {
+  background: transparent;
+  border: 1px solid #c8a96b;
+  color: #c8a96b;
+  padding: 6px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.btn-admin-header:hover {
+  background: #c8a96b;
+  color: #111;
+}
