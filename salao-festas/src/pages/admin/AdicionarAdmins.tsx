@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import { Plus, Trash2, Shield } from "lucide-react";
+import { apiFetch } from "../../lib/api";
 
 type AdminUsuario = {
   id: string;
   full_name?: string | null;
-  nome?: string | null;
   email: string;
   is_admin: boolean;
 };
@@ -13,6 +13,7 @@ export default function AdicionarAdmins() {
   const [admins, setAdmins] = useState<AdminUsuario[]>([]);
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState("");
+  const [sucesso, setSucesso] = useState("");
   const [emailNovoAdmin, setEmailNovoAdmin] = useState("");
   const [salvando, setSalvando] = useState(false);
 
@@ -20,18 +21,13 @@ export default function AdicionarAdmins() {
     try {
       setLoading(true);
       setErro("");
+      setSucesso("");
 
-      const response = await fetch("http://localhost:3001/api/admins");
-
-      if (!response.ok) {
-        throw new Error("Erro ao buscar admins");
-      }
-
-      const data = await response.json();
+      const data = await apiFetch("/api/admins");
       setAdmins(data);
-    } catch (error) {
-      console.error(error);
-      setErro("Não foi possível carregar os administradores.");
+    } catch (error: any) {
+      console.error("Erro ao buscar admins:", error);
+      setErro(error.message || "Não foi possível carregar os administradores.");
     } finally {
       setLoading(false);
     }
@@ -50,27 +46,20 @@ export default function AdicionarAdmins() {
 
       setSalvando(true);
       setErro("");
+      setSucesso("");
 
-      const response = await fetch("http://localhost:3001/api/admins/promover", {
+      await apiFetch("/api/admins/promover", {
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
         body: JSON.stringify({
           email: emailNovoAdmin.trim().toLowerCase(),
         }),
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "Erro ao adicionar admin");
-      }
-
       setEmailNovoAdmin("");
+      setSucesso("Administrador adicionado com sucesso.");
       await buscarAdmins();
     } catch (error: any) {
-      console.error(error);
+      console.error("Erro ao adicionar admin:", error);
       setErro(error.message || "Não foi possível adicionar o admin.");
     } finally {
       setSalvando(false);
@@ -80,23 +69,16 @@ export default function AdicionarAdmins() {
   async function removerAdmin(id: string) {
     try {
       setErro("");
+      setSucesso("");
 
-      const response = await fetch(
-        `http://localhost:3001/api/admins/${id}/remover`,
-        {
-          method: "PUT",
-        }
-      );
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "Erro ao remover admin");
-      }
+      await apiFetch(`/api/admins/${id}/remover`, {
+        method: "PUT",
+      });
 
       setAdmins((prev) => prev.filter((admin) => admin.id !== id));
+      setSucesso("Administrador removido com sucesso.");
     } catch (error: any) {
-      console.error(error);
+      console.error("Erro ao remover admin:", error);
       setErro(error.message || "Não foi possível remover o admin.");
     }
   }
@@ -135,6 +117,7 @@ export default function AdicionarAdmins() {
         </div>
 
         {erro && <p className="admin-message-error">{erro}</p>}
+        {sucesso && <p className="admin-message-success">{sucesso}</p>}
 
         {loading ? (
           <p className="admin-message-info">Carregando administradores...</p>
@@ -162,7 +145,7 @@ export default function AdicionarAdmins() {
                         </div>
 
                         <div className="admin-user-name">
-                          {admin.full_name || admin.nome || "Sem nome"}
+                          {admin.full_name || "Sem nome"}
                         </div>
                       </div>
                     </td>
