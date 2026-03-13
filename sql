@@ -345,3 +345,30 @@ create index if not exists idx_agendamentos_data_evento on public.agendamentos(d
 create index if not exists idx_visitas_usuario_id on public.visitas(usuario_id);
 create index if not exists idx_visitas_status on public.visitas(status);
 create index if not exists idx_visitas_data_visita on public.visitas(data_visita);
+
+insert into orcamentos (usuario_id, descricao, status)
+values
+('848608c3-d70d-4f55-b5a7-6b6fa07da887', 'Orçamento para instalação elétrica completa em residência.', 'pendente'),
+('848608c3-d70d-4f55-b5a7-6b6fa07da887', 'Orçamento para manutenção preventiva do sistema elétrico.', 'pendente'),
+('848608c3-d70d-4f55-b5a7-6b6fa07da887', 'Orçamento para troca de quadro de disjuntores.', 'aprovado'),
+
+('99ddaf84-1cd8-4059-ade2-42f22d782f74', 'Orçamento para instalação de iluminação LED em salão.', 'pendente'),
+('99ddaf84-1cd8-4059-ade2-42f22d782f74', 'Orçamento para revisão elétrica completa do imóvel.', 'rejeitado'),
+('99ddaf84-1cd8-4059-ade2-42f22d782f74', 'Orçamento para instalação de tomadas industriais.', 'pendente');
+
+create table if not exists public.tipos_servico (
+    id uuid primary key default gen_random_uuid(),
+    nome text not null unique,
+    ativo boolean not null default true,
+    created_at timestamptz not null default now()
+);
+
+insert into public.tipos_servico (nome)
+values
+('Casamentos'),
+('Aniversários'),
+('Eventos Corporativos'),
+('Formaturas'),
+('Festas Infantis'),
+('Eventos Personalizados')
+on conflict (nome) do nothing;

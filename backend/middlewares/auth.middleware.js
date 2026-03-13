@@ -1,9 +1,9 @@
-import jwt from "jsonwebtoken";
 import { supabase } from "../config/supabase.js";
 
 export async function authenticateToken(req, res, next) {
   try {
     const authHeader = req.headers.authorization;
+
     const token = authHeader?.startsWith("Bearer ")
       ? authHeader.split(" ")[1]
       : null;
@@ -12,23 +12,32 @@ export async function authenticateToken(req, res, next) {
       return res.status(401).json({ error: "Token não informado" });
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const { data, error } = await supabase.auth.getUser(token);
 
-    const { data: user, error } = await supabase
-      .from("usuarios")
-      .select("id, email, full_name, is_admin")
-      .eq("id", decoded.id)
-      .single();
-
-    if (error || !user) {
-      return res.status(401).json({ error: "Usuário inválido" });
+    if (error || !data?.user) {
+      return res.status(401).json({ error: "Token inválido ou expirado" });
     }
 
-    req.user = user;
+    const { data: usuario, error: erroUsuario } = await supabase
+      .from("usuarios")
+      .select("id, email, full_name, is_admin")
+      .eq("id", data.user.id)
+      .single();
+
+    if (erroUsuario || !usuario) {
+      return res
+        .status(401)
+        .json({ error: "Usuário não encontrado no sistema" });
+    }
+
+    req.user = usuario;
     next();
   } catch (error) {
+    console.error("Erro no middleware de auth:", error);
     return res.status(401).json({ error: "Token inválido ou expirado" });
   }
+
+  console.log("authorization:", req.headers.authorization);
 }
 
 export function requireAdmin(req, res, next) {

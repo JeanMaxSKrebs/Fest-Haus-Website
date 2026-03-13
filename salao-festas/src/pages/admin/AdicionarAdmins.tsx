@@ -4,7 +4,7 @@ import { apiFetch } from "../../lib/api";
 
 type AdminUsuario = {
   id: string;
-  full_name?: string | null;
+  nome?: string | null;
   email: string;
   is_admin: boolean;
 };
@@ -145,7 +145,7 @@ export default function AdicionarAdmins() {
                         </div>
 
                         <div className="admin-user-name">
-                          {admin.full_name || "Sem nome"}
+                          {admin.nome || "Sem nome"}
                         </div>
                       </div>
                     </td>

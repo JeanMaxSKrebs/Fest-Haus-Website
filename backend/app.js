@@ -10,6 +10,10 @@ import adminsRoutes from "./routes/admins.routes.js";
 import googleCalendarRoutes from "./routes/google-calendar.routes.js";
 import { notFoundHandler, errorHandler } from "./middlewares/error.middleware.js";
 
+import tiposServicoRoutes from "./routes/tipos-servico.routes.js";
+import solicitacoesOrcamentoRoutes from "./routes/solicitacoes-orcamento.routes.js";
+import modelosOrcamentoRoutes from "./routes/modelos-orcamento.routes.js";
+
 dotenv.config();
 
 const app = express();
@@ -27,6 +31,10 @@ app.use(adminsRoutes);
 app.use(agendamentosRoutes);
 app.use(orcamentosRoutes);
 app.use(visitasRoutes);
+
+app.use(tiposServicoRoutes);
+app.use(solicitacoesOrcamentoRoutes);
+app.use(modelosOrcamentoRoutes);
 
 app.use(notFoundHandler);
 app.use(errorHandler);

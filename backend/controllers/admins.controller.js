@@ -4,9 +4,9 @@ export async function listarAdmins(_req, res, next) {
   try {
     const { data, error } = await supabase
       .from("usuarios")
-      .select("id, full_name, email, telefone, is_admin")
+      .select("id, nome, email, telefone, is_admin")
       .eq("is_admin", true)
-      .order("full_name", { ascending: true });
+      .order("nome", { ascending: true });
 
     if (error) {
       return res.status(400).json({ error: error.message });
@@ -32,7 +32,7 @@ export async function promoverAdmin(req, res, next) {
       .from("usuarios")
       .update({ is_admin: true })
       .eq("email", emailNormalizado)
-      .select("id, full_name, email, is_admin");
+      .select("id, nome, email, is_admin");
 
     if (error) {
       return res.status(400).json({ error: error.message });
@@ -56,7 +56,7 @@ export async function removerAdmin(req, res, next) {
       .from("usuarios")
       .update({ is_admin: false })
       .eq("id", id)
-      .select("id, full_name, email, is_admin");
+      .select("id, nome, email, is_admin");
 
     if (error) {
       return res.status(400).json({ error: error.message });

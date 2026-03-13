@@ -3,12 +3,17 @@ import { supabase } from "./supabaseClient";
 const API_URL = "http://localhost:3001";
 
 export async function apiFetch(path: string, options: RequestInit = {}) {
-  const { data } = await supabase.auth.getSession();
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
 
-  const token = data.session?.access_token;
+  const token = session?.access_token;
 
   const headers = new Headers(options.headers || {});
-  headers.set("Content-Type", "application/json");
+
+  if (!headers.has("Content-Type") && options.body) {
+    headers.set("Content-Type", "application/json");
+  }
 
   if (token) {
     headers.set("Authorization", `Bearer ${token}`);
@@ -19,11 +24,13 @@ export async function apiFetch(path: string, options: RequestInit = {}) {
     headers,
   });
 
-  const result = await response.json();
+  const data = await response.json().catch(() => null);
 
   if (!response.ok) {
-    throw new Error(result?.error || "Erro na requisição");
+    throw new Error(data?.error || "Erro na requisição");
   }
 
-  return result;
+  console.log("session token:", token);
+  return data;
 }
+
