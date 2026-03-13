@@ -206,6 +206,25 @@ app.post("/api/orcamentos", async (req, res) => {
   res.json(data);
 });
 
+app.put("/api/orcamentos/:id/status", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    const { error } = await supabase
+      .from("orcamentos")
+      .update({ status })
+      .eq("id", id);
+
+    if (error) throw error;
+
+    res.json({ message: "Status do orçamento atualizado" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Erro ao atualizar status do orçamento" });
+  }
+});
+
 /* 🔵 LISTAR TODOS */
 app.get("/api/orcamentos", async (req, res) => {
   const { data, error } = await supabase.from("orcamentos").select("*");
@@ -350,4 +369,70 @@ app.get("/", (req, res) => {
 
 app.listen(3001, () => {
   console.log("Backend rodando na porta 3001");
+});
+
+/* ===============================
+   ADMINS
+=================================*/
+
+app.get("/api/admins", async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from("usuarios")
+      .select("id, full_name, nome, email, is_admin")
+      .eq("is_admin", true)
+      .order("full_name", { ascending: true });
+
+    if (error) throw error;
+
+    res.json(data);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Erro ao buscar admins" });
+  }
+});
+
+app.put("/api/admins/promover", async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ error: "Email é obrigatório" });
+    }
+
+    const { data, error } = await supabase
+      .from("usuarios")
+      .update({ is_admin: true })
+      .eq("email", email.toLowerCase())
+      .select();
+
+    if (error) throw error;
+
+    if (!data || data.length === 0) {
+      return res.status(404).json({ error: "Usuário não encontrado" });
+    }
+
+    res.json({ message: "Usuário promovido para admin" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Erro ao promover admin" });
+  }
+});
+
+app.put("/api/admins/:id/remover", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const { error } = await supabase
+      .from("usuarios")
+      .update({ is_admin: false })
+      .eq("id", id);
+
+    if (error) throw error;
+
+    res.json({ message: "Admin removido com sucesso" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Erro ao remover admin" });
+  }
 });

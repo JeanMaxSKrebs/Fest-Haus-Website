@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import { Plus, Trash2, Shield } from "lucide-react";
-import { supabase } from "../../lib/supabaseClient";
 
 type AdminUsuario = {
   id: string;
-  nome: string | null;
+  full_name?: string | null;
+  nome?: string | null;
   email: string;
   is_admin: boolean;
 };
@@ -21,17 +21,16 @@ export default function AdicionarAdmins() {
       setLoading(true);
       setErro("");
 
-      const { data, error } = await supabase
-        .from("usuarios")
-        .select("id, nome, email, is_admin")
-        .eq("is_admin", true)
-        .order("nome", { ascending: true });
+      const response = await fetch("http://localhost:3001/api/admins");
 
-      if (error) throw error;
+      if (!response.ok) {
+        throw new Error("Erro ao buscar admins");
+      }
 
-      setAdmins(data || []);
+      const data = await response.json();
+      setAdmins(data);
     } catch (error) {
-      console.error("Erro ao buscar admins:", error);
+      console.error(error);
       setErro("Não foi possível carregar os administradores.");
     } finally {
       setLoading(false);
@@ -45,33 +44,34 @@ export default function AdicionarAdmins() {
   async function adicionarAdmin() {
     try {
       if (!emailNovoAdmin.trim()) {
-        setErro("Informe o email do usuário que será admin.");
+        setErro("Informe o email do usuário.");
         return;
       }
 
       setSalvando(true);
       setErro("");
 
-      const emailTratado = emailNovoAdmin.trim().toLowerCase();
+      const response = await fetch("http://localhost:3001/api/admins/promover", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: emailNovoAdmin.trim().toLowerCase(),
+        }),
+      });
 
-      const { data, error } = await supabase
-        .from("usuarios")
-        .update({ is_admin: true })
-        .eq("email", emailTratado)
-        .select("id");
+      const data = await response.json();
 
-      if (error) throw error;
-
-      if (!data || data.length === 0) {
-        setErro("Nenhum usuário com esse email foi encontrado.");
-        return;
+      if (!response.ok) {
+        throw new Error(data.error || "Erro ao adicionar admin");
       }
 
       setEmailNovoAdmin("");
       await buscarAdmins();
-    } catch (error) {
-      console.error("Erro ao adicionar admin:", error);
-      setErro("Não foi possível adicionar o administrador.");
+    } catch (error: any) {
+      console.error(error);
+      setErro(error.message || "Não foi possível adicionar o admin.");
     } finally {
       setSalvando(false);
     }
@@ -81,17 +81,23 @@ export default function AdicionarAdmins() {
     try {
       setErro("");
 
-      const { error } = await supabase
-        .from("usuarios")
-        .update({ is_admin: false })
-        .eq("id", id);
+      const response = await fetch(
+        `http://localhost:3001/api/admins/${id}/remover`,
+        {
+          method: "PUT",
+        }
+      );
 
-      if (error) throw error;
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Erro ao remover admin");
+      }
 
       setAdmins((prev) => prev.filter((admin) => admin.id !== id));
-    } catch (error) {
-      console.error("Erro ao remover admin:", error);
-      setErro("Não foi possível remover o administrador.");
+    } catch (error: any) {
+      console.error(error);
+      setErro(error.message || "Não foi possível remover o admin.");
     }
   }
 
@@ -152,11 +158,11 @@ export default function AdicionarAdmins() {
                     <td>
                       <div className="admin-user-cell">
                         <div className="admin-user-icon">
-                          <Shield size={18} />
+                          <Shield className="admin-icon-svg" />
                         </div>
 
                         <div className="admin-user-name">
-                          {admin.nome || "Sem nome"}
+                          {admin.full_name || admin.nome || "Sem nome"}
                         </div>
                       </div>
                     </td>
@@ -164,7 +170,7 @@ export default function AdicionarAdmins() {
                     <td>{admin.email}</td>
 
                     <td>
-                      <span className="admin-role-badge">Admin</span>
+                      <span className="admin-role-badge aprovado">Admin</span>
                     </td>
 
                     <td>
@@ -174,7 +180,7 @@ export default function AdicionarAdmins() {
                         onClick={() => removerAdmin(admin.id)}
                         title="Remover admin"
                       >
-                        <Trash2 size={18} />
+                        <Trash2 className="admin-icon-svg" />
                       </button>
                     </td>
                   </tr>
