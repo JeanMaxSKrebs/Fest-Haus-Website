@@ -55,3 +55,45 @@ create table datas_bloqueadas (
   origem text, -- google ou sistema
   created_at timestamp default now()
 );
+
+alter table agendamentos add column google_event_id text;
+
+alter table agendamentos
+add column usuario_id_uuid uuid;
+
+alter table agendamentos
+add constraint agendamentos_usuario_fk
+foreign key (usuario_id_uuid)
+references auth.users(id)
+on delete cascade;
+
+-- 1. Adicionar nova coluna UUID
+alter table orcamentos
+add column usuario_id uuid;
+
+-- 2. Criar foreign key
+alter table orcamentos
+add constraint orcamentos_usuario_fk
+foreign key (usuario_id)
+references auth.users(id)
+on delete cascade;
+
+alter table orcamentos
+alter column usuario_id drop not null;
+
+alter table agendamentos
+alter column usuario_id drop not null;
+
+drop table agendamentos cascade;
+
+create table agendamentos (
+  id uuid default gen_random_uuid() primary key,
+  usuario_id uuid references auth.users(id) on delete cascade,
+  servico text not null,
+  data_evento timestamp not null,
+  mensagem text,
+  google_event_id text,
+  created_at timestamp default now()
+);
+ALTER TABLE agendamentos
+ADD COLUMN status VARCHAR(20) NOT NULL DEFAULT 'em_processo';

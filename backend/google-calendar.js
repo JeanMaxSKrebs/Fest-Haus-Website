@@ -92,3 +92,19 @@ START SERVER
 app.listen(3001, () => {
   console.log("Servidor rodando em http://localhost:3001");
 });
+
+
+export async function getDatasOcupadas() {
+  try {
+    const response = await fetch("http://localhost:3001/list-events");
+
+    if (!response.ok) {
+      throw new Error("Erro ao buscar Google Calendar");
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+}
