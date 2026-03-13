@@ -7,9 +7,19 @@ import Home from "./pages/Home";
 import Agendamento from "./pages/Agendamento";
 import Orcamentos from "./pages/Orcamento";
 import Visitas from "./pages/Visitas";
+
 import LoginModal from "./components/LoginModal";
+
 import AdminRoute from "./components/Admin/AdminRoute";
 import { AdminHome } from "./pages/admin/AdminHome";
+import AdminLayout from "./components/Admin/AdminLayout";
+
+import AdicionarAdmins from "./pages/admin/AdicionarAdmins";
+// import AjustarOrcamentos from "./pages/admin/AjustarOrcamentos";
+// import VerAgendamentos from "./pages/admin/VerAgendamentos";
+// import VerVisitas from "./pages/admin/VerVisitas";
+// import AjustarServicos from "./pages/admin/AjustarServicos";
+// import AjustarGaleria from "./pages/admin/AjustarGaleria";
 
 function AppRoutes() {
   const { user } = useAuth();
@@ -54,6 +64,7 @@ function AppRoutes() {
 
         <Route path="/orcamentos" element={<Orcamentos />} />
 
+        {/* HOME DO ADMIN - SEM SIDEBAR */}
         <Route
           path="/admin"
           element={
@@ -62,6 +73,23 @@ function AppRoutes() {
             </AdminRoute>
           }
         />
+
+        {/* PÁGINAS INTERNAS DO ADMIN - COM SIDEBAR */}
+        <Route
+          path="/admin/*"
+          element={
+            <AdminRoute>
+              <AdminLayout />
+            </AdminRoute>
+          }
+        >
+          <Route path="adicionar-admins" element={<AdicionarAdmins />} />
+          {/* <Route path="ajustar-orcamentos" element={<AjustarOrcamentos />} />
+          <Route path="ver-agendamentos" element={<VerAgendamentos />} />
+          <Route path="ver-visitas" element={<VerVisitas />} />
+          <Route path="ajustar-servicos" element={<AjustarServicos />} />
+          <Route path="ajustar-galeria" element={<AjustarGaleria />} /> */}
+        </Route>
       </Routes>
     </>
   );

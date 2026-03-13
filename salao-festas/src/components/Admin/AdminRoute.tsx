@@ -6,7 +6,9 @@ type Props = {
 };
 
 export default function AdminRoute({ children }: Props) {
-  const { user, isAdmin } = useAuth();
+  const { user, isAdmin, loading } = useAuth();
+
+  if (loading) return null;
 
   if (!user || !isAdmin) {
     return <Navigate to="/" replace />;
