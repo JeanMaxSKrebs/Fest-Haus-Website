@@ -73,13 +73,27 @@ function Header() {
       </div>
 
       <nav className="header-nav">
-        <button type="button" onClick={() => voltarParaHome("servicos")}>
+        <button
+          type="button"
+          className="btn-header"
+          onClick={() => voltarParaHome("servicos")}
+        >
           Serviços
         </button>
-        <button type="button" onClick={() => voltarParaHome("galeria")}>
+
+        <button
+          type="button"
+          className="btn-header"
+          onClick={() => voltarParaHome("galeria")}
+        >
           Galeria
         </button>
-        <button type="button" onClick={() => voltarParaHome("contato")}>
+
+        <button
+          type="button"
+          className="btn-header"
+          onClick={() => voltarParaHome("contato")}
+        >
           Contato
         </button>
       </nav>
@@ -92,15 +106,17 @@ function Header() {
             <span style={{ marginRight: "15px" }}>
               Olá, {user.user_metadata?.full_name || user.email}
             </span>
-
+            
             {isAdmin && (
               <button
                 type="button"
-                onClick={() => navigate("/admin")}
+                onClick={() =>
+                  location.pathname === "/admin" ? navigate("/") : navigate("/admin")
+                }
                 className="btn-admin-header"
                 style={{ marginRight: "15px" }}
               >
-                Admin
+                {location.pathname === "/admin" ? "Visão do Usuário" : "Admin"}
               </button>
             )}
 

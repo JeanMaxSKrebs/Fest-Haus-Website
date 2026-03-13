@@ -6,6 +6,14 @@ type AuthContextType = {
   user: User | null;
   isAdmin: boolean;
   loading: boolean;
+  login: (email: string, senha: string) => Promise<void>;
+  signup: (
+    email: string,
+    senha: string,
+    nome: string,
+    telefone: string
+  ) => Promise<void>;
+  loginWithGoogle: () => Promise<void>;
   signOut: () => Promise<void>;
 };
 
@@ -75,7 +83,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } = supabase.auth.onAuthStateChange(
       (_event: string, session: Session | null) => {
         if (!mounted) return;
-
         setUser(session?.user ?? null);
       }
     );
@@ -90,8 +97,77 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     buscarAdmin(user?.email ?? undefined);
   }, [user]);
 
+  async function login(email: string, senha: string) {
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password: senha,
+    });
+
+    if (error) {
+      console.error("Erro no login:", error);
+      throw error;
+    }
+  }
+
+  async function signup(
+    email: string,
+    senha: string,
+    nome: string,
+    telefone: string
+  ) {
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password: senha,
+      options: {
+        data: {
+          full_name: nome,
+          phone: telefone,
+        },
+      },
+    });
+
+    if (error) {
+      console.error("Erro no cadastro:", error);
+      throw error;
+    }
+
+    const userCriado = data.user;
+
+    if (userCriado) {
+      const { error: insertError } = await supabase.from("usuarios").insert([
+        {
+          id: userCriado.id,
+          nome,
+          telefone,
+          email,
+          is_admin: false,
+        },
+      ]);
+
+      if (insertError) {
+        console.error("Erro ao salvar usuário na tabela usuarios:", insertError);
+        throw insertError;
+      }
+    }
+  }
+
+  async function loginWithGoogle() {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: window.location.origin,
+      },
+    });
+
+    if (error) {
+      console.error("Erro no login com Google:", error);
+      throw error;
+    }
+  }
+
   async function signOut() {
     const { error } = await supabase.auth.signOut();
+
     if (error) {
       console.error("Erro no signOut:", error);
       throw error;
@@ -102,7 +178,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, isAdmin, loading, signOut }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        isAdmin,
+        loading,
+        login,
+        signup,
+        loginWithGoogle,
+        signOut,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

@@ -608,6 +608,25 @@ button:hover {
 }
 
 /* =========================================
+   BOTÃO Header
+========================================= */
+
+.btn-header {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: inherit;
+    font: inherit;
+    padding: 0;
+    font-size: 18px;
+    padding: 8px 12px;
+}
+
+.btn-header:hover {
+    opacity: 0.7;
+}
+
+/* =========================================
    BOTÃO APRESENTAÇÃO
 ========================================= */
 
@@ -653,98 +672,98 @@ button:hover {
 
 
 .agendamento-card {
-  max-width: 500px;
-  margin: 0 auto 40px auto;
+    max-width: 500px;
+    margin: 0 auto 40px auto;
 }
 
 .title {
-  margin-bottom: 20px;
-  color: var(--primary-color);
+    margin-bottom: 20px;
+    color: var(--primary-color);
 }
 
 .form-group {
-  display: flex;
-  flex-direction: column;
-  margin-bottom: 15px;
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 15px;
 }
 
 .input {
-  padding: 10px;
-  border-radius: 8px;
-  border: 1px solid #ddd;
-  transition: 0.2s;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    transition: 0.2s;
 }
 
 .input:focus {
-  border-color: var(--primary-color);
-  outline: none;
+    border-color: var(--primary-color);
+    outline: none;
 }
 
 .btn-primary {
-  background: var(--primary-color);
-  color: white;
-  padding: 12px;
-  border-radius: 10px;
-  border: none;
-  cursor: pointer;
-  transition: 0.3s;
+    background: var(--primary-color);
+    color: white;
+    padding: 12px;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    transition: 0.3s;
 }
 
 .btn-primary:hover {
-  opacity: 0.85;
+    opacity: 0.85;
 }
 
 .calendar-container {
-  margin-top: 40px;
+    margin-top: 40px;
 }
 
 .agendamentos-grid {
-  gap: 20px;
+    gap: 20px;
 }
 
 .agendamento-item {
-  transition: 0.2s;
+    transition: 0.2s;
 }
 
 .agendamento-item:hover {
-  transform: translateY(-4px);
+    transform: translateY(-4px);
 }
 
 .data {
-  font-weight: bold;
-  color: var(--primary-color);
+    font-weight: bold;
+    color: var(--primary-color);
 }
 
 .empty-text {
-  opacity: 0.6;
+    opacity: 0.6;
 }
 
 .status {
-  font-weight: bold;
+    font-weight: bold;
 }
 
 .status.aprovado {
-  color: green;
+    color: green;
 }
 
 .status.em_processo {
-  color: orange;
+    color: orange;
 }
 
 
 /* ADMIN */
 
 .btn-admin-header {
-  background: transparent;
-  border: 1px solid #c8a96b;
-  color: #c8a96b;
-  padding: 6px 14px;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: 0.3s;
+    background: transparent;
+    border: 1px solid #c8a96b;
+    color: #c8a96b;
+    padding: 6px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: 0.3s;
 }
 
 .btn-admin-header:hover {
-  background: #c8a96b;
-  color: #111;
+    background: #c8a96b;
+    color: #111;
 }
