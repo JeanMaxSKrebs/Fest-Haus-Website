@@ -372,3 +372,155 @@ values
 ('Festas Infantis'),
 ('Eventos Personalizados')
 on conflict (nome) do nothing;
+
+
+-- ============================================
+-- 1) CATÁLOGO FIXO DE ITENS
+-- evita repetir nomes de itens em vários modelos/orçamentos
+-- ============================================
+create table if not exists modelos_item_orcamento (
+  id uuid primary key default gen_random_uuid(),
+  tipo_servico_id uuid references tipos_servico(id) on delete set null,
+  nome varchar(150) not null,
+  descricao text,
+  ativo boolean not null default true,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create unique index if not exists ux_modelos_item_orcamento_nome_tipo
+  on modelos_item_orcamento (
+    coalesce(tipo_servico_id, '00000000-0000-0000-0000-000000000000'::uuid),
+    lower(nome)
+  );
+
+-- ============================================
+-- 2) VINCULAR ITENS DE MODELO AO CATÁLOGO FIXO
+-- mantém nome/descrição próprios no modelo, mas reaproveita base
+-- ============================================
+alter table itens_modelo_orcamento
+add column if not exists modelo_item_id uuid references modelos_item_orcamento(id) on delete set null;
+
+-- ============================================
+-- 3) TABELA DE ORÇAMENTOS DO USUÁRIO
+-- aqui ficam os orçamentos reais, que o usuário visualiza/solicita
+-- ============================================
+create table if not exists orcamentos (
+  id uuid primary key default gen_random_uuid(),
+  usuario_id uuid not null references usuarios(id) on delete cascade,
+  tipo_servico_id uuid references tipos_servico(id) on delete set null,
+  modelo_orcamento_id uuid references modelos_orcamento(id) on delete set null,
+  solicitacao_orcamento_id uuid references solicitacoes_orcamento(id) on delete set null,
+
+  titulo varchar(150) not null,
+  descricao text,
+
+  origem varchar(30) not null default 'personalizado'
+    check (origem in ('modelo', 'personalizado', 'admin')),
+
+  status varchar(30) not null default 'rascunho'
+    check (status in (
+      'rascunho',
+      'pendente',
+      'enviado',
+      'em_analise',
+      'aprovado',
+      'recusado',
+      'cancelado'
+    )),
+
+  valor_total numeric(10,2),
+  observacoes_admin text,
+  enviado_whatsapp boolean not null default false,
+
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create index if not exists idx_orcamentos_usuario_id on orcamentos(usuario_id);
+create index if not exists idx_orcamentos_tipo_servico_id on orcamentos(tipo_servico_id);
+create index if not exists idx_orcamentos_modelo_orcamento_id on orcamentos(modelo_orcamento_id);
+create index if not exists idx_orcamentos_solicitacao_orcamento_id on orcamentos(solicitacao_orcamento_id);
+create index if not exists idx_orcamentos_status on orcamentos(status);
+
+-- ============================================
+-- 4) ITENS DO ORÇAMENTO REAL
+-- itens copiados do modelo ou montados manualmente
+-- ============================================
+create table if not exists itens_orcamento (
+  id uuid primary key default gen_random_uuid(),
+  orcamento_id uuid not null references orcamentos(id) on delete cascade,
+  modelo_item_id uuid references modelos_item_orcamento(id) on delete set null,
+
+  nome varchar(150) not null,
+  descricao text,
+  quantidade integer not null default 1 check (quantidade > 0),
+  valor_unitario numeric(10,2),
+  valor_total numeric(10,2),
+  ordem integer not null default 0,
+
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create index if not exists idx_itens_orcamento_orcamento_id on itens_orcamento(orcamento_id);
+create index if not exists idx_itens_orcamento_modelo_item_id on itens_orcamento(modelo_item_id);
+
+-- ============================================
+-- 5) OPCIONAL: vincular solicitação ao orçamento criado
+-- útil quando o usuário monta personalizado e isso vira um orçamento real
+-- ============================================
+alter table solicitacoes_orcamento
+add column if not exists orcamento_id uuid references orcamentos(id) on delete set null;
+
+create index if not exists idx_solicitacoes_orcamento_orcamento_id
+  on solicitacoes_orcamento(orcamento_id);
+
+-- ============================================
+-- 6) TRIGGER PARA updated_at
+-- ============================================
+create or replace function set_updated_at()
+returns trigger as $$
+begin
+  new.updated_at = now();
+  return new;
+end;
+$$ language plpgsql;
+
+drop trigger if exists trg_modelos_item_orcamento_updated_at on modelos_item_orcamento;
+create trigger trg_modelos_item_orcamento_updated_at
+before update on modelos_item_orcamento
+for each row execute function set_updated_at();
+
+drop trigger if exists trg_orcamentos_updated_at on orcamentos;
+create trigger trg_orcamentos_updated_at
+before update on orcamentos
+for each row execute function set_updated_at();
+
+drop trigger if exists trg_itens_orcamento_updated_at on itens_orcamento;
+create trigger trg_itens_orcamento_updated_at
+before update on itens_orcamento
+for each row execute function set_updated_at();
+
+insert into modelos_item_orcamento (tipo_servico_id, nome, descricao)
+select ts.id, x.nome, x.descricao
+from tipos_servico ts
+cross join (
+  values
+    ('Janta simples', 'Serviço de janta para o evento'),
+    ('Garçom', 'Atendimento de garçons durante o evento'),
+    ('Decoração básica', 'Decoração padrão do salão'),
+    ('Mesa de doces', 'Mesa decorada com doces'),
+    ('Bebidas', 'Serviço de bebidas não alcoólicas'),
+    ('Som ambiente', 'Som ambiente para recepção e evento'),
+    ('Limpeza', 'Equipe de apoio e limpeza'),
+    ('Espaço kids', 'Área para crianças'),
+    ('Painel decorativo', 'Painel principal para fotos'),
+    ('Iluminação especial', 'Iluminação decorativa do ambiente')
+) as x(nome, descricao)
+where not exists (
+  select 1
+  from modelos_item_orcamento mio
+  where mio.tipo_servico_id = ts.id
+    and lower(mio.nome) = lower(x.nome)
+);

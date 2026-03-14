@@ -1636,7 +1636,7 @@ button:hover {
 
 .admin-input {
     flex: 1;
-    min-width: 260px;
+    min-width: 350px;
     background-color: rgba(255, 255, 255, 0.04);
     border: 1px solid var(--cor-borda);
     color: var(--cor-texto);
@@ -1766,4 +1766,81 @@ button:hover {
     color: #86f0ad;
     font-size: 12px;
     font-weight: 700;
+}
+
+.admin-input textarea,
+textarea.admin-input {
+    min-height: 110px;
+    resize: vertical;
+}
+
+.admin-items-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.admin-item-row {
+    padding: 12px 14px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.admin-item-row-top {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 6px;
+}
+
+.admin-item-order {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 34px;
+    height: 24px;
+    border-radius: 999px;
+    background: rgba(253, 213, 126, 0.12);
+    color: var(--cor-header-texto);
+    font-size: 12px;
+    font-weight: 700;
+    padding: 0 8px;
+}
+
+.admin-item-price {
+    margin-left: auto;
+    font-weight: 700;
+    color: #86f0ad;
+}
+
+body.modal-open {
+    overflow: hidden;
+}
+
+.admin-filters-row {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+}
+
+.admin-filter-group {
+    min-width: 240px;
+    flex: 1;
+}
+
+.admin-modal-scrollable {
+    max-height: 85vh;
+    overflow-y: auto;
+}
+
+.admin-modal-scrollable::-webkit-scrollbar {
+    width: 8px;
+}
+
+.admin-modal-scrollable::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.16);
+    border-radius: 999px;
 }

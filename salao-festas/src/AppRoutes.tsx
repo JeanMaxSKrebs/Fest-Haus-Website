@@ -5,7 +5,7 @@ import { useAuth } from "./context/AuthContext";
 import Header from "./components/Header";
 import Home from "./pages/Home";
 import Agendamento from "./pages/Agendamento";
-import Orcamentos from "./pages/Orcamento";
+import Orcamentos from "./pages/Orcamentos";
 import Visitas from "./pages/Visitas";
 
 import LoginModal from "./components/LoginModal";
@@ -15,8 +15,12 @@ import { AdminHome } from "./pages/admin/AdminHome";
 import AdminLayout from "./components/Admin/AdminLayout";
 
 import AdicionarAdmins from "./pages/admin/AdicionarAdmins";
-import AjustarOrcamentos from "./pages/admin/AjustarOrcamentos";
 import VerAgendamentos from "./pages/admin/VerAgendamentos";
+
+import AjustarOrcamentos from "./pages/admin/orcamento/AjustarOrcamentos";
+import SolicitacoesOrcamento from "./pages/admin/orcamento/SolicitacoesOrcamento";
+import ModelosOrcamento from "./pages/admin/orcamento/ModelosOrcamento";
+import ItensModeloOrcamento from "./pages/admin/orcamento/ItensModeloOrcamento";
 // import VerVisitas from "./pages/admin/VerVisitas";
 // import AjustarServicos from "./pages/admin/AjustarServicos";
 // import AjustarGaleria from "./pages/admin/AjustarGaleria";
@@ -62,7 +66,10 @@ function AppRoutes() {
           element={user ? <Visitas /> : LoginRequired}
         />
 
-        <Route path="/orcamentos" element={<Orcamentos />} />
+        <Route
+          path="/orcamentos"
+          element={user ? <Orcamentos /> : LoginRequired}
+        />
 
         {/* HOME DO ADMIN - SEM SIDEBAR */}
         <Route
@@ -84,7 +91,16 @@ function AppRoutes() {
           }
         >
           <Route path="adicionar-admins" element={<AdicionarAdmins />} />
+
           <Route path="ajustar-orcamentos" element={<AjustarOrcamentos />} />
+          <Route path="orcamentos" element={<AjustarOrcamentos />} />
+          <Route
+            path="orcamentos/solicitacoes"
+            element={<SolicitacoesOrcamento />}
+          />
+          <Route path="orcamentos/modelos" element={<ModelosOrcamento />} />
+          <Route path="orcamentos/itens" element={<ItensModeloOrcamento />} />
+
           <Route path="ver-agendamentos" element={<VerAgendamentos />} />
           {/* <Route path="ver-visitas" element={<VerVisitas />} />
           <Route path="ajustar-servicos" element={<AjustarServicos />} />
