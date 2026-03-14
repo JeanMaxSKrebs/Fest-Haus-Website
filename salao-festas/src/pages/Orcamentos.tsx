@@ -1,22 +1,26 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { apiFetch } from "../lib/api";
+import ListaModelosOrcamento from "../components/orcamentos/ListaModelosOrcamento";
+import FormOrcamentoPersonalizado from "../components/orcamentos/FormOrcamentoPersonalizado";
+import MeusOrcamentos from "../components/orcamentos/MeusOrcamentos";
 
-type TipoServico = {
+export type TipoServico = {
   id: string;
   nome: string;
 };
 
-type ModeloOrcamento = {
+export type ModeloOrcamento = {
   id: string;
   nome: string;
   descricao: string | null;
   valor_base: number | null;
   ativo: boolean;
-  tipos_servico?: TipoServico | null;
+  tipos_servico?: TipoServico | TipoServico[] | null;
+  tipo_servico_id?: string | null;
 };
 
-type ItemModelo = {
+export type ItemModelo = {
   id: string;
   nome: string;
   descricao: string | null;
@@ -24,21 +28,51 @@ type ItemModelo = {
   ordem: number;
 };
 
-export default function Orcamentos() {
+export type ItemPersonalizado = {
+  id: string;
+  nome: string;
+  descricao: string;
+  quantidade: number;
+};
+
+type AbaAtiva = "modelos" | "personalizado" | "meus";
+
+function getTipoServicoId(modelo: ModeloOrcamento): string {
+  if (modelo.tipo_servico_id) return modelo.tipo_servico_id;
+  if (Array.isArray(modelo.tipos_servico)) return modelo.tipos_servico[0]?.id || "";
+  return modelo.tipos_servico?.id || "";
+}
+
+function Orcamentos() {
   const { user } = useAuth();
 
-  const [modelos, setModelos] = useState<ModeloOrcamento[]>([]);
-  const [carregando, setCarregando] = useState(true);
-  const [modeloSelecionado, setModeloSelecionado] = useState<ModeloOrcamento | null>(null);
-  const [itensModelo, setItensModelo] = useState<ItemModelo[]>([]);
-  const [carregandoItens, setCarregandoItens] = useState(false);
+  const [abaAtiva, setAbaAtiva] = useState<AbaAtiva>("modelos");
 
+  const [modelos, setModelos] = useState<ModeloOrcamento[]>([]);
   const [tiposServico, setTiposServico] = useState<TipoServico[]>([]);
-  const [tipoServicoId, setTipoServicoId] = useState("");
-  const [titulo, setTitulo] = useState("");
-  const [descricao, setDescricao] = useState("");
+
+  const [carregandoModelos, setCarregandoModelos] = useState(true);
+  const [carregandoTipos, setCarregandoTipos] = useState(true);
+
+  const [erroModelos, setErroModelos] = useState("");
+  const [erroTipos, setErroTipos] = useState("");
   const [mensagem, setMensagem] = useState("");
-  const [enviando, setEnviando] = useState(false);
+
+  const [modelosAbertos, setModelosAbertos] = useState<string[]>([]);
+  const [itensPorModelo, setItensPorModelo] = useState<Record<string, ItemModelo[]>>({});
+  const [carregandoItensPorModelo, setCarregandoItensPorModelo] = useState<Record<string, boolean>>({});
+
+  const [tipoServicoInicial, setTipoServicoInicial] = useState("");
+  const [tituloInicial, setTituloInicial] = useState("");
+  const [observacoesIniciais, setObservacoesIniciais] = useState("");
+  const [itensIniciais, setItensIniciais] = useState<ItemPersonalizado[]>([
+    {
+      id: crypto.randomUUID(),
+      nome: "",
+      descricao: "",
+      quantidade: 1,
+    },
+  ]);
 
   useEffect(() => {
     carregarModelos();
@@ -47,234 +81,275 @@ export default function Orcamentos() {
 
   async function carregarModelos() {
     try {
-      setCarregando(true);
-      const data = await apiFetch("/orcamentos/modelos");
-      setModelos((data || []).filter((item: ModeloOrcamento) => item.ativo));
+      setCarregandoModelos(true);
+      setErroModelos("");
+
+      const data = await apiFetch("/api/modelos-orcamento");
+      const lista = Array.isArray(data) ? data : [];
+
+      setModelos(lista.filter((item) => item.ativo !== false));
     } catch (error) {
-      console.error(error);
-      setMensagem("Erro ao carregar os modelos de orçamento.");
+      console.error("Erro ao carregar modelos de orçamento:", error);
+      setErroModelos("Não foi possível carregar os modelos de orçamento.");
+      setModelos([]);
     } finally {
-      setCarregando(false);
+      setCarregandoModelos(false);
     }
   }
 
   async function carregarTiposServico() {
     try {
-      const data = await apiFetch("/tipos-servico");
-      setTiposServico(data || []);
-    } catch (error) {
-      console.error(error);
-    }
-  }
+      setCarregandoTipos(true);
+      setErroTipos("");
 
-  async function verItens(modelo: ModeloOrcamento) {
-    try {
-      setModeloSelecionado(modelo);
-      setCarregandoItens(true);
-      const data = await apiFetch(`/orcamentos/modelos/${modelo.id}/itens`);
-      setItensModelo(data || []);
+      const data = await apiFetch("/api/tipos-servico");
+      setTiposServico(Array.isArray(data) ? data : []);
     } catch (error) {
-      console.error(error);
-      setMensagem("Erro ao carregar os itens do orçamento.");
+      console.error("Erro ao carregar tipos de serviço:", error);
+      setErroTipos("Não foi possível carregar os tipos de serviço.");
+      setTiposServico([]);
     } finally {
-      setCarregandoItens(false);
+      setCarregandoTipos(false);
     }
   }
 
-  async function enviarSolicitacao(e: React.FormEvent) {
-    e.preventDefault();
+  async function alternarModelo(modelo: ModeloOrcamento) {
+    const jaAberto = modelosAbertos.includes(modelo.id);
 
-    if (!user) {
-      setMensagem("Você precisa estar logado para solicitar um orçamento personalizado.");
+    if (jaAberto) {
+      setModelosAbertos((prev) => prev.filter((id) => id !== modelo.id));
       return;
     }
 
-    if (!tipoServicoId || !descricao.trim()) {
-      setMensagem("Selecione o tipo de serviço e descreva o orçamento desejado.");
+    setModelosAbertos((prev) => [...prev, modelo.id]);
+    setMensagem("");
+
+    if (itensPorModelo[modelo.id]) {
       return;
     }
 
     try {
-      setEnviando(true);
+      setCarregandoItensPorModelo((prev) => ({
+        ...prev,
+        [modelo.id]: true,
+      }));
+
+      const data = await apiFetch(`/api/modelos-orcamento/${modelo.id}/itens`);
+
+      setItensPorModelo((prev) => ({
+        ...prev,
+        [modelo.id]: Array.isArray(data) ? data : [],
+      }));
+    } catch (error) {
+      console.error("Erro ao carregar itens do modelo:", error);
+      setMensagem("Não foi possível carregar os itens deste modelo.");
+      setItensPorModelo((prev) => ({
+        ...prev,
+        [modelo.id]: [],
+      }));
+    } finally {
+      setCarregandoItensPorModelo((prev) => ({
+        ...prev,
+        [modelo.id]: false,
+      }));
+    }
+  }
+
+  async function personalizarModelo(modelo: ModeloOrcamento) {
+    try {
       setMensagem("");
+      setAbaAtiva("personalizado");
 
-      await apiFetch("/orcamentos/solicitacoes", {
-        method: "POST",
-        body: JSON.stringify({
-          usuario_id: user.id,
-          tipo_servico_id: tipoServicoId,
-          titulo: titulo.trim() || null,
-          descricao: descricao.trim(),
-        }),
-      });
+      let itensModelo = itensPorModelo[modelo.id];
 
-      setTitulo("");
-      setDescricao("");
-      setTipoServicoId("");
-      setMensagem("Solicitação enviada com sucesso! Ela ficará pendente para análise do administrador.");
+      if (!itensModelo) {
+        setCarregandoItensPorModelo((prev) => ({
+          ...prev,
+          [modelo.id]: true,
+        }));
+
+        const data = await apiFetch(`/api/modelos-orcamento/${modelo.id}/itens`);
+        itensModelo = Array.isArray(data) ? data : [];
+
+        setItensPorModelo((prev) => ({
+          ...prev,
+          [modelo.id]: itensModelo || [],
+        }));
+      }
+
+      setTipoServicoInicial(getTipoServicoId(modelo));
+      setTituloInicial(`${modelo.nome} - personalizado`);
+      setObservacoesIniciais(
+        modelo.descricao || "Baseado em um modelo pronto, com personalizações do cliente."
+      );
+
+      const itensConvertidos: ItemPersonalizado[] =
+        itensModelo && itensModelo.length > 0
+          ? itensModelo.map((item) => ({
+              id: crypto.randomUUID(),
+              nome: item.nome || "",
+              descricao: item.descricao || "",
+              quantidade: 1,
+            }))
+          : [
+              {
+                id: crypto.randomUUID(),
+                nome: "",
+                descricao: "",
+                quantidade: 1,
+              },
+            ];
+
+      setItensIniciais(itensConvertidos);
     } catch (error) {
-      console.error(error);
-      setMensagem("Erro ao enviar solicitação de orçamento.");
+      console.error("Erro ao preparar personalização do modelo:", error);
+      setMensagem("Não foi possível carregar este modelo para personalização.");
     } finally {
-      setEnviando(false);
+      setCarregandoItensPorModelo((prev) => ({
+        ...prev,
+        [modelo.id]: false,
+      }));
     }
+  }
+
+  function limparFormularioPersonalizado() {
+    setTipoServicoInicial("");
+    setTituloInicial("");
+    setObservacoesIniciais("");
+    setItensIniciais([
+      {
+        id: crypto.randomUUID(),
+        nome: "",
+        descricao: "",
+        quantidade: 1,
+      },
+    ]);
   }
 
   return (
     <section className="section">
       <h1>Orçamentos</h1>
-      <p style={{ color: "var(--cor-texto-secundario)", marginTop: 8 }}>
-        Escolha um modelo pronto ou monte um orçamento personalizado.
+
+      <p
+        style={{
+          color: "var(--cor-texto-secundario)",
+          marginTop: "10px",
+          marginBottom: "25px",
+        }}
+      >
+        Escolha um modelo pronto, personalize um modelo existente ou monte seu próprio orçamento.
       </p>
 
       {mensagem && (
-        <div style={{ marginTop: 16 }}>
-          <p>{mensagem}</p>
-        </div>
-      )}
-
-      <div style={{ marginTop: 30 }}>
-        <h2>Modelos prontos</h2>
-
-        {carregando ? (
-          <p>Carregando orçamentos...</p>
-        ) : modelos.length === 0 ? (
-          <p>Nenhum modelo disponível no momento.</p>
-        ) : (
-          <div
-            className="grid"
-            style={{
-              marginTop: 16,
-              gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
-              gap: "16px",
-            }}
-          >
-            {modelos.map((modelo) => (
-              <div
-                key={modelo.id}
-                style={{
-                  border: "1px solid var(--cor-borda)",
-                  borderRadius: 12,
-                  padding: 16,
-                  background: "var(--cor-fundo-secundario)",
-                }}
-              >
-                <h3 style={{ marginBottom: 8 }}>{modelo.nome}</h3>
-
-                <p style={{ marginBottom: 8, color: "var(--cor-texto-secundario)" }}>
-                  <strong>Tipo:</strong> {modelo.tipos_servico?.nome || "Não informado"}
-                </p>
-
-                {modelo.descricao && (
-                  <p style={{ marginBottom: 12 }}>{modelo.descricao}</p>
-                )}
-
-                {modelo.valor_base !== null && (
-                  <p style={{ marginBottom: 16 }}>
-                    <strong>A partir de:</strong>{" "}
-                    {Number(modelo.valor_base).toLocaleString("pt-BR", {
-                      style: "currency",
-                      currency: "BRL",
-                    })}
-                  </p>
-                )}
-
-                <button
-                  className="btn-apresentacao"
-                  type="button"
-                  onClick={() => verItens(modelo)}
-                >
-                  Ver itens
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {modeloSelecionado && (
-        <div style={{ marginTop: 32 }}>
-          <h2>Itens do orçamento: {modeloSelecionado.nome}</h2>
-
-          {carregandoItens ? (
-            <p>Carregando itens...</p>
-          ) : itensModelo.length === 0 ? (
-            <p>Esse modelo ainda não possui itens cadastrados.</p>
-          ) : (
-            <div
-              style={{
-                marginTop: 16,
-                border: "1px solid var(--cor-borda)",
-                borderRadius: 12,
-                padding: 16,
-                background: "var(--cor-fundo-secundario)",
-              }}
-            >
-              <ul style={{ paddingLeft: 20 }}>
-                {itensModelo.map((item) => (
-                  <li key={item.id} style={{ marginBottom: 10 }}>
-                    <strong>{item.nome}</strong>
-                    {item.descricao ? ` — ${item.descricao}` : ""}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-        </div>
-      )}
-
-      <div style={{ marginTop: 40 }}>
-        <h2>Solicitar orçamento personalizado</h2>
-        <p style={{ color: "var(--cor-texto-secundario)", marginTop: 8 }}>
-          Monte seu pedido com os itens desejados. Os valores serão analisados pelo administrador.
-        </p>
-
-        <form
-          onSubmit={enviarSolicitacao}
+        <div
           style={{
-            marginTop: 16,
-            display: "grid",
-            gap: 12,
-            maxWidth: 700,
+            marginBottom: "20px",
+            padding: "12px 14px",
+            borderRadius: "10px",
+            background: "var(--cor-fundo-secundario)",
+            border: "1px solid var(--cor-borda)",
           }}
         >
-          <select
-            value={tipoServicoId}
-            onChange={(e) => setTipoServicoId(e.target.value)}
-            required
-          >
-            <option value="">Selecione o tipo de serviço</option>
-            {tiposServico.map((tipo) => (
-              <option key={tipo.id} value={tipo.id}>
-                {tipo.nome}
-              </option>
-            ))}
-          </select>
+          {mensagem}
+        </div>
+      )}
 
-          <input
-            type="text"
-            placeholder="Título do orçamento (opcional)"
-            value={titulo}
-            onChange={(e) => setTitulo(e.target.value)}
-          />
+      <div
+        style={{
+          display: "flex",
+          gap: "12px",
+          flexWrap: "wrap",
+          marginBottom: "24px",
+        }}
+      >
+        <button
+          type="button"
+          className="btn-apresentacao"
+          onClick={() => setAbaAtiva("modelos")}
+          style={{
+            width: "auto",
+            opacity: abaAtiva === "modelos" ? 1 : 0.75,
+            border:
+              abaAtiva === "modelos"
+                ? "2px solid var(--cor-primaria)"
+                : "1px solid var(--cor-borda)",
+          }}
+        >
+          Modelos prontos
+        </button>
 
-          <textarea
-            placeholder="Descreva os itens desejados, quantidade de pessoas, duração do evento e outras observações"
-            value={descricao}
-            onChange={(e) => setDescricao(e.target.value)}
-            rows={6}
-            required
-          />
+        <button
+          type="button"
+          className="btn-apresentacao"
+          onClick={() => setAbaAtiva("personalizado")}
+          style={{
+            width: "auto",
+            opacity: abaAtiva === "personalizado" ? 1 : 0.75,
+            border:
+              abaAtiva === "personalizado"
+                ? "2px solid var(--cor-primaria)"
+                : "1px solid var(--cor-borda)",
+          }}
+        >
+          Monte seu orçamento
+        </button>
 
-          <button
-            className="btn-apresentacao"
-            type="submit"
-            disabled={enviando}
-          >
-            {enviando ? "Enviando..." : "Enviar orçamento personalizado"}
-          </button>
-        </form>
+        <button
+          type="button"
+          className="btn-apresentacao"
+          onClick={() => setAbaAtiva("meus")}
+          style={{
+            width: "auto",
+            opacity: abaAtiva === "meus" ? 1 : 0.75,
+            border:
+              abaAtiva === "meus"
+                ? "2px solid var(--cor-primaria)"
+                : "1px solid var(--cor-borda)",
+          }}
+        >
+          Meus orçamentos
+        </button>
       </div>
+
+      {abaAtiva === "modelos" && (
+        <ListaModelosOrcamento
+          modelos={modelos}
+          carregando={carregandoModelos}
+          erro={erroModelos}
+          modelosAbertos={modelosAbertos}
+          itensPorModelo={itensPorModelo}
+          carregandoItensPorModelo={carregandoItensPorModelo}
+          onVerItens={alternarModelo}
+          onPersonalizarModelo={personalizarModelo}
+          onTentarNovamente={carregarModelos}
+        />
+      )}
+
+      {abaAtiva === "personalizado" && (
+        <FormOrcamentoPersonalizado
+          user={user}
+          tiposServico={tiposServico}
+          carregandoTipos={carregandoTipos}
+          erroTipos={erroTipos}
+          tipoServicoInicial={tipoServicoInicial}
+          tituloInicial={tituloInicial}
+          observacoesIniciais={observacoesIniciais}
+          itensIniciais={itensIniciais}
+          onLimparIniciais={limparFormularioPersonalizado}
+          onSucesso={(texto) => {
+            setMensagem(texto);
+            setAbaAtiva("meus");
+            limparFormularioPersonalizado();
+          }}
+          onErro={(texto) => setMensagem(texto)}
+        />
+      )}
+
+      {abaAtiva === "meus" && user && (
+        <MeusOrcamentos userId={user.id} />
+      )}
     </section>
   );
 }
+
+export default Orcamentos;

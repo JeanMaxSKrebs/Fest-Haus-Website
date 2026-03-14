@@ -15,9 +15,15 @@ import {
 
 const router = Router();
 
-router.post("/api/solicitacoes-orcamento", criarSolicitacaoOrcamento);
+router.post(
+  "/api/solicitacoes-orcamento",
+  authenticateToken,
+  criarSolicitacaoOrcamento
+);
+
 router.get(
   "/api/solicitacoes-orcamento/usuario/:usuario_id",
+  authenticateToken,
   listarSolicitacoesOrcamentoPorUsuario
 );
 

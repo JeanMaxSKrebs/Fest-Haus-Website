@@ -642,7 +642,7 @@ button:hover {
 
     border-radius: 12px;
 
-    font-size: 18px;
+    font-size: 16px;
 
     font-weight: bold;
 
@@ -750,6 +750,134 @@ button:hover {
     color: orange;
 }
 
+.btn-aba-orcamento {
+    width: auto;
+    min-width: 180px;
+}
+
+.titulo-secao {
+    margin-bottom: 16px;
+}
+
+.grid-modelos {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+    align-items: start;
+}
+
+@media (max-width: 1100px) {
+    .grid-modelos {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 700px) {
+    .grid-modelos {
+        grid-template-columns: 1fr;
+    }
+}
+
+
+.card-orcamento {
+    background: var(--cor-fundo-secundario);
+    border: 1px solid var(--cor-borda);
+    border-radius: 14px;
+    padding: 18px;
+    transition: 0.2s;
+}
+
+.card-orcamento.aberto {
+    border: 2px solid var(--cor-primaria);
+}
+
+.card-orcamento-tipo {
+    color: var(--cor-texto-secundario);
+    margin-bottom: 8px;
+}
+
+.card-orcamento-descricao {
+    color: var(--cor-texto-secundario);
+    margin-bottom: 12px;
+}
+
+.card-orcamento-preco {
+    font-weight: 500;
+    margin-bottom: 14px;
+}
+
+.card-itens-modelo {
+    margin-top: 12px;
+    padding: 14px;
+    border-radius: 10px;
+    border: 1px solid var(--cor-borda);
+    background: var(--cor-fundo);
+}
+
+.card-itens-modelo ul {
+    padding-left: 20px;
+    display: grid;
+    gap: 6px;
+}
+
+.acoes-modelo-orcamento {
+  display: flex;
+  gap: 10px;
+  align-items: stretch;
+}
+
+.btn-acao-modelo {
+  flex: 1 1 0;
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+@media (max-width: 700px) {
+  .acoes-modelo-orcamento {
+    flex-direction: column;
+  }
+
+  .btn-acao-modelo {
+    width: 100%;
+  }
+}
+
+
+.lista-meus-orcamentos {
+  display: grid;
+  gap: 18px;
+}
+
+
+.lista-itens-modelo {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.lista-itens-modelo li {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--cor-borda);
+}
+
+.lista-itens-modelo li:nth-child(odd) {
+  background: var(--cor-fundo);
+}
+
+.lista-itens-modelo li:nth-child(even) {
+  background: var(--cor-fundo-secundario);
+}
+
+.lista-itens-modelo li:last-child {
+  border-bottom: none;
+}
+
 
 /* ADMIN */
 
@@ -838,11 +966,9 @@ button:hover {
 
 .admin-card {
     height: 100%;
-    background: linear-gradient(
-        180deg,
-        rgba(99, 23, 153, 0.92) 0%,
-        rgba(29, 29, 29, 0.96) 100%
-    );
+    background: linear-gradient(180deg,
+            rgba(99, 23, 153, 0.92) 0%,
+            rgba(29, 29, 29, 0.96) 100%);
     border: 1px solid rgba(253, 213, 126, 0.14);
     border-radius: 22px;
     padding: 28px;
@@ -860,12 +986,10 @@ button:hover {
     content: "";
     position: absolute;
     inset: 0;
-    background: linear-gradient(
-        135deg,
-        rgba(253, 213, 126, 0.05),
-        transparent 45%,
-        rgba(159, 103, 255, 0.05)
-    );
+    background: linear-gradient(135deg,
+            rgba(253, 213, 126, 0.05),
+            transparent 45%,
+            rgba(159, 103, 255, 0.05));
     pointer-events: none;
 }
 
@@ -1136,23 +1260,23 @@ button:hover {
 }
 
 .admin-layout {
-  display: flex;
-  min-height: 100vh;
+    display: flex;
+    min-height: 100vh;
 }
 
 .admin-sidebar {
-  width: 260px;
-  min-width: 260px;
-  position: fixed;
-  top: 0;
-  left: 0;
-  bottom: 0;
+    width: 260px;
+    min-width: 260px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
 }
 
 .admin-content {
-  flex: 1;
-  margin-left: 260px;
-  padding: 40px;
+    flex: 1;
+    margin-left: 260px;
+    padding: 40px;
 }
 
 /* =========================================
@@ -1311,11 +1435,9 @@ button:hover {
 }
 
 .admin-panel {
-    background: linear-gradient(
-        180deg,
-        rgba(36, 11, 54, 0.72) 0%,
-        rgba(30, 30, 30, 0.96) 100%
-    );
+    background: linear-gradient(180deg,
+            rgba(36, 11, 54, 0.72) 0%,
+            rgba(30, 30, 30, 0.96) 100%);
     border: 1px solid rgba(253, 213, 126, 0.12);
     border-radius: 22px;
     padding: 24px;
@@ -1571,6 +1693,7 @@ button:hover {
         grid-template-columns: 1fr;
     }
 }
+
 /* =========================================
    PÁGINAS INTERNAS DO ADMIN
 ========================================= */
@@ -1612,11 +1735,9 @@ button:hover {
 }
 
 .admin-panel {
-    background: linear-gradient(
-        180deg,
-        rgba(36, 11, 54, 0.75) 0%,
-        rgba(30, 30, 30, 0.96) 100%
-    );
+    background: linear-gradient(180deg,
+            rgba(36, 11, 54, 0.75) 0%,
+            rgba(30, 30, 30, 0.96) 100%);
     border: 1px solid rgba(253, 213, 126, 0.12);
     border-radius: 22px;
     padding: 24px;

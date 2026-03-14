@@ -17,20 +17,30 @@ import {
 
 const router = Router();
 
+/**
+ * USUÁRIO LOGADO PODE VISUALIZAR
+ */
 router.get(
   "/api/modelos-orcamento",
   authenticateToken,
-  requireAdmin,
   listarModelosOrcamento
 );
 
 router.get(
   "/api/modelos-orcamento/:id",
   authenticateToken,
-  requireAdmin,
   buscarModeloOrcamentoPorId
 );
 
+router.get(
+  "/api/modelos-orcamento/:id/itens",
+  authenticateToken,
+  listarItensModeloOrcamento
+);
+
+/**
+ * APENAS ADMIN PODE ALTERAR
+ */
 router.post(
   "/api/modelos-orcamento",
   authenticateToken,
@@ -50,13 +60,6 @@ router.delete(
   authenticateToken,
   requireAdmin,
   deletarModeloOrcamento
-);
-
-router.get(
-  "/api/modelos-orcamento/:id/itens",
-  authenticateToken,
-  requireAdmin,
-  listarItensModeloOrcamento
 );
 
 router.post(
