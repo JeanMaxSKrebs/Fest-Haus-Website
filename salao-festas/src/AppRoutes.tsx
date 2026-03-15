@@ -11,18 +11,16 @@ import Visitas from "./pages/Visitas";
 import LoginModal from "./components/LoginModal";
 
 import AdminRoute from "./components/Admin/AdminRoute";
-import { AdminHome } from "./pages/admin/AdminHome";
 import AdminLayout from "./components/Admin/AdminLayout";
-
+import { AdminHome } from "./pages/admin/AdminHome";
 import AdicionarAdmins from "./pages/admin/AdicionarAdmins";
 import VerAgendamentos from "./pages/admin/VerAgendamentos";
-
 import AjustarOrcamentos from "./pages/admin/orcamento/AjustarOrcamentos";
 import SolicitacoesOrcamento from "./pages/admin/orcamento/SolicitacoesOrcamento";
 import ModelosOrcamento from "./pages/admin/orcamento/ModelosOrcamento";
 import ItensModeloOrcamento from "./pages/admin/orcamento/ItensModeloOrcamento";
-// import VerVisitas from "./pages/admin/VerVisitas";
-// import AjustarServicos from "./pages/admin/AjustarServicos";
+import VerVisitas from "./pages/admin/VerVisitas";
+import AjustarServicos from "./pages/admin/AjustarServicos";
 // import AjustarGaleria from "./pages/admin/AjustarGaleria";
 
 function AppRoutes() {
@@ -71,27 +69,16 @@ function AppRoutes() {
           element={user ? <Orcamentos /> : LoginRequired}
         />
 
-        {/* HOME DO ADMIN - SEM SIDEBAR */}
         <Route
           path="/admin"
-          element={
-            <AdminRoute>
-              <AdminHome />
-            </AdminRoute>
-          }
-        />
-
-        {/* PÁGINAS INTERNAS DO ADMIN - COM SIDEBAR */}
-        <Route
-          path="/admin/*"
           element={
             <AdminRoute>
               <AdminLayout />
             </AdminRoute>
           }
         >
+          <Route index element={<AdminHome />} />
           <Route path="adicionar-admins" element={<AdicionarAdmins />} />
-
           <Route path="ajustar-orcamentos" element={<AjustarOrcamentos />} />
           <Route path="orcamentos" element={<AjustarOrcamentos />} />
           <Route
@@ -100,11 +87,10 @@ function AppRoutes() {
           />
           <Route path="orcamentos/modelos" element={<ModelosOrcamento />} />
           <Route path="orcamentos/itens" element={<ItensModeloOrcamento />} />
-
           <Route path="ver-agendamentos" element={<VerAgendamentos />} />
-          {/* <Route path="ver-visitas" element={<VerVisitas />} />
+          <Route path="ver-visitas" element={<VerVisitas />} />
           <Route path="ajustar-servicos" element={<AjustarServicos />} />
-          <Route path="ajustar-galeria" element={<AjustarGaleria />} /> */}
+          {/* <Route path="ajustar-galeria" element={<AjustarGaleria />} /> */}
         </Route>
       </Routes>
     </>
