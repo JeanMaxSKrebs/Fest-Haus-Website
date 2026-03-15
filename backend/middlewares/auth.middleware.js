@@ -20,11 +20,12 @@ export async function authenticateToken(req, res, next) {
 
     const { data: usuario, error: erroUsuario } = await supabase
       .from("usuarios")
-      .select("id, email, full_name, is_admin")
+      .select("id, email, nome, is_admin")
       .eq("id", data.user.id)
       .single();
 
     if (erroUsuario || !usuario) {
+      console.error("Erro ao buscar usuário no banco:", erroUsuario);
       return res
         .status(401)
         .json({ error: "Usuário não encontrado no sistema" });
@@ -36,8 +37,6 @@ export async function authenticateToken(req, res, next) {
     console.error("Erro no middleware de auth:", error);
     return res.status(401).json({ error: "Token inválido ou expirado" });
   }
-
-  console.log("authorization:", req.headers.authorization);
 }
 
 export function requireAdmin(req, res, next) {

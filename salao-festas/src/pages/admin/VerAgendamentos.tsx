@@ -1,14 +1,20 @@
 import { useEffect, useState } from "react";
-import { Check, X, Clock } from "lucide-react";
-import { supabase } from "../../lib/supabaseClient";
+import { Check, X, Clock, Trash2 } from "lucide-react";
+import { apiFetch } from "../../lib/api";
 
 type Agendamento = {
   id: string;
-  nome: string | null;
-  servico: string | null;
-  data: string | null;
-  hora: string | null;
-  status: string | null;
+  servico?: string | null;
+  data_evento?: string | null;
+  status?: string | null;
+  mensagem?: string | null;
+  usuario_id?: string | null;
+  usuario?: {
+    id: string;
+    nome?: string | null;
+    email?: string | null;
+    telefone?: string | null;
+  } | null;
 };
 
 export default function VerAgendamentos() {
@@ -21,18 +27,14 @@ export default function VerAgendamentos() {
     try {
       setLoading(true);
       setErro("");
+      setSucesso("");
 
-      const { data, error } = await supabase
-        .from("agendamentos")
-        .select("id, nome, servico, data, hora, status")
-        .order("data", { ascending: true });
-
-      if (error) throw error;
-
-      setAgendamentos(data || []);
+      const data = await apiFetch("/api/agendamentos");
+      setAgendamentos(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error("Erro ao buscar agendamentos:", error);
       setErro("Não foi possível carregar os agendamentos.");
+      setAgendamentos([]);
     } finally {
       setLoading(false);
     }
@@ -42,42 +44,129 @@ export default function VerAgendamentos() {
     buscarAgendamentos();
   }, []);
 
-  async function atualizarStatus(id: string, novoStatus: string) {
+  async function aprovarAgendamento(id: string) {
     try {
       setErro("");
       setSucesso("");
 
-      const { error } = await supabase
-        .from("agendamentos")
-        .update({ status: novoStatus })
-        .eq("id", id);
-
-      if (error) throw error;
+      const resposta = await apiFetch(`/api/agendamentos/${id}/aprovar`, {
+        method: "PUT",
+      });
 
       setAgendamentos((prev) =>
         prev.map((ag) =>
-          ag.id === id ? { ...ag, status: novoStatus } : ag
+          ag.id === id ? resposta.data || { ...ag, status: "aprovado" } : ag
         )
       );
 
-      setSucesso("Status atualizado com sucesso.");
+      setSucesso("Agendamento aprovado com sucesso.");
     } catch (error) {
-      console.error("Erro ao atualizar status:", error);
-      setErro("Não foi possível atualizar o status.");
+      console.error("Erro ao aprovar agendamento:", error);
+      setErro("Não foi possível aprovar o agendamento.");
     }
   }
 
-  function classeStatus(status: string | null) {
+  async function rejeitarAgendamento(id: string) {
+    try {
+      setErro("");
+      setSucesso("");
+
+      const resposta = await apiFetch(`/api/agendamentos/${id}/rejeitar`, {
+        method: "PUT",
+      });
+
+      setAgendamentos((prev) =>
+        prev.map((ag) =>
+          ag.id === id ? resposta.data || { ...ag, status: "rejeitado" } : ag
+        )
+      );
+
+      setSucesso("Agendamento rejeitado com sucesso.");
+    } catch (error) {
+      console.error("Erro ao rejeitar agendamento:", error);
+      setErro("Não foi possível rejeitar o agendamento.");
+    }
+  }
+
+  async function excluirAgendamento(id: string) {
+    const confirmar = window.confirm(
+      "Tem certeza que deseja excluir este agendamento?"
+    );
+
+    if (!confirmar) return;
+
+    try {
+      setErro("");
+      setSucesso("");
+
+      await apiFetch(`/api/agendamentos/${id}`, {
+        method: "DELETE",
+      });
+
+      setAgendamentos((prev) => prev.filter((ag) => ag.id !== id));
+      setSucesso("Agendamento excluído com sucesso.");
+    } catch (error) {
+      console.error("Erro ao excluir agendamento:", error);
+      setErro("Não foi possível excluir o agendamento.");
+    }
+  }
+
+  function classeStatus(status: string | null | undefined) {
     const valor = (status || "").toLowerCase();
 
     if (valor === "aprovado") return "admin-role-badge aprovado";
-    if (valor === "recusado") return "admin-role-badge recusado";
+    if (valor === "rejeitado" || valor === "recusado") {
+      return "admin-role-badge recusado";
+    }
+
     return "admin-role-badge pendente";
   }
 
-  function formatarData(data: string | null) {
-    if (!data) return "Não informado";
-    return new Date(data).toLocaleDateString("pt-BR");
+  function renderIconeStatus(status: string | null | undefined) {
+    const valor = (status || "").toLowerCase();
+
+    if (valor === "aprovado") return <Check size={14} />;
+    if (valor === "rejeitado" || valor === "recusado") return <X size={14} />;
+    return <Clock size={14} />;
+  }
+
+  function formatarStatus(status: string | null | undefined) {
+    const valor = (status || "").toLowerCase();
+
+    if (valor === "aprovado") return "Aprovado";
+    if (valor === "rejeitado" || valor === "recusado") return "Rejeitado";
+    if (valor === "em_processo") return "Em processo";
+    if (valor === "pendente") return "Pendente";
+
+    return status || "Pendente";
+  }
+
+  function obterNomeCliente(ag: Agendamento) {
+    return ag.usuario?.nome?.trim() || "Sem nome";
+  }
+
+  function obterEmailCliente(ag: Agendamento) {
+    return ag.usuario?.email || "";
+  }
+
+  function parseDataEvento(dataEvento: string | null | undefined) {
+    if (!dataEvento) {
+      return { data: "Não informado", hora: "—" };
+    }
+
+    const dt = new Date(dataEvento);
+
+    if (Number.isNaN(dt.getTime())) {
+      return { data: dataEvento, hora: "—" };
+    }
+
+    return {
+      data: dt.toLocaleDateString("pt-BR"),
+      hora: dt.toLocaleTimeString("pt-BR", {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+    };
   }
 
   return (
@@ -97,9 +186,7 @@ export default function VerAgendamentos() {
         {loading ? (
           <p className="admin-message-info">Carregando agendamentos...</p>
         ) : agendamentos.length === 0 ? (
-          <p className="admin-message-info">
-            Nenhum agendamento encontrado.
-          </p>
+          <p className="admin-message-info">Nenhum agendamento encontrado.</p>
         ) : (
           <div className="admin-table-wrapper">
             <table className="admin-table">
@@ -115,65 +202,69 @@ export default function VerAgendamentos() {
               </thead>
 
               <tbody>
-                {agendamentos.map((ag) => (
-                  <tr key={ag.id}>
-                    <td>
-                      <div className="admin-user-name">
-                        {ag.nome || "Sem nome"}
-                      </div>
-                    </td>
+                {agendamentos.map((ag) => {
+                  const dataHora = parseDataEvento(ag.data_evento);
 
-                    <td>{ag.servico || "Não informado"}</td>
+                  return (
+                    <tr key={ag.id}>
+                      <td>
+                        <div className="admin-user-name">
+                          {obterNomeCliente(ag)}
+                        </div>
 
-                    <td>{formatarData(ag.data)}</td>
-
-                    <td>{ag.hora || "—"}</td>
-
-                    <td>
-                      <span className={classeStatus(ag.status)}>
-                        {ag.status === "Aprovado" ? (
-                          <Check size={14} />
-                        ) : ag.status === "Recusado" ? (
-                          <X size={14} />
-                        ) : (
-                          <Clock size={14} />
+                        {obterEmailCliente(ag) && (
+                          <div className="admin-user-email">
+                            {obterEmailCliente(ag)}
+                          </div>
                         )}
-                        &nbsp;{ag.status || "Pendente"}
-                      </span>
-                    </td>
+                      </td>
 
-                    <td>
-                      <div className="admin-actions">
-                        {ag.status === "Em Processo" ||
-                        ag.status === "Pendente" ? (
-                          <>
-                            <button
-                              className="admin-icon-button edit"
-                              title="Aprovar"
-                              onClick={() =>
-                                atualizarStatus(ag.id, "Aprovado")
-                              }
-                            >
-                              <Check size={18} />
-                            </button>
+                      <td>{ag.servico || "Não informado"}</td>
+                      <td>{dataHora.data}</td>
+                      <td>{dataHora.hora}</td>
 
-                            <button
-                              className="admin-icon-button danger"
-                              title="Rejeitar"
-                              onClick={() =>
-                                atualizarStatus(ag.id, "Recusado")
-                              }
-                            >
-                              <X size={18} />
-                            </button>
-                          </>
-                        ) : (
-                          "-"
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                ))}
+                      <td>
+                        <span className={classeStatus(ag.status)}>
+                          {renderIconeStatus(ag.status)}
+                          <span style={{ marginLeft: 6 }}>
+                            {formatarStatus(ag.status)}
+                          </span>
+                        </span>
+                      </td>
+
+                      <td>
+                        <div className="admin-actions">
+                          <button
+                            className="admin-icon-button edit"
+                            title="Aprovar"
+                            onClick={() => aprovarAgendamento(ag.id)}
+                          >
+                            <Check size={16} />
+                            <span>Aprovar</span>
+                          </button>
+
+                          <button
+                            className="admin-icon-button danger"
+                            title="Rejeitar"
+                            onClick={() => rejeitarAgendamento(ag.id)}
+                          >
+                            <X size={16} />
+                            <span>Rejeitar</span>
+                          </button>
+
+                          <button
+                            className="admin-icon-button danger"
+                            title="Excluir"
+                            onClick={() => excluirAgendamento(ag.id)}
+                          >
+                            <Trash2 size={16} />
+                            <span>Excluir</span>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
