@@ -13,14 +13,23 @@ import { notFoundHandler, errorHandler } from "./middlewares/error.middleware.js
 import tiposServicoRoutes from "./routes/tipos-servico.routes.js";
 import solicitacoesOrcamentoRoutes from "./routes/solicitacoes-orcamento.routes.js";
 import modelosOrcamentoRoutes from "./routes/modelos-orcamento.routes.js";
-
 import galeriaRoutes from "./routes/galeria.routes.js";
 
 dotenv.config();
 
 const app = express();
 
-app.use(cors());
+app.use(
+  cors({
+    origin: [
+      "http://localhost:5173",
+      "http://localhost:3000",
+      "https://SEU-SITE.pages.dev",
+    ],
+    credentials: true,
+  })
+);
+
 app.use(express.json());
 
 app.get("/", (_req, res) => {
@@ -33,11 +42,9 @@ app.use(adminsRoutes);
 app.use(agendamentosRoutes);
 app.use(orcamentosRoutes);
 app.use(visitasRoutes);
-
 app.use(tiposServicoRoutes);
 app.use(solicitacoesOrcamentoRoutes);
 app.use(modelosOrcamentoRoutes);
-
 app.use(galeriaRoutes);
 
 app.use(notFoundHandler);
