@@ -9,10 +9,6 @@ import BtnOrcamento from "./BtnOrcamento";
 import Festa15 from "./servicos/Festa15";
 import Personalizado from "./servicos/Personalizado";
 
-interface ServicosProps {
-  user?: { email?: string; user_metadata?: { full_name?: string } };
-}
-
 type TipoServicoApi = {
   id: string;
   nome: string;
@@ -26,7 +22,7 @@ type TipoServicoApi = {
   }>;
 };
 
-function Servicos({ user }: ServicosProps) {
+function Servicos() {
   const [servicoAtivo, setServicoAtivo] = useState<string | null>(null);
   const [servicosApi, setServicosApi] = useState<TipoServicoApi[]>([]);
   const [loading, setLoading] = useState(true);
