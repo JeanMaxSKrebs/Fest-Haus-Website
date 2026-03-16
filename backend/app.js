@@ -19,13 +19,25 @@ dotenv.config();
 
 const app = express();
 
+const allowedOrigins = [
+  "http://localhost:5173",
+  "http://localhost:3000",
+];
+
 app.use(
   cors({
-    origin: [
-      "http://localhost:5173",
-      "http://localhost:3000",
-      "https://https://fest-haus-website.pages.dev/",
-    ],
+    origin(origin, callback) {
+      if (!origin) return callback(null, true);
+
+      if (
+        allowedOrigins.includes(origin) ||
+        origin.endsWith(".pages.dev")
+      ) {
+        return callback(null, true);
+      }
+
+      return callback(new Error(`Origin não permitido por CORS: ${origin}`));
+    },
     credentials: true,
   })
 );
