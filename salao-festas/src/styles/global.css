@@ -2828,3 +2828,15 @@ body.modal-open {
     grid-template-columns: repeat(3, 1fr);
   }
 }
+.servicos-home__linha {
+  display: flex;
+  gap: 18px;
+  overflow-x: auto;
+  padding-bottom: 10px;
+  flex-wrap: nowrap;
+}
+
+.servicos-home__card {
+  min-width: 230px;
+  flex: 0 0 230px;
+}

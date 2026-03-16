@@ -30,6 +30,7 @@ function Servicos({ user }: ServicosProps) {
   const [servicoAtivo, setServicoAtivo] = useState<string | null>(null);
   const [servicosApi, setServicosApi] = useState<TipoServicoApi[]>([]);
   const [loading, setLoading] = useState(true);
+
   const sectionRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
@@ -106,15 +107,25 @@ function Servicos({ user }: ServicosProps) {
       nome: "Festa de 15 Anos",
       imagem: getImagemServico("Festa de 15 Anos", "/servicos/15anos.jpg"),
       componente: (
-        <Festa15 imagem={getImagemServico("Festa de 15 Anos", "/servicos/15anos.jpg")} />
-      )
+        <Festa15
+          imagem={getImagemServico("Festa de 15 Anos", "/servicos/15anos.jpg")}
+        />
+      ),
     },
     {
       nome: "Eventos Personalizados",
-      imagem: getImagemServico("Eventos Personalizados", "/servicos/personalizado.jpg"),
+      imagem: getImagemServico(
+        "Eventos Personalizados",
+        "/servicos/personalizado.jpg"
+      ),
       componente: (
-        <Personalizado imagem={getImagemServico("Eventos Personalizados", "/servicos/personalizado.jpg")} />
-      )
+        <Personalizado
+          imagem={getImagemServico(
+            "Eventos Personalizados",
+            "/servicos/personalizado.jpg"
+          )}
+        />
+      ),
     },
   ];
 
@@ -135,7 +146,7 @@ function Servicos({ user }: ServicosProps) {
 
       {loading && <p>Carregando serviços...</p>}
 
-      <div className="grid">
+      <div className="servicos-home__linha">
         {servicosVisiveis.map((servico, index) => {
           const isAtivo = servicoAtivo === servico.nome;
           const algumAtivo = servicoAtivo !== null;
@@ -144,7 +155,7 @@ function Servicos({ user }: ServicosProps) {
           return (
             <div
               key={index}
-              className="card"
+              className="card servicos-home__card"
               style={{
                 display: "flex",
                 flexDirection: "column",
