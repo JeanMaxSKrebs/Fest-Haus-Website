@@ -2828,15 +2828,21 @@ body.modal-open {
     grid-template-columns: repeat(3, 1fr);
   }
 }
-.servicos-home__linha {
-  display: flex;
-  gap: 18px;
-  overflow-x: auto;
-  padding-bottom: 10px;
-  flex-wrap: nowrap;
+/* ========================= */
+/* SERVIÇOS HOME */
+/* ========================= */
+
+.servicos-home__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 20px;
+  width: 100%;
+  margin-top: 20px;
 }
 
-.servicos-home__card {
-  min-width: 230px;
-  flex: 0 0 230px;
+/* garante que os cards não estiquem demais */
+.servicos-home__grid .card {
+  width: 100%;
+  max-width: 260px;
+  margin: 0 auto;
 }

@@ -146,7 +146,7 @@ function Servicos({ user }: ServicosProps) {
 
       {loading && <p>Carregando serviços...</p>}
 
-      <div className="servicos-home__linha">
+      <div className="servicos-home__grid">
         {servicosVisiveis.map((servico, index) => {
           const isAtivo = servicoAtivo === servico.nome;
           const algumAtivo = servicoAtivo !== null;
@@ -155,7 +155,7 @@ function Servicos({ user }: ServicosProps) {
           return (
             <div
               key={index}
-              className="card servicos-home__card"
+              className="card"
               style={{
                 display: "flex",
                 flexDirection: "column",
