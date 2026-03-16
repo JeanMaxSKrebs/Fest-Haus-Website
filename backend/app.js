@@ -14,6 +14,8 @@ import tiposServicoRoutes from "./routes/tipos-servico.routes.js";
 import solicitacoesOrcamentoRoutes from "./routes/solicitacoes-orcamento.routes.js";
 import modelosOrcamentoRoutes from "./routes/modelos-orcamento.routes.js";
 
+import galeriaRoutes from "./routes/galeria.routes.js";
+
 dotenv.config();
 
 const app = express();
@@ -35,6 +37,8 @@ app.use(visitasRoutes);
 app.use(tiposServicoRoutes);
 app.use(solicitacoesOrcamentoRoutes);
 app.use(modelosOrcamentoRoutes);
+
+app.use(galeriaRoutes);
 
 app.use(notFoundHandler);
 app.use(errorHandler);

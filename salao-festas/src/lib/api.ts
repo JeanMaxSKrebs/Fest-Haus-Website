@@ -8,10 +8,10 @@ export async function apiFetch(path: string, options: RequestInit = {}) {
   } = await supabase.auth.getSession();
 
   const token = session?.access_token;
-
   const headers = new Headers(options.headers || {});
+  const isFormData = options.body instanceof FormData;
 
-  if (!headers.has("Content-Type") && options.body) {
+  if (!headers.has("Content-Type") && options.body && !isFormData) {
     headers.set("Content-Type", "application/json");
   }
 
@@ -30,7 +30,5 @@ export async function apiFetch(path: string, options: RequestInit = {}) {
     throw new Error(data?.error || "Erro na requisição");
   }
 
-  console.log("session token:", token);
   return data;
 }
-

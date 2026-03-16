@@ -21,7 +21,7 @@ import ModelosOrcamento from "./pages/admin/orcamento/ModelosOrcamento";
 import ItensModeloOrcamento from "./pages/admin/orcamento/ItensModeloOrcamento";
 import VerVisitas from "./pages/admin/VerVisitas";
 import AjustarServicos from "./pages/admin/AjustarServicos";
-// import AjustarGaleria from "./pages/admin/AjustarGaleria";
+import AjustarGaleria from "./pages/admin/AjustarGaleria";
 
 function AppRoutes() {
   const { user } = useAuth();
@@ -90,7 +90,7 @@ function AppRoutes() {
           <Route path="ver-agendamentos" element={<VerAgendamentos />} />
           <Route path="ver-visitas" element={<VerVisitas />} />
           <Route path="ajustar-servicos" element={<AjustarServicos />} />
-          {/* <Route path="ajustar-galeria" element={<AjustarGaleria />} /> */}
+          <Route path="ajustar-galeria" element={<AjustarGaleria />} />
         </Route>
       </Routes>
     </>

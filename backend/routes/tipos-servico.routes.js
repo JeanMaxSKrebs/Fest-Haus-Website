@@ -5,8 +5,11 @@ import {
   criarTipoServico,
   atualizarTipoServico,
   deletarTipoServico,
+  uploadImagemPrincipalServico,
+  uploadImagensServico,
+  deletarImagemServico,
+  uploadServico,
 } from "../controllers/tipos-servico.controller.js";
-
 import {
   authenticateToken,
   requireAdmin,
@@ -14,10 +17,10 @@ import {
 
 const router = Router();
 
-// rota pública (site)
+// pública
 router.get("/api/tipos-servico", listarTiposServico);
 
-// rotas admin (painel)
+// admin
 router.get(
   "/api/admin/tipos-servico",
   authenticateToken,
@@ -44,6 +47,29 @@ router.delete(
   authenticateToken,
   requireAdmin,
   deletarTipoServico
+);
+
+router.post(
+  "/api/admin/tipos-servico/:id/imagem-principal",
+  authenticateToken,
+  requireAdmin,
+  uploadServico.single("imagem"),
+  uploadImagemPrincipalServico
+);
+
+router.post(
+  "/api/admin/tipos-servico/:id/imagens",
+  authenticateToken,
+  requireAdmin,
+  uploadServico.array("imagens", 5),
+  uploadImagensServico
+);
+
+router.delete(
+  "/api/admin/tipos-servico/:id/imagens/:path(*)",
+  authenticateToken,
+  requireAdmin,
+  deletarImagemServico
 );
 
 export default router;
