@@ -1,24 +1,47 @@
-type CorporativoProps = {
-  imagem?: string;
-  imagens?: string[];
+type ImagemGaleria = {
+  path: string;
+  url: string;
+  created_at?: string | null;
 };
 
-function Corporativo({ imagem = "/corporativo.jpg", imagens = [] }: CorporativoProps) {
+type CorporativoProps = {
+  imagem?: string | null;
+  imagens?: ImagemGaleria[];
+};
+
+function Corporativo({
+  imagem = "/corporativo.jpg",
+  imagens = [],
+}: CorporativoProps) {
+  const imagemPrincipal = imagem || "/corporativo.jpg";
+
+  const imagensValidas = imagens.filter((img) => img?.url).slice(0, 5);
+
   return (
     <section id="servico-corporativo" className="section">
       <h2>Eventos Corporativos</h2>
 
-      <img src={imagem} className="img-200" alt="Evento Corporativo" />
+      <img
+        src={imagemPrincipal}
+        className="img-200"
+        alt="Evento Corporativo"
+      />
 
       <p style={{ maxWidth: "600px", marginTop: "20px" }}>
-        O Fest Haus é o local ideal para eventos empresariais, como confraternizações,
-        treinamentos, palestras e reuniões.
+        O Fest Haus é o local ideal para eventos empresariais, como
+        confraternizações, treinamentos, palestras e reuniões.
       </p>
 
-      {imagens.length > 0 && (
+      {imagensValidas.length > 0 && (
         <div className="servico-galeria">
-          {imagens.slice(0, 5).map((img, i) => (
-            <img key={i} src={img} className="servico-galeria-img" alt="Evento Corporativo" />
+          {imagensValidas.map((img, i) => (
+            <img
+              key={img.path || i}
+              src={img.url}
+              className="servico-galeria-img"
+              alt={`Evento Corporativo ${i + 1}`}
+              loading="lazy"
+            />
           ))}
         </div>
       )}

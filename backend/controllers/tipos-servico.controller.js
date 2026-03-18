@@ -39,6 +39,20 @@ function slugify(texto = "") {
     .replace(/-+/g, "-");
 }
 
+async function obterSlugServico(id) {
+  const { data, error } = await supabase
+    .from("tipos_servico")
+    .select("nome")
+    .eq("id", id)
+    .single();
+
+  if (error || !data) {
+    throw new Error(`Serviço não encontrado para o id ${id}`);
+  }
+
+  return slugify(data.nome);
+}
+
 function bufferPareceHeic(buffer) {
   if (!buffer || buffer.length < 32) return false;
 
@@ -72,7 +86,9 @@ function ehArquivoHeic(arquivo) {
 }
 
 async function processarArquivoImagem(arquivo, nomeFallback = "imagem") {
-  const nomeOriginalSemExt = path.parse(arquivo.originalname || nomeFallback).name;
+  const nomeOriginalSemExt = path.parse(
+    arquivo.originalname || nomeFallback
+  ).name;
   const nomeBase = slugify(nomeOriginalSemExt || nomeFallback) || nomeFallback;
   const deveConverter = ehArquivoHeic(arquivo);
 
@@ -109,6 +125,25 @@ async function processarArquivoImagem(arquivo, nomeFallback = "imagem") {
   };
 }
 
+function getPublicUrl(caminho) {
+  const { data } = supabase.storage.from(BUCKET_SERVICOS).getPublicUrl(caminho);
+  return data?.publicUrl || null;
+}
+
+function gerarNomeArquivo(nomeBase, extensao) {
+  return `${Date.now()}-${Math.random()
+    .toString(36)
+    .slice(2, 10)}-${nomeBase}${extensao}`;
+}
+
+function ordenarPorDataDesc(lista = []) {
+  return [...lista].sort((a, b) => {
+    const dataA = a.created_at ? new Date(a.created_at).getTime() : 0;
+    const dataB = b.created_at ? new Date(b.created_at).getTime() : 0;
+    return dataB - dataA;
+  });
+}
+
 async function listarArquivosRecursivo(bucket, pasta = "") {
   const { data, error } = await supabase.storage.from(bucket).list(pasta, {
     limit: 100,
@@ -121,7 +156,13 @@ async function listarArquivosRecursivo(bucket, pasta = "") {
 
   for (const item of data || []) {
     const caminhoAtual = pasta ? `${pasta}/${item.name}` : item.name;
-    const ehPasta = !item.metadata;
+
+    const ehPasta =
+      !item.id &&
+      !item.metadata &&
+      !item.created_at &&
+      !item.updated_at &&
+      !item.last_accessed_at;
 
     if (ehPasta) {
       const internos = await listarArquivosRecursivo(bucket, caminhoAtual);
@@ -143,30 +184,30 @@ async function listarArquivosRecursivo(bucket, pasta = "") {
 
 async function montarImagensServico(servicoId) {
   try {
-    const arquivos = await listarArquivosRecursivo(BUCKET_SERVICOS, servicoId);
-
-    const principal = arquivos.find(
-      (arquivo) =>
-        arquivo.path.includes(`/${servicoId}/principal/`) ||
-        arquivo.path.startsWith(`${servicoId}/principal/`)
+    const slugServico = await obterSlugServico(servicoId);
+    const arquivos = await listarArquivosRecursivo(
+      BUCKET_SERVICOS,
+      slugServico
     );
 
-    const galeria = arquivos.filter(
-      (arquivo) =>
-        arquivo.path.includes(`/${servicoId}/galeria/`) ||
-        arquivo.path.startsWith(`${servicoId}/galeria/`)
+    const principalPrefixo = `${slugServico}/principal/`;
+    const galeriaPrefixo = `${slugServico}/galeria/`;
+
+    const principais = ordenarPorDataDesc(
+      arquivos.filter((arquivo) => arquivo.path.startsWith(principalPrefixo))
     );
 
-    const imagem_principal_url = principal
-      ? supabase.storage.from(BUCKET_SERVICOS).getPublicUrl(principal.path).data
-          .publicUrl
-      : null;
+    const galeria = ordenarPorDataDesc(
+      arquivos.filter((arquivo) => arquivo.path.startsWith(galeriaPrefixo))
+    ).slice(0, 5);
+
+    const principal = principais[0] || null;
+
+    const imagem_principal_url = principal ? getPublicUrl(principal.path) : null;
 
     const imagens_galeria = galeria.map((arquivo) => ({
       path: arquivo.path,
-      url: supabase.storage
-        .from(BUCKET_SERVICOS)
-        .getPublicUrl(arquivo.path).data.publicUrl,
+      url: getPublicUrl(arquivo.path),
       created_at: arquivo.created_at,
     }));
 
@@ -339,11 +380,26 @@ export async function deletarTipoServico(req, res) {
       return res.status(400).json({ error: "ID do serviço é obrigatório." });
     }
 
-    const arquivos = await listarArquivosRecursivo(BUCKET_SERVICOS, id);
+    const slugServico = await obterSlugServico(id);
+    const arquivos = await listarArquivosRecursivo(
+      BUCKET_SERVICOS,
+      slugServico
+    );
+
     if (arquivos.length) {
-      await supabase.storage
+      const { error: erroRemoverArquivos } = await supabase.storage
         .from(BUCKET_SERVICOS)
         .remove(arquivos.map((arquivo) => arquivo.path));
+
+      if (erroRemoverArquivos) {
+        console.error(
+          "Erro ao remover arquivos do storage:",
+          erroRemoverArquivos
+        );
+        return res
+          .status(500)
+          .json({ error: "Erro ao remover imagens do serviço." });
+      }
     }
 
     const { error } = await supabase.from("tipos_servico").delete().eq("id", id);
@@ -375,24 +431,35 @@ export async function uploadImagemPrincipalServico(req, res) {
       return res.status(400).json({ error: "Imagem é obrigatória." });
     }
 
-    const pastaPrincipal = `${id}/principal`;
+    const slugServico = await obterSlugServico(id);
+    const pastaPrincipal = `${slugServico}/principal`;
+
     const existentes = await listarArquivosRecursivo(
       BUCKET_SERVICOS,
       pastaPrincipal
     );
 
     if (existentes.length) {
-      await supabase.storage
+      const { error: erroRemoverAntiga } = await supabase.storage
         .from(BUCKET_SERVICOS)
         .remove(existentes.map((arquivoExistente) => arquivoExistente.path));
+
+      if (erroRemoverAntiga) {
+        console.error(
+          "Erro ao remover imagem principal antiga:",
+          erroRemoverAntiga
+        );
+        return res
+          .status(500)
+          .json({ error: "Erro ao substituir imagem principal." });
+      }
     }
 
-    const arquivoProcessado = await processarArquivoImagem(
-      arquivo,
-      "principal"
+    const arquivoProcessado = await processarArquivoImagem(arquivo, "principal");
+    const nomeArquivo = gerarNomeArquivo(
+      arquivoProcessado.nomeBase,
+      arquivoProcessado.extensao
     );
-
-    const nomeArquivo = `${Date.now()}-${arquivoProcessado.nomeBase}${arquivoProcessado.extensao}`;
     const caminho = `${pastaPrincipal}/${nomeArquivo}`;
 
     console.log("Salvando imagem principal do serviço:", {
@@ -412,13 +479,9 @@ export async function uploadImagemPrincipalServico(req, res) {
       return res.status(500).json({ error: "Erro ao enviar imagem principal." });
     }
 
-    const { data } = supabase.storage
-      .from(BUCKET_SERVICOS)
-      .getPublicUrl(caminho);
-
     return res.status(201).json({
       path: caminho,
-      url: data.publicUrl,
+      url: getPublicUrl(caminho),
     });
   } catch (error) {
     console.error("Erro ao fazer upload da imagem principal:", error);
@@ -431,7 +494,7 @@ export async function uploadImagemPrincipalServico(req, res) {
 export async function uploadImagensServico(req, res) {
   try {
     const { id } = req.params;
-    const arquivos = req.files || [];
+    const arquivos = Array.isArray(req.files) ? req.files : [];
 
     if (!id) {
       return res.status(400).json({ error: "ID do serviço é obrigatório." });
@@ -441,7 +504,8 @@ export async function uploadImagensServico(req, res) {
       return res.status(400).json({ error: "Envie pelo menos uma imagem." });
     }
 
-    const pastaGaleria = `${id}/galeria`;
+    const slugServico = await obterSlugServico(id);
+    const pastaGaleria = `${slugServico}/galeria`;
     const atuais = await listarArquivosRecursivo(BUCKET_SERVICOS, pastaGaleria);
 
     if (atuais.length + arquivos.length > 5) {
@@ -454,7 +518,10 @@ export async function uploadImagensServico(req, res) {
 
     for (const arquivo of arquivos) {
       const arquivoProcessado = await processarArquivoImagem(arquivo, "imagem");
-      const nomeArquivo = `${Date.now()}-${arquivoProcessado.nomeBase}${arquivoProcessado.extensao}`;
+      const nomeArquivo = gerarNomeArquivo(
+        arquivoProcessado.nomeBase,
+        arquivoProcessado.extensao
+      );
       const caminho = `${pastaGaleria}/${nomeArquivo}`;
 
       console.log("Salvando imagem da galeria do serviço:", {
@@ -476,13 +543,9 @@ export async function uploadImagensServico(req, res) {
           .json({ error: "Erro ao enviar imagens da galeria." });
       }
 
-      const { data } = supabase.storage
-        .from(BUCKET_SERVICOS)
-        .getPublicUrl(caminho);
-
       enviados.push({
         path: caminho,
-        url: data.publicUrl,
+        url: getPublicUrl(caminho),
       });
     }
 

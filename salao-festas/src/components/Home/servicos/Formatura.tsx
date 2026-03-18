@@ -1,23 +1,43 @@
-type FormaturaProps = {
-  imagem?: string;
-  imagens?: string[];
+type ImagemGaleria = {
+  path: string;
+  url: string;
+  created_at?: string | null;
 };
 
-function Formatura({ imagem = "/formatura.jpg", imagens = [] }: FormaturaProps) {
+type FormaturaProps = {
+  imagem?: string | null;
+  imagens?: ImagemGaleria[];
+};
+
+function Formatura({
+  imagem = "/formatura.jpg",
+  imagens = [],
+}: FormaturaProps) {
+  const imagemPrincipal = imagem || "/formatura.jpg";
+
+  const imagensValidas = imagens.filter((img) => img?.url).slice(0, 5);
+
   return (
-    <section id="servico-formatura" className="section">
+    <section id="servico-formaturas" className="section">
       <h2>Formaturas</h2>
 
-      <img src={imagem} className="img-200" alt="Formatura" />
+      <img src={imagemPrincipal} className="img-200" alt="Formaturas" />
 
       <p style={{ maxWidth: "600px", marginTop: "20px" }}>
-        Celebre sua conquista em grande estilo no Fest Haus.
+        Comemore essa conquista com uma festa completa, preparada para marcar
+        esse momento especial.
       </p>
 
-      {imagens.length > 0 && (
+      {imagensValidas.length > 0 && (
         <div className="servico-galeria">
-          {imagens.slice(0, 5).map((img, i) => (
-            <img key={i} src={img} className="servico-galeria-img" alt="Formatura" />
+          {imagensValidas.map((img, i) => (
+            <img
+              key={img.path || i}
+              src={img.url}
+              className="servico-galeria-img"
+              alt={`Formatura ${i + 1}`}
+              loading="lazy"
+            />
           ))}
         </div>
       )}

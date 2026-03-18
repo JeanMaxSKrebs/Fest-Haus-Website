@@ -1,24 +1,43 @@
-type CasamentoProps = {
-  imagem?: string;
-  imagens?: string[];
+type ImagemGaleria = {
+  path: string;
+  url: string;
+  created_at?: string | null;
 };
 
-function Casamento({ imagem = "/casamento.jpg", imagens = [] }: CasamentoProps) {
+type CasamentoProps = {
+  imagem?: string | null;
+  imagens?: ImagemGaleria[];
+};
+
+function Casamento({
+  imagem = "/casamento.jpg",
+  imagens = [],
+}: CasamentoProps) {
+  const imagemPrincipal = imagem || "/casamento.jpg";
+
+  const imagensValidas = imagens.filter((img) => img?.url).slice(0, 5);
+
   return (
-    <section id="servico-casamento" className="section">
+    <section id="servico-casamentos" className="section">
       <h2>Casamentos</h2>
 
-      <img src={imagem} className="img-200" alt="Casamento" />
+      <img src={imagemPrincipal} className="img-200" alt="Casamentos" />
 
       <p style={{ maxWidth: "600px", marginTop: "20px" }}>
-        O Fest Haus oferece um ambiente elegante e completo para tornar seu casamento inesquecível.
-        Estrutura completa, decoração personalizada e espaço ideal para celebrar este momento especial.
+        Celebre o seu grande dia em um ambiente elegante, com estrutura completa
+        para tornar seu casamento inesquecível.
       </p>
 
-      {imagens.length > 0 && (
+      {imagensValidas.length > 0 && (
         <div className="servico-galeria">
-          {imagens.slice(0, 5).map((img, i) => (
-            <img key={i} src={img} className="servico-galeria-img" alt="Casamento" />
+          {imagensValidas.map((img, i) => (
+            <img
+              key={img.path || i}
+              src={img.url}
+              className="servico-galeria-img"
+              alt={`Casamento ${i + 1}`}
+              loading="lazy"
+            />
           ))}
         </div>
       )}

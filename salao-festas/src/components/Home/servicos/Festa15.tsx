@@ -1,23 +1,43 @@
-type Festa15Props = {
-  imagem?: string;
-  imagens?: string[];
+type ImagemGaleria = {
+  path: string;
+  url: string;
+  created_at?: string | null;
 };
 
-function Festa15({ imagem = "/servicos/15anos.jpg", imagens = [] }: Festa15Props) {
+type Festa15Props = {
+  imagem?: string | null;
+  imagens?: ImagemGaleria[];
+};
+
+function Festa15({
+  imagem = "/15anos.jpg",
+  imagens = [],
+}: Festa15Props) {
+  const imagemPrincipal = imagem || "/15anos.jpg";
+
+  const imagensValidas = imagens.filter((img) => img?.url).slice(0, 5);
+
   return (
-    <section id="servico-15anos" className="section">
+    <section id="servico-festa15" className="section">
       <h2>Festa de 15 Anos</h2>
 
-      <img src={imagem} className="img-200" alt="Festa de 15 anos" />
+      <img src={imagemPrincipal} className="img-200" alt="Festa de 15 Anos" />
 
       <p style={{ maxWidth: "600px", marginTop: "20px" }}>
-        Celebre este momento único em um ambiente elegante e inesquecível.
+        Celebre os 15 anos com estilo, em um ambiente preparado para um evento
+        marcante e especial.
       </p>
 
-      {imagens.length > 0 && (
+      {imagensValidas.length > 0 && (
         <div className="servico-galeria">
-          {imagens.slice(0, 5).map((img, i) => (
-            <img key={i} src={img} className="servico-galeria-img" alt="15 anos" />
+          {imagensValidas.map((img, i) => (
+            <img
+              key={img.path || i}
+              src={img.url}
+              className="servico-galeria-img"
+              alt={`Festa de 15 Anos ${i + 1}`}
+              loading="lazy"
+            />
           ))}
         </div>
       )}

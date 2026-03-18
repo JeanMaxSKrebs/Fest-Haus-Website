@@ -1,23 +1,46 @@
-type PersonalizadoProps = {
-  imagem?: string;
-  imagens?: string[];
+type ImagemGaleria = {
+  path: string;
+  url: string;
+  created_at?: string | null;
 };
 
-function Personalizado({ imagem = "/servicos/personalizado.jpg", imagens = [] }: PersonalizadoProps) {
+type PersonalizadoProps = {
+  imagem?: string | null;
+  imagens?: ImagemGaleria[];
+};
+
+function Personalizado({
+  imagem = "/personalizado.jpg",
+  imagens = [],
+}: PersonalizadoProps) {
+  const imagemPrincipal = imagem || "/personalizado.jpg";
+
+  const imagensValidas = imagens.filter((img) => img?.url).slice(0, 5);
+
   return (
     <section id="servico-personalizado" className="section">
       <h2>Eventos Personalizados</h2>
 
-      <img src={imagem} className="img-200" alt="Eventos personalizados" />
+      <img
+        src={imagemPrincipal}
+        className="img-200"
+        alt="Eventos Personalizados"
+      />
 
       <p style={{ maxWidth: "600px", marginTop: "20px" }}>
         Criamos eventos personalizados adaptados às necessidades do cliente.
       </p>
 
-      {imagens.length > 0 && (
+      {imagensValidas.length > 0 && (
         <div className="servico-galeria">
-          {imagens.slice(0, 5).map((img, i) => (
-            <img key={i} src={img} className="servico-galeria-img" alt="Evento personalizado" />
+          {imagensValidas.map((img, i) => (
+            <img
+              key={img.path || i}
+              src={img.url}
+              className="servico-galeria-img"
+              alt={`Evento Personalizado ${i + 1}`}
+              loading="lazy"
+            />
           ))}
         </div>
       )}

@@ -9,6 +9,12 @@ import BtnOrcamento from "./BtnOrcamento";
 import Festa15 from "./servicos/Festa15";
 import Personalizado from "./servicos/Personalizado";
 
+type ImagemGaleria = {
+  path: string;
+  url: string;
+  created_at?: string | null;
+};
+
 type TipoServicoApi = {
   id: string;
   nome: string;
@@ -16,10 +22,7 @@ type TipoServicoApi = {
   preco: number | null;
   ativo: boolean;
   imagem_principal_url?: string | null;
-  imagens_galeria?: Array<{
-    path: string;
-    url: string;
-  }>;
+  imagens_galeria?: ImagemGaleria[];
 };
 
 type CardServico = {
@@ -64,9 +67,18 @@ function Servicos() {
     }
   }
 
+  function getServicoBanco(nome: string) {
+    return servicosApi.find((s) => s.nome === nome);
+  }
+
   function getImagemServico(nome: string, fallback: string) {
-    const servicoBanco = servicosApi.find((s) => s.nome === nome);
+    const servicoBanco = getServicoBanco(nome);
     return servicoBanco?.imagem_principal_url || fallback;
+  }
+
+  function getImagensGaleriaServico(nome: string) {
+    const servicoBanco = getServicoBanco(nome);
+    return servicoBanco?.imagens_galeria ?? [];
   }
 
   const servicos: CardServico[] = useMemo(
@@ -75,7 +87,10 @@ function Servicos() {
         nome: "Casamentos",
         imagem: getImagemServico("Casamentos", "/servicos/casamento.png"),
         componente: (
-          <Casamento imagem={getImagemServico("Casamentos", "/casamento.jpg")} />
+          <Casamento
+            imagem={getImagemServico("Casamentos", "/casamento.jpg")}
+            imagens={getImagensGaleriaServico("Casamentos")}
+          />
         ),
       },
       {
@@ -84,6 +99,7 @@ function Servicos() {
         componente: (
           <Aniversario
             imagem={getImagemServico("Aniversários", "/aniversario.jpg")}
+            imagens={getImagensGaleriaServico("Aniversários")}
           />
         ),
       },
@@ -99,6 +115,7 @@ function Servicos() {
               "Eventos Corporativos",
               "/corporativo.jpg"
             )}
+            imagens={getImagensGaleriaServico("Eventos Corporativos")}
           />
         ),
       },
@@ -106,7 +123,10 @@ function Servicos() {
         nome: "Formaturas",
         imagem: getImagemServico("Formaturas", "/servicos/formatura.jpg"),
         componente: (
-          <Formatura imagem={getImagemServico("Formaturas", "/formatura.jpg")} />
+          <Formatura
+            imagem={getImagemServico("Formaturas", "/formatura.jpg")}
+            imagens={getImagensGaleriaServico("Formaturas")}
+          />
         ),
       },
       {
@@ -115,6 +135,7 @@ function Servicos() {
         componente: (
           <Infantil
             imagem={getImagemServico("Festas Infantis", "/infantil.jpg")}
+            imagens={getImagensGaleriaServico("Festas Infantis")}
           />
         ),
       },
@@ -123,7 +144,11 @@ function Servicos() {
         imagem: getImagemServico("Festa de 15 Anos", "/servicos/15anos.jpg"),
         componente: (
           <Festa15
-            imagem={getImagemServico("Festa de 15 Anos", "/servicos/15anos.jpg")}
+            imagem={getImagemServico(
+              "Festa de 15 Anos",
+              "/servicos/15anos.jpg"
+            )}
+            imagens={getImagensGaleriaServico("Festa de 15 Anos")}
           />
         ),
       },
@@ -139,6 +164,7 @@ function Servicos() {
               "Eventos Personalizados",
               "/servicos/personalizado.jpg"
             )}
+            imagens={getImagensGaleriaServico("Eventos Personalizados")}
           />
         ),
       },
@@ -152,16 +178,19 @@ function Servicos() {
       : true
   );
 
-  const handleClick = (nome: string) => {
+  function handleClick(nome: string) {
     const novoAtivo = servicoAtivo === nome ? null : nome;
     setServicoAtivo(novoAtivo);
 
     if (!isMobile) {
       setTimeout(() => {
-        sectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+        sectionRef.current?.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
       }, 50);
     }
-  };
+  }
 
   return (
     <section id="servicos" className="section" ref={sectionRef}>
@@ -170,13 +199,13 @@ function Servicos() {
       {loading && <p>Carregando serviços...</p>}
 
       <div className="servicos-home__grid">
-        {servicosVisiveis.map((servico, index) => {
+        {servicosVisiveis.map((servico) => {
           const isAtivo = servicoAtivo === servico.nome;
           const algumAtivo = servicoAtivo !== null;
 
           return (
             <div
-              key={index}
+              key={servico.nome}
               style={{
                 width: "100%",
               }}
@@ -224,6 +253,7 @@ function Servicos() {
                             objectFit: "cover",
                             display: "block",
                           }}
+                          loading="lazy"
                         />
                       </div>
 

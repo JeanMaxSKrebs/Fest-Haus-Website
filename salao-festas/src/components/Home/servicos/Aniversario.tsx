@@ -1,23 +1,43 @@
-type AniversarioProps = {
-  imagem?: string;
-  imagens?: string[];
+type ImagemGaleria = {
+  path: string;
+  url: string;
+  created_at?: string | null;
 };
 
-function Aniversario({ imagem = "/aniversario.jpg", imagens = [] }: AniversarioProps) {
+type AniversarioProps = {
+  imagem?: string | null;
+  imagens?: ImagemGaleria[];
+};
+
+function Aniversario({
+  imagem = "/aniversario.jpg",
+  imagens = [],
+}: AniversarioProps) {
+  const imagemPrincipal = imagem || "/aniversario.jpg";
+
+  const imagensValidas = imagens.filter((img) => img?.url).slice(0, 5);
+
   return (
-    <section id="servico-aniversario" className="section">
+    <section id="servico-aniversarios" className="section">
       <h2>Aniversários</h2>
 
-      <img src={imagem} className="img-200" alt="Aniversário" />
+      <img src={imagemPrincipal} className="img-200" alt="Aniversários" />
 
-      <p>
-        Espaço perfeito para comemorar aniversários com conforto, segurança e diversão.
+      <p style={{ maxWidth: "600px", marginTop: "20px" }}>
+        Espaço perfeito para comemorar aniversários com conforto, segurança e
+        diversão.
       </p>
 
-      {imagens.length > 0 && (
+      {imagensValidas.length > 0 && (
         <div className="servico-galeria">
-          {imagens.slice(0, 5).map((img, i) => (
-            <img key={i} src={img} className="servico-galeria-img" alt="Aniversário" />
+          {imagensValidas.map((img, i) => (
+            <img
+              key={img.path || i}
+              src={img.url}
+              className="servico-galeria-img"
+              alt={`Aniversário ${i + 1}`}
+              loading="lazy"
+            />
           ))}
         </div>
       )}

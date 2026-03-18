@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com');
+
 /* =========================================
    RESET
 ========================================= */
@@ -116,15 +118,16 @@ html {
 ========================================= */
 
 body {
+  font-family: 'Josefin Slab', serif;
 
-  font-family:
+  /* font-family:
 
     system-ui,
     -apple-system,
     Segoe UI,
     Roboto,
     Ubuntu,
-    sans-serif;
+    sans-serif; */
 
   background-color: var(--cor-fundo);
 
