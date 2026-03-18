@@ -3148,11 +3148,13 @@ select {
 
   .galeria-home .galeria-home__filtro:hover {
     color: var(--cor-primaria);
+    color: #fff;
     transform: translateY(-1px);
   }
 
   .galeria-home .galeria-home__filtro.ativo {
     color: var(--cor-primaria);
+    color: #fff;
     font-weight: 600;
   }
 
