@@ -15,6 +15,8 @@ import solicitacoesOrcamentoRoutes from "./routes/solicitacoes-orcamento.routes.
 import modelosOrcamentoRoutes from "./routes/modelos-orcamento.routes.js";
 import galeriaRoutes from "./routes/galeria.routes.js";
 
+import { configurarBuckets } from "./config/storage.js";
+
 dotenv.config();
 
 const app = express();
@@ -61,5 +63,7 @@ app.use(galeriaRoutes);
 
 app.use(notFoundHandler);
 app.use(errorHandler);
+
+configurarBuckets();
 
 export default app;
