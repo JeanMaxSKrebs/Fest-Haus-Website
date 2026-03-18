@@ -16,6 +16,8 @@ type TipoServico = {
   nome: string;
 };
 
+type TipoFiltroSecundario = "data" | "titulo";
+
 function slugify(texto = "") {
   return texto
     .normalize("NFD")
@@ -43,7 +45,10 @@ function Galeria() {
   const [imagens, setImagens] = useState<ImagemGaleria[]>([]);
   const [servicos, setServicos] = useState<TipoServico[]>([]);
   const [categoriaSelecionada, setCategoriaSelecionada] = useState("todas");
+  const [tipoFiltroSecundario, setTipoFiltroSecundario] =
+    useState<TipoFiltroSecundario>("data");
   const [periodoSelecionado, setPeriodoSelecionado] = useState("todos");
+  const [tituloFiltro, setTituloFiltro] = useState("");
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState("");
   const [isMobile, setIsMobile] = useState(false);
@@ -106,12 +111,31 @@ function Galeria() {
         categoriaSelecionada === "todas" ||
         slugify(imagem.categoria) === categoriaSelecionada;
 
-      const batePeriodo =
-        periodoSelecionado === "todos" || imagem.periodo === periodoSelecionado;
+      const bateFiltroSecundario =
+        tipoFiltroSecundario === "data"
+          ? periodoSelecionado === "todos" || imagem.periodo === periodoSelecionado
+          : !tituloFiltro.trim() ||
+            imagem.titulo?.toLowerCase().includes(tituloFiltro.toLowerCase());
 
-      return bateCategoria && batePeriodo;
+      return bateCategoria && bateFiltroSecundario;
     });
-  }, [imagens, categoriaSelecionada, periodoSelecionado]);
+  }, [
+    imagens,
+    categoriaSelecionada,
+    tipoFiltroSecundario,
+    periodoSelecionado,
+    tituloFiltro,
+  ]);
+
+  function trocarTipoFiltro(valor: TipoFiltroSecundario) {
+    setTipoFiltroSecundario(valor);
+
+    if (valor === "data") {
+      setTituloFiltro("");
+    } else {
+      setPeriodoSelecionado("todos");
+    }
+  }
 
   return (
     <section className="section galeria-home">
@@ -121,30 +145,47 @@ function Galeria() {
         style={{
           width: "100%",
           display: "flex",
-          flexDirection: "column",
+          flexDirection: isMobile ? "column" : "row",
+          alignItems: isMobile ? "stretch" : "center",
           gap: "18px",
           marginBottom: "24px",
+          position: "relative",
         }}
       >
         <div
           style={{
-            width: "100%",
             display: "flex",
-            flexDirection: isMobile ? "column" : "row",
-            gap: "12px",
-            alignItems: isMobile ? "stretch" : "center",
-            justifyContent: "space-between",
+            flexDirection: "column",
+            gap: "10px",
+            minWidth: isMobile ? "100%" : "260px",
+            flexShrink: 0,
+            borderRadius: "12px",
+            padding: "12px 16px",
+            background: "var(--cor-fundo-secundario)",
+            boxShadow: "inset 0 0 0 1px rgba(0,0,0,0.06)",
           }}
         >
-          <div
+          <label htmlFor="tipo-filtro-galeria">Filtrar por</label>
+
+          <select
+            id="tipo-filtro-galeria"
+            value={tipoFiltroSecundario}
+            onChange={(e) =>
+              trocarTipoFiltro(e.target.value as TipoFiltroSecundario)
+            }
             style={{
-              display: "flex",
-              flexDirection: "column",
-              gap: "6px",
-              minWidth: isMobile ? "100%" : "220px",
+              padding: "10px 12px",
+              borderRadius: "10px",
+              border: "1px solid var(--cor-borda)",
+              background: "var(--cor-fundo-secundario)",
+              color: "inherit",
             }}
           >
-            <label htmlFor="filtro-periodo">Filtrar por data</label>
+            <option value="data">Data</option>
+            <option value="titulo">Nome / título</option>
+          </select>
+
+          {tipoFiltroSecundario === "data" ? (
             <select
               id="filtro-periodo"
               value={periodoSelecionado}
@@ -164,7 +205,21 @@ function Galeria() {
                 </option>
               ))}
             </select>
-          </div>
+          ) : (
+            <input
+              type="text"
+              value={tituloFiltro}
+              onChange={(e) => setTituloFiltro(e.target.value)}
+              placeholder="Buscar por nome ou título"
+              style={{
+                padding: "10px 12px",
+                borderRadius: "10px",
+                border: "1px solid var(--cor-borda)",
+                background: "var(--cor-fundo-secundario)",
+                color: "inherit",
+              }}
+            />
+          )}
         </div>
 
         <div
@@ -179,7 +234,8 @@ function Galeria() {
                   paddingBottom: "6px",
                 }
               : {
-                  width: "100%",
+                  flex: 1,
+                  minWidth: 0,
                 }
           }
         >
