@@ -32,9 +32,21 @@ function Galeria() {
   const [categoriaSelecionada, setCategoriaSelecionada] = useState("todas");
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState("");
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
     carregarDados();
+  }, []);
+
+  useEffect(() => {
+    function verificarTela() {
+      setIsMobile(window.innerWidth <= 768);
+    }
+
+    verificarTela();
+    window.addEventListener("resize", verificarTela);
+
+    return () => window.removeEventListener("resize", verificarTela);
   }, []);
 
   async function carregarDados() {
@@ -73,11 +85,46 @@ function Galeria() {
   }, [imagens, categoriaSelecionada]);
 
   return (
-    <section className="section">
-      <h2>Galeria</h2>
-
-      <div className="galeria-home__filtros-wrapper">
-        <div className="galeria-home__filtros">
+    <section className="section galeria-home">
+      <h2 className="galeria-home__titulo">Galeria</h2>
+      <div
+        className="galeria-home__filtros-wrapper"
+        style={
+          isMobile
+            ? {
+              width: "100%",
+              overflowX: "auto",
+              overflowY: "hidden",
+              WebkitOverflowScrolling: "touch",
+              paddingBottom: "6px",
+              marginBottom: "24px",
+            }
+            : {
+              width: "100%",
+              marginBottom: "24px",
+            }
+        }
+      >
+        <div
+          className="galeria-home__filtros"
+          style={
+            isMobile
+              ? {
+                display: "flex",
+                gap: "10px",
+                flexWrap: "nowrap",
+                width: "max-content",
+                minWidth: "100%",
+              }
+              : {
+                display: "flex",
+                gap: "10px",
+                flexWrap: "wrap",
+                justifyContent: "center",
+                width: "100%",
+              }
+          }
+        >
           {categorias.map((categoria) => {
             const valor = categoria === "Todas" ? "todas" : slugify(categoria);
             const ativo = categoriaSelecionada === valor;
@@ -88,6 +135,14 @@ function Galeria() {
                 type="button"
                 className={`galeria-home__filtro ${ativo ? "ativo" : ""}`}
                 onClick={() => setCategoriaSelecionada(valor)}
+                style={{
+                  ...(isMobile
+                    ? {
+                      flex: "0 0 auto",
+                      whiteSpace: "nowrap",
+                    }
+                    : {}),
+                }}
               >
                 {categoria}
               </button>
