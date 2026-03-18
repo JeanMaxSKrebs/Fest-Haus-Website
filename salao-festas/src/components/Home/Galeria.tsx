@@ -76,22 +76,24 @@ function Galeria() {
     <section className="section">
       <h2>Galeria</h2>
 
-      <div className="galeria-home__filtros">
-        {categorias.map((categoria) => {
-          const valor = categoria === "Todas" ? "todas" : slugify(categoria);
-          const ativo = categoriaSelecionada === valor;
+      <div className="galeria-home__filtros-wrapper">
+        <div className="galeria-home__filtros">
+          {categorias.map((categoria) => {
+            const valor = categoria === "Todas" ? "todas" : slugify(categoria);
+            const ativo = categoriaSelecionada === valor;
 
-          return (
-            <button
-              key={valor}
-              type="button"
-              className={`galeria-home__filtro ${ativo ? "ativo" : ""}`}
-              onClick={() => setCategoriaSelecionada(valor)}
-            >
-              {categoria}
-            </button>
-          );
-        })}
+            return (
+              <button
+                key={valor}
+                type="button"
+                className={`galeria-home__filtro ${ativo ? "ativo" : ""}`}
+                onClick={() => setCategoriaSelecionada(valor)}
+              >
+                {categoria}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {loading ? (

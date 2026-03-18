@@ -456,7 +456,52 @@ body {
 
 }
 
+/* container do filtro */
+.galeria__filtros {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
 
+/* MOBILE */
+@media (max-width: 768px) {
+  .galeria__filtros {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 5px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* remove quebra de linha dos botões */
+  .galeria__filtros button {
+    flex: 0 0 auto;
+    white-space: nowrap;
+  }
+
+  /* esconder scrollbar (opcional) */
+  .galeria__filtros::-webkit-scrollbar {
+    display: none;
+  }
+
+  .galeria__filtros {
+    scrollbar-width: none;
+  }
+}
+
+.galeria__filtros-wrapper {
+  position: relative;
+}
+
+.galeria__filtros-wrapper::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  top: 0;
+  height: 100%;
+  width: 30px;
+  background: linear-gradient(to left, var(--cor-fundo), transparent);
+  pointer-events: none;
+}
 
 .galeria-home__filtros {
   display: flex;

@@ -1,5 +1,5 @@
 import { Routes, Route } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { useAuth } from "./context/AuthContext";
 
 import Header from "./components/Header";
@@ -23,28 +23,43 @@ import VerVisitas from "./pages/admin/VerVisitas";
 import AjustarServicos from "./pages/admin/AjustarServicos";
 import AjustarGaleria from "./pages/admin/AjustarGaleria";
 
+type PageTitleProps = {
+  title: string;
+  children: ReactNode;
+};
+
+function PageTitle({ title, children }: PageTitleProps) {
+  useEffect(() => {
+    document.title = title;
+  }, [title]);
+
+  return <>{children}</>;
+}
+
 function AppRoutes() {
   const { user } = useAuth();
   const [mostrarLogin, setMostrarLogin] = useState(false);
 
   const LoginRequired = (
-    <div className="section">
-      <h2>Login necessário</h2>
-      <br />
-      <p>Você precisa estar logado para acessar.</p>
-      <br />
+    <PageTitle title="Login necessário | Fest Haus">
+      <div className="section">
+        <h2>Login necessário</h2>
+        <br />
+        <p>Você precisa estar logado para acessar.</p>
+        <br />
 
-      <button
-        onClick={() => setMostrarLogin(true)}
-        className="btn-apresentacao"
-      >
-        Fazer Login
-      </button>
+        <button
+          onClick={() => setMostrarLogin(true)}
+          className="btn-apresentacao"
+        >
+          Fazer Login
+        </button>
 
-      {mostrarLogin && (
-        <LoginModal onClose={() => setMostrarLogin(false)} />
-      )}
-    </div>
+        {mostrarLogin && (
+          <LoginModal onClose={() => setMostrarLogin(false)} />
+        )}
+      </div>
+    </PageTitle>
   );
 
   return (
@@ -52,45 +67,152 @@ function AppRoutes() {
       <Header />
 
       <Routes>
-        <Route path="/" element={<Home />} />
+        <Route
+          path="/"
+          element={
+            <PageTitle title="Fest Haus - Salão de Festas">
+              <Home />
+            </PageTitle>
+          }
+        />
 
         <Route
           path="/agendamento"
-          element={user ? <Agendamento /> : LoginRequired}
+          element={
+            user ? (
+              <PageTitle title="Agendamento | Fest Haus">
+                <Agendamento />
+              </PageTitle>
+            ) : (
+              LoginRequired
+            )
+          }
         />
 
         <Route
           path="/visitas"
-          element={user ? <Visitas /> : LoginRequired}
+          element={
+            user ? (
+              <PageTitle title="Visitas | Fest Haus">
+                <Visitas />
+              </PageTitle>
+            ) : (
+              LoginRequired
+            )
+          }
         />
 
         <Route
           path="/orcamentos"
-          element={user ? <Orcamentos /> : LoginRequired}
+          element={
+            user ? (
+              <PageTitle title="Orçamentos | Fest Haus">
+                <Orcamentos />
+              </PageTitle>
+            ) : (
+              LoginRequired
+            )
+          }
         />
 
         <Route
           path="/admin"
           element={
             <AdminRoute>
-              <AdminLayout />
+              <PageTitle title="Painel Admin | Fest Haus">
+                <AdminLayout />
+              </PageTitle>
             </AdminRoute>
           }
         >
-          <Route index element={<AdminHome />} />
-          <Route path="adicionar-admins" element={<AdicionarAdmins />} />
-          <Route path="ajustar-orcamentos" element={<AjustarOrcamentos />} />
-          <Route path="orcamentos" element={<AjustarOrcamentos />} />
+          <Route
+            index
+            element={
+              <PageTitle title="Admin Home | Fest Haus">
+                <AdminHome />
+              </PageTitle>
+            }
+          />
+          <Route
+            path="adicionar-admins"
+            element={
+              <PageTitle title="Adicionar Admins | Fest Haus">
+                <AdicionarAdmins />
+              </PageTitle>
+            }
+          />
+          <Route
+            path="ajustar-orcamentos"
+            element={
+              <PageTitle title="Ajustar Orçamentos | Fest Haus">
+                <AjustarOrcamentos />
+              </PageTitle>
+            }
+          />
+          <Route
+            path="orcamentos"
+            element={
+              <PageTitle title="Orçamentos | Fest Haus">
+                <AjustarOrcamentos />
+              </PageTitle>
+            }
+          />
           <Route
             path="orcamentos/solicitacoes"
-            element={<SolicitacoesOrcamento />}
+            element={
+              <PageTitle title="Solicitações de Orçamento | Fest Haus">
+                <SolicitacoesOrcamento />
+              </PageTitle>
+            }
           />
-          <Route path="orcamentos/modelos" element={<ModelosOrcamento />} />
-          <Route path="orcamentos/itens" element={<ItensModeloOrcamento />} />
-          <Route path="ver-agendamentos" element={<VerAgendamentos />} />
-          <Route path="ver-visitas" element={<VerVisitas />} />
-          <Route path="ajustar-servicos" element={<AjustarServicos />} />
-          <Route path="ajustar-galeria" element={<AjustarGaleria />} />
+          <Route
+            path="orcamentos/modelos"
+            element={
+              <PageTitle title="Modelos de Orçamento | Fest Haus">
+                <ModelosOrcamento />
+              </PageTitle>
+            }
+          />
+          <Route
+            path="orcamentos/itens"
+            element={
+              <PageTitle title="Itens do Modelo | Fest Haus">
+                <ItensModeloOrcamento />
+              </PageTitle>
+            }
+          />
+          <Route
+            path="ver-agendamentos"
+            element={
+              <PageTitle title="Ver Agendamentos | Fest Haus">
+                <VerAgendamentos />
+              </PageTitle>
+            }
+          />
+          <Route
+            path="ver-visitas"
+            element={
+              <PageTitle title="Ver Visitas | Fest Haus">
+                <VerVisitas />
+              </PageTitle>
+            }
+          />
+          <Route
+            path="ajustar-servicos"
+            element={
+              <PageTitle title="Ajustar Serviços | Fest Haus">
+                <AjustarServicos />
+              </PageTitle>
+            }
+          />
+          <Route
+            path="ajustar-galeria"
+            element={
+              <PageTitle title="Ajustar Galeria | Fest Haus">
+                <AjustarGaleria />
+              </PageTitle>
+            }
+          />
         </Route>
       </Routes>
     </>
