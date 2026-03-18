@@ -1,5 +1,6 @@
 import path from "path";
 import multer from "multer";
+import convert from "heic-convert";
 import { supabase } from "../config/supabase.js";
 
 const BUCKET = "galeria";
@@ -34,6 +35,48 @@ function formatarTituloDoArquivo(nomeArquivo) {
     .filter(Boolean)
     .map((palavra) => palavra.charAt(0).toUpperCase() + palavra.slice(1))
     .join(" ");
+}
+
+function ehArquivoHeic(arquivo) {
+  const nome = (arquivo?.originalname || "").toLowerCase();
+  const mimetype = (arquivo?.mimetype || "").toLowerCase();
+
+  return (
+    mimetype === "image/heic" ||
+    mimetype === "image/heif" ||
+    mimetype === "application/octet-stream" ||
+    nome.endsWith(".heic") ||
+    nome.endsWith(".heif")
+  );
+}
+
+async function processarArquivoImagem(arquivo, titulo) {
+  const nomeBase = slugify(titulo || arquivo.originalname || "imagem") || "imagem";
+
+  if (ehArquivoHeic(arquivo)) {
+    const bufferConvertido = await convert({
+      buffer: arquivo.buffer,
+      format: "JPEG",
+      quality: 0.9,
+    });
+
+    return {
+      buffer: Buffer.from(bufferConvertido),
+      extensao: ".jpg",
+      contentType: "image/jpeg",
+      nomeBase,
+    };
+  }
+
+  const extensao =
+    path.extname(arquivo.originalname || "").toLowerCase() || ".jpg";
+
+  return {
+    buffer: arquivo.buffer,
+    extensao,
+    contentType: arquivo.mimetype || "application/octet-stream",
+    nomeBase,
+  };
 }
 
 async function listarArquivosRecursivo(bucket, pasta = "") {
@@ -102,18 +145,16 @@ export async function uploadImagemGaleria(req, res) {
       return res.status(400).json({ error: "Arquivo de imagem é obrigatório." });
     }
 
-    const nomeBase = slugify(titulo || arquivo.originalname || "imagem");
     const categoriaSlug = slugify(categoria || "geral") || "geral";
-    const extensao =
-      path.extname(arquivo.originalname || "").toLowerCase() || ".jpg";
 
-    const nomeFinal = `${Date.now()}-${nomeBase}${extensao}`;
+    const arquivoProcessado = await processarArquivoImagem(arquivo, titulo);
+    const nomeFinal = `${Date.now()}-${arquivoProcessado.nomeBase}${arquivoProcessado.extensao}`;
     const caminhoArquivo = `${categoriaSlug}/${nomeFinal}`;
 
     const { error: uploadError } = await supabase.storage
       .from(BUCKET)
-      .upload(caminhoArquivo, arquivo.buffer, {
-        contentType: arquivo.mimetype,
+      .upload(caminhoArquivo, arquivoProcessado.buffer, {
+        contentType: arquivoProcessado.contentType,
         upsert: false,
       });
 

@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 import { Plus, Trash2, Image as ImageIcon, Upload } from "lucide-react";
-import heic2any from "heic2any";
 import { apiFetch } from "../../lib/api";
 
 type ImagemGaleria = {
@@ -33,27 +32,6 @@ function ehArquivoHeic(file: File) {
   );
 }
 
-async function converterSeHeic(file: File): Promise<File> {
-  if (!ehArquivoHeic(file)) return file;
-
-  const convertido = await heic2any({
-    blob: file,
-    toType: "image/jpeg",
-    quality: 0.9,
-  });
-
-  const blob = Array.isArray(convertido) ? convertido[0] : convertido;
-
-  return new File(
-    [blob as Blob],
-    file.name.replace(/\.(heic|heif)$/i, ".jpg"),
-    {
-      type: "image/jpeg",
-      lastModified: Date.now(),
-    }
-  );
-}
-
 export default function AjustarGaleria() {
   const [imagens, setImagens] = useState<ImagemGaleria[]>([]);
   const [servicos, setServicos] = useState<TipoServico[]>([]);
@@ -63,21 +41,12 @@ export default function AjustarGaleria() {
   const [salvando, setSalvando] = useState(false);
   const [form, setForm] = useState(valorInicial);
   const [arquivo, setArquivo] = useState<File | null>(null);
-  const [previewUrl, setPreviewUrl] = useState("");
 
   const inputArquivoRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     carregarDados();
   }, []);
-
-  useEffect(() => {
-    return () => {
-      if (previewUrl) {
-        URL.revokeObjectURL(previewUrl);
-      }
-    };
-  }, [previewUrl]);
 
   async function carregarDados() {
     try {
@@ -117,11 +86,7 @@ export default function AjustarGaleria() {
   function abrirNovaImagem() {
     setForm(valorInicial);
     setArquivo(null);
-
-    if (previewUrl) {
-      URL.revokeObjectURL(previewUrl);
-      setPreviewUrl("");
-    }
+    setErro("");
 
     if (inputArquivoRef.current) {
       inputArquivoRef.current.value = "";
@@ -134,11 +99,7 @@ export default function AjustarGaleria() {
     setModalAberto(false);
     setForm(valorInicial);
     setArquivo(null);
-
-    if (previewUrl) {
-      URL.revokeObjectURL(previewUrl);
-      setPreviewUrl("");
-    }
+    setErro("");
 
     if (inputArquivoRef.current) {
       inputArquivoRef.current.value = "";
@@ -152,42 +113,10 @@ export default function AjustarGaleria() {
     }));
   }
 
-  async function selecionarArquivo(e: React.ChangeEvent<HTMLInputElement>) {
+  function selecionarArquivo(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0] || null;
-
-    if (!file) {
-      setArquivo(null);
-
-      if (previewUrl) {
-        URL.revokeObjectURL(previewUrl);
-        setPreviewUrl("");
-      }
-
-      return;
-    }
-
-    try {
-      setErro("");
-
-      const arquivoFinal = await converterSeHeic(file);
-      setArquivo(arquivoFinal);
-
-      if (previewUrl) {
-        URL.revokeObjectURL(previewUrl);
-      }
-
-      setPreviewUrl(URL.createObjectURL(arquivoFinal));
-    } catch (error) {
-      console.error(error);
-      setArquivo(null);
-
-      if (previewUrl) {
-        URL.revokeObjectURL(previewUrl);
-        setPreviewUrl("");
-      }
-
-      setErro("Não foi possível processar essa imagem.");
-    }
+    setErro("");
+    setArquivo(file);
   }
 
   async function salvarImagem(e: React.FormEvent) {
@@ -208,7 +137,7 @@ export default function AjustarGaleria() {
       setErro("");
 
       const formData = new FormData();
-      formData.append("imagem", arquivo);
+      formData.append("imagem", arquivo, arquivo.name);
       formData.append("titulo", form.titulo.trim());
       formData.append("categoria", form.categoria.trim());
 
@@ -281,7 +210,6 @@ export default function AjustarGaleria() {
                   src={imagem.url}
                   alt={imagem.titulo}
                   className="ajustar-galeria__imagem"
-                  loading="lazy"
                 />
               </div>
 
@@ -369,29 +297,18 @@ export default function AjustarGaleria() {
                 <input
                   ref={inputArquivoRef}
                   type="file"
-                  accept="image/*,.heic,.heif"
+                  accept=".jpg,.jpeg,.png,.webp,.heic,.heif,image/*"
                   onChange={selecionarArquivo}
                 />
               </div>
-
-              {previewUrl && (
-                <div className="ajustar-galeria__campo">
-                  <label>Pré-visualização</label>
-                  <div className="ajustar-galeria__imagem-box">
-                    <img
-                      src={previewUrl}
-                      alt="Pré-visualização"
-                      className="ajustar-galeria__imagem"
-                    />
-                  </div>
-                </div>
-              )}
 
               <div className="ajustar-galeria__upload-info">
                 <Upload size={16} />
                 <span>
                   {arquivo
-                    ? `Arquivo selecionado: ${arquivo.name}`
+                    ? ehArquivoHeic(arquivo)
+                      ? `Arquivo selecionado: ${arquivo.name} (será convertido para JPG no servidor)`
+                      : `Arquivo selecionado: ${arquivo.name}`
                     : "Selecione uma imagem para enviar"}
                 </span>
               </div>
