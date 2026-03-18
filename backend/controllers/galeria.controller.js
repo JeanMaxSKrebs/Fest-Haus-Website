@@ -70,7 +70,10 @@ function ehArquivoHeic(arquivo) {
 }
 
 async function processarArquivoImagem(arquivo, titulo) {
-  const nomeBase = slugify(titulo || arquivo.originalname || "imagem") || "imagem";
+  const nomeBase =
+    slugify(titulo || path.parse(arquivo.originalname || "imagem").name) ||
+    "imagem";
+
   const deveConverter = ehArquivoHeic(arquivo);
 
   console.log("Upload galeria recebido:", {
@@ -135,22 +138,34 @@ async function listarArquivosRecursivo(bucket, pasta = "") {
   return arquivos;
 }
 
+function extrairDadosDoPath(caminho) {
+  const partes = caminho.split("/").filter(Boolean);
+
+  const categoria = partes[0] || "geral";
+  const periodo = partes[1] || null;
+  const nomeArquivo = partes[partes.length - 1] || "";
+
+  return {
+    categoria,
+    periodo,
+    nomeArquivo,
+  };
+}
+
 export async function listarGaleriaAdmin(req, res) {
   try {
     const arquivos = await listarArquivosRecursivo(BUCKET);
 
     const imagens = arquivos.map((arquivo) => {
       const { data } = supabase.storage.from(BUCKET).getPublicUrl(arquivo.path);
-
-      const partes = arquivo.path.split("/");
-      const nomeArquivo = partes[partes.length - 1];
-      const categoria = partes.length > 1 ? partes[0] : "geral";
+      const { categoria, periodo, nomeArquivo } = extrairDadosDoPath(arquivo.path);
 
       return {
         id: arquivo.path,
         path: arquivo.path,
         titulo: formatarTituloDoArquivo(nomeArquivo),
         categoria,
+        periodo,
         url: data.publicUrl,
         created_at: arquivo.created_at,
       };
@@ -165,45 +180,64 @@ export async function listarGaleriaAdmin(req, res) {
 
 export async function uploadImagemGaleria(req, res) {
   try {
-    const arquivo = req.file;
-    const { titulo, categoria } = req.body;
+    const arquivos = Array.isArray(req.files) ? req.files : [];
+    const { titulo, categoria, periodo } = req.body;
 
-    if (!arquivo) {
-      return res.status(400).json({ error: "Arquivo de imagem é obrigatório." });
+    if (!arquivos.length) {
+      return res.status(400).json({ error: "Envie pelo menos uma imagem." });
     }
 
-    const categoriaSlug = slugify(categoria || "geral") || "geral";
-    const arquivoProcessado = await processarArquivoImagem(arquivo, titulo);
+    if (!categoria || !categoria.trim()) {
+      return res.status(400).json({ error: "Categoria é obrigatória." });
+    }
 
-    const nomeFinal = `${Date.now()}-${arquivoProcessado.nomeBase}${arquivoProcessado.extensao}`;
-    const caminhoArquivo = `${categoriaSlug}/${nomeFinal}`;
+    if (!periodo || !/^\d{4}-\d{2}$/.test(periodo)) {
+      return res.status(400).json({ error: "Período inválido. Use o formato YYYY-MM." });
+    }
 
-    console.log("Salvando arquivo final:", {
-      caminhoArquivo,
-      contentType: arquivoProcessado.contentType,
-    });
+    const categoriaSlug = slugify(categoria) || "geral";
+    const periodoSlug = periodo.trim();
+    const enviados = [];
 
-    const { error: uploadError } = await supabase.storage
-      .from(BUCKET)
-      .upload(caminhoArquivo, arquivoProcessado.buffer, {
+    for (const arquivo of arquivos) {
+      const arquivoProcessado = await processarArquivoImagem(arquivo, titulo);
+
+      const nomeFinal = `${Date.now()}-${Math.random()
+        .toString(36)
+        .slice(2, 8)}-${arquivoProcessado.nomeBase}${arquivoProcessado.extensao}`;
+
+      const caminhoArquivo = `${categoriaSlug}/${periodoSlug}/${nomeFinal}`;
+
+      console.log("Salvando arquivo final:", {
+        caminhoArquivo,
         contentType: arquivoProcessado.contentType,
-        upsert: false,
       });
 
-    if (uploadError) {
-      console.error("Erro ao enviar imagem para o storage:", uploadError);
-      return res.status(500).json({ error: "Erro ao enviar imagem." });
+      const { error: uploadError } = await supabase.storage
+        .from(BUCKET)
+        .upload(caminhoArquivo, arquivoProcessado.buffer, {
+          contentType: arquivoProcessado.contentType,
+          upsert: false,
+        });
+
+      if (uploadError) {
+        console.error("Erro ao enviar imagem para o storage:", uploadError);
+        return res.status(500).json({ error: "Erro ao enviar imagem." });
+      }
+
+      const { data } = supabase.storage.from(BUCKET).getPublicUrl(caminhoArquivo);
+
+      enviados.push({
+        id: caminhoArquivo,
+        path: caminhoArquivo,
+        titulo: titulo?.trim() || formatarTituloDoArquivo(nomeFinal),
+        categoria: categoriaSlug,
+        periodo: periodoSlug,
+        url: data.publicUrl,
+      });
     }
 
-    const { data } = supabase.storage.from(BUCKET).getPublicUrl(caminhoArquivo);
-
-    return res.status(201).json({
-      id: caminhoArquivo,
-      path: caminhoArquivo,
-      titulo: titulo?.trim() || formatarTituloDoArquivo(nomeFinal),
-      categoria: categoriaSlug,
-      url: data.publicUrl,
-    });
+    return res.status(201).json(enviados);
   } catch (error) {
     console.error("Erro ao fazer upload da imagem:", error);
     return res.status(500).json({ error: "Erro interno ao enviar imagem." });
@@ -241,16 +275,14 @@ export async function listarGaleriaPublica(req, res) {
     const imagens = arquivos
       .map((arquivo) => {
         const { data } = supabase.storage.from(BUCKET).getPublicUrl(arquivo.path);
-
-        const partes = arquivo.path.split("/");
-        const nomeArquivo = partes[partes.length - 1];
-        const categoria = partes.length > 1 ? partes[0] : "geral";
+        const { categoria, periodo, nomeArquivo } = extrairDadosDoPath(arquivo.path);
 
         return {
           id: arquivo.path,
           path: arquivo.path,
           titulo: formatarTituloDoArquivo(nomeArquivo),
           categoria,
+          periodo,
           url: data.publicUrl,
           created_at: arquivo.created_at,
         };

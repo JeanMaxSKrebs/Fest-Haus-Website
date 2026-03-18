@@ -28,7 +28,7 @@ router.post(
   "/api/admin/galeria",
   authenticateToken,
   requireAdmin,
-  uploadGaleria.single("imagem"),
+  uploadGaleria.array("imagens", 50),
   uploadImagemGaleria
 );
 

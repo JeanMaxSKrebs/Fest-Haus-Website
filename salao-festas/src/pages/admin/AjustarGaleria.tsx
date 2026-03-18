@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Plus, Trash2, Image as ImageIcon, Upload } from "lucide-react";
 import { apiFetch } from "../../lib/api";
 
@@ -9,6 +9,7 @@ type ImagemGaleria = {
   categoria: string;
   url: string;
   created_at?: string | null;
+  periodo?: string | null;
 };
 
 type TipoServico = {
@@ -19,6 +20,7 @@ type TipoServico = {
 const valorInicial = {
   titulo: "",
   categoria: "",
+  periodo: "",
 };
 
 function ehArquivoHeic(file: File) {
@@ -50,7 +52,7 @@ export default function AjustarGaleria() {
   const [modalAberto, setModalAberto] = useState(false);
   const [salvando, setSalvando] = useState(false);
   const [form, setForm] = useState(valorInicial);
-  const [arquivo, setArquivo] = useState<File | null>(null);
+  const [arquivos, setArquivos] = useState<File[]>([]);
 
   const inputArquivoRef = useRef<HTMLInputElement | null>(null);
 
@@ -95,7 +97,7 @@ export default function AjustarGaleria() {
 
   function abrirNovaImagem() {
     setForm(valorInicial);
-    setArquivo(null);
+    setArquivos([]);
     setErro("");
 
     if (inputArquivoRef.current) {
@@ -108,7 +110,7 @@ export default function AjustarGaleria() {
   function fecharModal() {
     setModalAberto(false);
     setForm(valorInicial);
-    setArquivo(null);
+    setArquivos([]);
     setErro("");
 
     if (inputArquivoRef.current) {
@@ -116,24 +118,24 @@ export default function AjustarGaleria() {
     }
   }
 
-  function atualizarCampo(campo: "titulo" | "categoria", valor: string) {
+  function atualizarCampo(campo: "titulo" | "categoria" | "periodo", valor: string) {
     setForm((prev) => ({
       ...prev,
       [campo]: valor,
     }));
   }
 
-  function selecionarArquivo(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0] || null;
+  function selecionarArquivos(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(e.target.files || []);
     setErro("");
-    setArquivo(file);
+    setArquivos(files);
   }
 
   async function salvarImagem(e: React.FormEvent) {
     e.preventDefault();
 
-    if (!arquivo) {
-      setErro("Selecione uma imagem para enviar.");
+    if (!arquivos.length) {
+      setErro("Selecione pelo menos uma imagem para enviar.");
       return;
     }
 
@@ -142,14 +144,24 @@ export default function AjustarGaleria() {
       return;
     }
 
+    if (!form.periodo.trim()) {
+      setErro("Selecione o mês e ano.");
+      return;
+    }
+
     try {
       setSalvando(true);
       setErro("");
 
       const formData = new FormData();
-      formData.append("imagem", arquivo, arquivo.name);
+
+      arquivos.forEach((arquivo) => {
+        formData.append("imagens", arquivo, arquivo.name);
+      });
+
       formData.append("titulo", form.titulo.trim());
       formData.append("categoria", form.categoria.trim());
+      formData.append("periodo", form.periodo.trim());
 
       await apiFetch("/api/admin/galeria", {
         method: "POST",
@@ -185,6 +197,20 @@ export default function AjustarGaleria() {
     }
   }
 
+  const resumoArquivos = useMemo(() => {
+    if (!arquivos.length) {
+      return "Selecione uma ou mais imagens para enviar";
+    }
+
+    return `${arquivos.length} imagem(ns) selecionada(s): ${arquivos
+      .map((arquivo) =>
+        ehArquivoHeic(arquivo)
+          ? `${getNomeExibicaoArquivo(arquivo)} (convertido para JPG no servidor)`
+          : arquivo.name
+      )
+      .join(", ")}`;
+  }, [arquivos]);
+
   return (
     <div className="ajustar-galeria">
       <div className="admin-page-header">
@@ -199,7 +225,7 @@ export default function AjustarGaleria() {
           onClick={abrirNovaImagem}
         >
           <Plus size={18} />
-          Adicionar Nova Imagem
+          Adicionar Novas Imagens
         </button>
       </div>
 
@@ -230,6 +256,10 @@ export default function AjustarGaleria() {
                   <span className="ajustar-galeria__categoria">
                     {imagem.categoria || "geral"}
                   </span>
+                </div>
+
+                <div style={{ marginBottom: "10px", fontSize: "0.9rem", opacity: 0.8 }}>
+                  {imagem.periodo || "Sem período"}
                 </div>
 
                 <button
@@ -264,7 +294,7 @@ export default function AjustarGaleria() {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="ajustar-galeria__modal-header">
-              <h2>Adicionar Nova Imagem</h2>
+              <h2>Adicionar Novas Imagens</h2>
 
               <button
                 type="button"
@@ -277,7 +307,7 @@ export default function AjustarGaleria() {
 
             <form className="ajustar-galeria__form" onSubmit={salvarImagem}>
               <div className="ajustar-galeria__campo">
-                <label>Título</label>
+                <label>Título (opcional)</label>
                 <input
                   type="text"
                   value={form.titulo}
@@ -303,26 +333,28 @@ export default function AjustarGaleria() {
               </div>
 
               <div className="ajustar-galeria__campo">
-                <label>Arquivo</label>
+                <label>Mês e ano</label>
+                <input
+                  type="month"
+                  value={form.periodo}
+                  onChange={(e) => atualizarCampo("periodo", e.target.value)}
+                />
+              </div>
+
+              <div className="ajustar-galeria__campo">
+                <label>Arquivos</label>
                 <input
                   ref={inputArquivoRef}
                   type="file"
                   accept=".jpg,.jpeg,.png,.webp,.heic,.heif,image/*"
-                  onChange={selecionarArquivo}
+                  multiple
+                  onChange={selecionarArquivos}
                 />
               </div>
 
               <div className="ajustar-galeria__upload-info">
                 <Upload size={16} />
-                <span>
-                  {arquivo
-                    ? ehArquivoHeic(arquivo)
-                      ? `Arquivo selecionado: ${getNomeExibicaoArquivo(
-                          arquivo
-                        )} (convertido para JPG no servidor)`
-                      : `Arquivo selecionado: ${arquivo.name}`
-                    : "Selecione uma imagem para enviar"}
-                </span>
+                <span>{resumoArquivos}</span>
               </div>
 
               <div className="ajustar-galeria__form-acoes">
@@ -339,7 +371,7 @@ export default function AjustarGaleria() {
                   className="ajustar-galeria__botao-principal"
                   disabled={salvando}
                 >
-                  {salvando ? "Enviando..." : "Enviar imagem"}
+                  {salvando ? "Enviando..." : "Enviar imagens"}
                 </button>
               </div>
             </form>

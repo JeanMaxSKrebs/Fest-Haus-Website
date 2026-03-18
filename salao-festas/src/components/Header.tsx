@@ -68,7 +68,7 @@ function Header() {
             className="header-logo"
             alt="Logo Fest Haus"
           />
-          <h2 className="header-title">Fest Haus</h2>
+          <h2 className="header-title">FEST HAUS</h2>
         </Link>
       </div>
 

@@ -180,8 +180,6 @@ body {
 
   background-color: var(--cor-fundo-secundario);
 
-  padding: 20px;
-
   border-radius: 10px;
 
   box-shadow: var(--sombra);
@@ -1341,7 +1339,7 @@ button:hover {
   align-items: center;
   gap: 12px;
   text-decoration: none;
-  color: var(--cor-texto);
+  color: var(--cor-texto-secundario);
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid transparent;
   padding: 14px 16px;
@@ -2294,6 +2292,15 @@ body.modal-open {
 }
 
 /* GALERIA HOME FILTROS */
+
+.galeria-home__select {
+  border: 1px solid var(--cor-borda);
+  background: var(--cor-fundo-secundario);
+  color: inherit;
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+
 .galeria-home__titulo {
   margin-bottom: 25px;
 }
@@ -2674,7 +2681,7 @@ button.galeria-home__filtro.ativo {
   width: 100%;
   border: 1px solid var(--cor-borda);
   border-radius: 10px;
-  background: transparent;
+  background: var(--cor-fundo-secundario);
   color: inherit;
   padding: 12px 14px;
   font: inherit;

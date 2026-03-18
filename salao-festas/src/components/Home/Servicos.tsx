@@ -182,7 +182,7 @@ function Servicos() {
     const novoAtivo = servicoAtivo === nome ? null : nome;
     setServicoAtivo(novoAtivo);
 
-    if (!isMobile) {
+    if (!isMobile && novoAtivo) {
       setTimeout(() => {
         sectionRef.current?.scrollIntoView({
           behavior: "smooth",
@@ -191,6 +191,8 @@ function Servicos() {
       }, 50);
     }
   }
+
+  const algumAtivo = servicoAtivo !== null;
 
   return (
     <section id="servicos" className="section" ref={sectionRef}>
@@ -201,15 +203,9 @@ function Servicos() {
       <div className="servicos-home__grid">
         {servicosVisiveis.map((servico) => {
           const isAtivo = servicoAtivo === servico.nome;
-          const algumAtivo = servicoAtivo !== null;
 
           return (
-            <div
-              key={servico.nome}
-              style={{
-                width: "100%",
-              }}
-            >
+            <div key={servico.nome} style={{ width: "100%" }}>
               <div
                 className="card"
                 style={{
@@ -221,65 +217,77 @@ function Servicos() {
                   textDecoration: "none",
                   color: "inherit",
                   cursor: "pointer",
-                  border: isAtivo ? "3px solid var(--cor-primaria)" : "none",
-                  padding: isAtivo ? "30px" : "20px",
-                  minHeight: "220px",
+                  border: isAtivo
+                    ? "3px solid var(--cor-primaria)"
+                    : "1px solid var(--cor-borda)",
+                  padding: algumAtivo ? "8px 10x" : "12px",
+                  minHeight: algumAtivo ? "72px" : "270px",
+                  height: algumAtivo ? "60px" : "270px",
+                  width: "100%",
+                  boxSizing: "border-box",
+                  transition: "0.2s",
                 }}
                 onClick={() => handleClick(servico.nome)}
               >
-                {isAtivo || !algumAtivo ? (
-                  !isAtivo ? (
-                    <>
-                      <div
+                {!algumAtivo ? (
+                  <>
+                    <div
+                      style={{
+                        width: "100%",
+                        maxWidth: "200px",
+                        height: "200px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        overflow: "hidden",
+                        borderRadius: "16px",
+                        background: "var(--cor-fundo-secundario)",
+                        marginBottom: "12px",
+                        flexShrink: 0,
+                      }}
+                    >
+                      <img
+                        src={servico.imagem}
+                        alt={servico.nome}
                         style={{
-                          width: "200px",
-                          height: "200px",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          overflow: "hidden",
-                          borderRadius: "16px",
-                          background: "var(--cor-fundo-secundario)",
-                          marginBottom: "12px",
-                          flexShrink: 0,
+                          width: "100%",
+                          height: "100%",
+                          objectFit: "cover",
+                          display: "block",
                         }}
-                      >
-                        <img
-                          src={servico.imagem}
-                          alt={servico.nome}
-                          style={{
-                            width: "100%",
-                            height: "100%",
-                            objectFit: "cover",
-                            display: "block",
-                          }}
-                          loading="lazy"
-                        />
-                      </div>
+                        loading="lazy"
+                      />
+                    </div>
 
-                      <h3>{servico.nome}</h3>
-                    </>
-                  ) : (
                     <h3
                       style={{
-                        display: "flex",
-                        justifyContent: "center",
-                        alignItems: "center",
-                        height: "200px",
+                        width: "100%",
+                        minHeight: "24px",
+                        lineHeight: "24px",
+                        fontSize: isMobile ? "0.95rem" : "1rem",
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        margin: 0,
                       }}
+                      title={servico.nome}
                     >
                       {servico.nome}
                     </h3>
-                  )
+                  </>
                 ) : (
                   <h3
                     style={{
-                      display: "flex",
-                      justifyContent: "center",
-                      alignItems: "center",
-                      height: "200px",
-                      opacity: 0.6,
+                      width: "100%",
+                      lineHeight: "24px",
+                      fontSize: isMobile ? "0.95rem" : "1rem",
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      opacity: isAtivo ? 1 : 0.7,
+                      margin: 0,
                     }}
+                    title={servico.nome}
                   >
                     {servico.nome}
                   </h3>
