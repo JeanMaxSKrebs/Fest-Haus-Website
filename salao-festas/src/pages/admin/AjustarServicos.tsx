@@ -1,5 +1,12 @@
 import { useEffect, useRef, useState } from "react";
-import { Plus, Edit, Trash2, Wrench, Image as ImageIcon, Upload } from "lucide-react";
+import {
+  Plus,
+  Edit,
+  Trash2,
+  Wrench,
+  Image as ImageIcon,
+  Upload,
+} from "lucide-react";
 import { apiFetch } from "../../lib/api";
 
 type ServicoImagem = {
@@ -23,6 +30,27 @@ const valorInicial = {
   preco: "",
   ativo: true,
 };
+
+function ehArquivoHeic(file: File) {
+  const nome = file.name.toLowerCase();
+
+  return (
+    file.type === "image/heic" ||
+    file.type === "image/heif" ||
+    nome.endsWith(".heic") ||
+    nome.endsWith(".heif")
+  );
+}
+
+function getNomeExibicaoArquivo(file: File | null) {
+  if (!file) return "";
+
+  if (ehArquivoHeic(file)) {
+    return file.name.replace(/\.(heic|heif)$/i, ".jpg");
+  }
+
+  return file.name;
+}
 
 export default function AjustarServicos() {
   const [servicos, setServicos] = useState<TipoServico[]>([]);
@@ -63,6 +91,7 @@ export default function AjustarServicos() {
     setForm(valorInicial);
     setImagemPrincipal(null);
     setImagensGaleria([]);
+    setErro("");
 
     if (inputPrincipalRef.current) inputPrincipalRef.current.value = "";
     if (inputGaleriaRef.current) inputGaleriaRef.current.value = "";
@@ -81,6 +110,7 @@ export default function AjustarServicos() {
 
     setImagemPrincipal(null);
     setImagensGaleria([]);
+    setErro("");
 
     if (inputPrincipalRef.current) inputPrincipalRef.current.value = "";
     if (inputGaleriaRef.current) inputGaleriaRef.current.value = "";
@@ -94,6 +124,7 @@ export default function AjustarServicos() {
     setForm(valorInicial);
     setImagemPrincipal(null);
     setImagensGaleria([]);
+    setErro("");
 
     if (inputPrincipalRef.current) inputPrincipalRef.current.value = "";
     if (inputGaleriaRef.current) inputGaleriaRef.current.value = "";
@@ -111,6 +142,7 @@ export default function AjustarServicos() {
 
   function selecionarImagemPrincipal(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0] || null;
+    setErro("");
     setImagemPrincipal(file);
   }
 
@@ -122,12 +154,13 @@ export default function AjustarServicos() {
       return;
     }
 
+    setErro("");
     setImagensGaleria(files);
   }
 
   async function uploadImagemPrincipalServico(id: string, arquivo: File) {
     const formData = new FormData();
-    formData.append("imagem", arquivo);
+    formData.append("imagem", arquivo, arquivo.name);
 
     await apiFetch(`/api/admin/tipos-servico/${id}/imagem-principal`, {
       method: "POST",
@@ -141,7 +174,7 @@ export default function AjustarServicos() {
     const formData = new FormData();
 
     arquivos.forEach((arquivo) => {
-      formData.append("imagens", arquivo);
+      formData.append("imagens", arquivo, arquivo.name);
     });
 
     await apiFetch(`/api/admin/tipos-servico/${id}/imagens`, {
@@ -287,9 +320,7 @@ export default function AjustarServicos() {
       {erro && <div className="ajustar-servicos__alerta-erro">{erro}</div>}
 
       {loading ? (
-        <div className="ajustar-servicos__estado">
-          Carregando serviços...
-        </div>
+        <div className="ajustar-servicos__estado">Carregando serviços...</div>
       ) : servicos.length === 0 ? (
         <div className="ajustar-servicos__estado">
           Nenhum serviço cadastrado.
@@ -342,9 +373,7 @@ export default function AjustarServicos() {
                 <span>
                   Principal: {servico.imagem_principal_url ? "Sim" : "Não"}
                 </span>
-                <span>
-                  Galeria: {servico.imagens_galeria?.length || 0}/5
-                </span>
+                <span>Galeria: {servico.imagens_galeria?.length || 0}/5</span>
               </div>
 
               {!!servico.imagens_galeria?.length && (
@@ -465,7 +494,7 @@ export default function AjustarServicos() {
                   <input
                     ref={inputPrincipalRef}
                     type="file"
-                    accept="image/*"
+                    accept=".jpg,.jpeg,.png,.webp,.heic,.heif,image/*"
                     onChange={selecionarImagemPrincipal}
                   />
                 </div>
@@ -474,7 +503,11 @@ export default function AjustarServicos() {
                   <Upload size={16} />
                   <span>
                     {imagemPrincipal
-                      ? `Arquivo selecionado: ${imagemPrincipal.name}`
+                      ? ehArquivoHeic(imagemPrincipal)
+                        ? `Arquivo selecionado: ${getNomeExibicaoArquivo(
+                            imagemPrincipal
+                          )} (convertido para JPG no servidor)`
+                        : `Arquivo selecionado: ${imagemPrincipal.name}`
                       : "Selecione uma nova imagem principal, se desejar"}
                   </span>
                 </div>
@@ -515,7 +548,7 @@ export default function AjustarServicos() {
                   <input
                     ref={inputGaleriaRef}
                     type="file"
-                    accept="image/*"
+                    accept=".jpg,.jpeg,.png,.webp,.heic,.heif,image/*"
                     multiple
                     onChange={selecionarImagensGaleria}
                   />
@@ -525,7 +558,15 @@ export default function AjustarServicos() {
                   <Upload size={16} />
                   <span>
                     {imagensGaleria.length
-                      ? `${imagensGaleria.length} imagem(ns) selecionada(s)`
+                      ? `${imagensGaleria.length} imagem(ns) selecionada(s): ${imagensGaleria
+                          .map((arquivo) =>
+                            ehArquivoHeic(arquivo)
+                              ? `${getNomeExibicaoArquivo(
+                                  arquivo
+                                )} (JPG no servidor)`
+                              : arquivo.name
+                          )
+                          .join(", ")}`
                       : "Selecione até 5 imagens para a galeria do serviço"}
                   </span>
                 </div>

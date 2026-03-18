@@ -3,9 +3,9 @@ import { supabase } from "./supabase.js";
 const buckets = [
   { name: "servicos", public: true },
   { name: "galeria", public: true },
-  { name: "orcamentos", public: false },
-  { name: "visitas", public: false },
-  { name: "avatars", public: true },
+//   { name: "orcamentos", public: false },
+//   { name: "visitas", public: false },
+//   { name: "avatars", public: true },
 ];
 
 const allowedMimeTypes = [

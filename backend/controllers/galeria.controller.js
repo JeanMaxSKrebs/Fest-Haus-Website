@@ -37,23 +37,50 @@ function formatarTituloDoArquivo(nomeArquivo) {
     .join(" ");
 }
 
+function bufferPareceHeic(buffer) {
+  if (!buffer || buffer.length < 32) return false;
+
+  const header = buffer.toString("ascii", 4, 16).toLowerCase();
+
+  return (
+    header.includes("ftypheic") ||
+    header.includes("ftypheix") ||
+    header.includes("ftyphevc") ||
+    header.includes("ftyphevx") ||
+    header.includes("ftypheim") ||
+    header.includes("ftypheis") ||
+    header.includes("ftypmif1") ||
+    header.includes("ftypmsf1")
+  );
+}
+
 function ehArquivoHeic(arquivo) {
   const nome = (arquivo?.originalname || "").toLowerCase();
   const mimetype = (arquivo?.mimetype || "").toLowerCase();
+  const ext = path.extname(nome);
 
   return (
+    ext === ".heic" ||
+    ext === ".heif" ||
     mimetype === "image/heic" ||
     mimetype === "image/heif" ||
     mimetype === "application/octet-stream" ||
-    nome.endsWith(".heic") ||
-    nome.endsWith(".heif")
+    bufferPareceHeic(arquivo?.buffer)
   );
 }
 
 async function processarArquivoImagem(arquivo, titulo) {
   const nomeBase = slugify(titulo || arquivo.originalname || "imagem") || "imagem";
+  const deveConverter = ehArquivoHeic(arquivo);
 
-  if (ehArquivoHeic(arquivo)) {
+  console.log("Upload galeria recebido:", {
+    originalname: arquivo.originalname,
+    mimetype: arquivo.mimetype,
+    size: arquivo.size,
+    heicDetectado: deveConverter,
+  });
+
+  if (deveConverter) {
     const bufferConvertido = await convert({
       buffer: arquivo.buffer,
       format: "JPEG",
@@ -146,10 +173,15 @@ export async function uploadImagemGaleria(req, res) {
     }
 
     const categoriaSlug = slugify(categoria || "geral") || "geral";
-
     const arquivoProcessado = await processarArquivoImagem(arquivo, titulo);
+
     const nomeFinal = `${Date.now()}-${arquivoProcessado.nomeBase}${arquivoProcessado.extensao}`;
     const caminhoArquivo = `${categoriaSlug}/${nomeFinal}`;
+
+    console.log("Salvando arquivo final:", {
+      caminhoArquivo,
+      contentType: arquivoProcessado.contentType,
+    });
 
     const { error: uploadError } = await supabase.storage
       .from(BUCKET)
@@ -208,9 +240,7 @@ export async function listarGaleriaPublica(req, res) {
 
     const imagens = arquivos
       .map((arquivo) => {
-        const { data } = supabase.storage
-          .from(BUCKET)
-          .getPublicUrl(arquivo.path);
+        const { data } = supabase.storage.from(BUCKET).getPublicUrl(arquivo.path);
 
         const partes = arquivo.path.split("/");
         const nomeArquivo = partes[partes.length - 1];

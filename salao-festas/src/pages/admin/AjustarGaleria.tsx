@@ -32,6 +32,16 @@ function ehArquivoHeic(file: File) {
   );
 }
 
+function getNomeExibicaoArquivo(file: File | null) {
+  if (!file) return "";
+
+  if (ehArquivoHeic(file)) {
+    return file.name.replace(/\.(heic|heif)$/i, ".jpg");
+  }
+
+  return file.name;
+}
+
 export default function AjustarGaleria() {
   const [imagens, setImagens] = useState<ImagemGaleria[]>([]);
   const [servicos, setServicos] = useState<TipoServico[]>([]);
@@ -307,7 +317,9 @@ export default function AjustarGaleria() {
                 <span>
                   {arquivo
                     ? ehArquivoHeic(arquivo)
-                      ? `Arquivo selecionado: ${arquivo.name} (será convertido para JPG no servidor)`
+                      ? `Arquivo selecionado: ${getNomeExibicaoArquivo(
+                          arquivo
+                        )} (convertido para JPG no servidor)`
                       : `Arquivo selecionado: ${arquivo.name}`
                     : "Selecione uma imagem para enviar"}
                 </span>

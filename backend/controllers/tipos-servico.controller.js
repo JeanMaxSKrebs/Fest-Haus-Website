@@ -1,5 +1,6 @@
 import path from "path";
 import multer from "multer";
+import convert from "heic-convert";
 import { supabase } from "../config/supabase.js";
 
 const BUCKET_SERVICOS = "servicos";
@@ -38,6 +39,76 @@ function slugify(texto = "") {
     .replace(/-+/g, "-");
 }
 
+function bufferPareceHeic(buffer) {
+  if (!buffer || buffer.length < 32) return false;
+
+  const header = buffer.toString("ascii", 4, 16).toLowerCase();
+
+  return (
+    header.includes("ftypheic") ||
+    header.includes("ftypheix") ||
+    header.includes("ftyphevc") ||
+    header.includes("ftyphevx") ||
+    header.includes("ftypheim") ||
+    header.includes("ftypheis") ||
+    header.includes("ftypmif1") ||
+    header.includes("ftypmsf1")
+  );
+}
+
+function ehArquivoHeic(arquivo) {
+  const nome = (arquivo?.originalname || "").toLowerCase();
+  const mimetype = (arquivo?.mimetype || "").toLowerCase();
+  const ext = path.extname(nome);
+
+  return (
+    ext === ".heic" ||
+    ext === ".heif" ||
+    mimetype === "image/heic" ||
+    mimetype === "image/heif" ||
+    mimetype === "application/octet-stream" ||
+    bufferPareceHeic(arquivo?.buffer)
+  );
+}
+
+async function processarArquivoImagem(arquivo, nomeFallback = "imagem") {
+  const nomeOriginalSemExt = path.parse(arquivo.originalname || nomeFallback).name;
+  const nomeBase = slugify(nomeOriginalSemExt || nomeFallback) || nomeFallback;
+  const deveConverter = ehArquivoHeic(arquivo);
+
+  console.log("Upload serviço recebido:", {
+    originalname: arquivo.originalname,
+    mimetype: arquivo.mimetype,
+    size: arquivo.size,
+    heicDetectado: deveConverter,
+  });
+
+  if (deveConverter) {
+    const bufferConvertido = await convert({
+      buffer: arquivo.buffer,
+      format: "JPEG",
+      quality: 0.9,
+    });
+
+    return {
+      buffer: Buffer.from(bufferConvertido),
+      extensao: ".jpg",
+      contentType: "image/jpeg",
+      nomeBase,
+    };
+  }
+
+  const extensao =
+    path.extname(arquivo.originalname || "").toLowerCase() || ".jpg";
+
+  return {
+    buffer: arquivo.buffer,
+    extensao,
+    contentType: arquivo.mimetype || "application/octet-stream",
+    nomeBase,
+  };
+}
+
 async function listarArquivosRecursivo(bucket, pasta = "") {
   const { data, error } = await supabase.storage.from(bucket).list(pasta, {
     limit: 100,
@@ -74,14 +145,16 @@ async function montarImagensServico(servicoId) {
   try {
     const arquivos = await listarArquivosRecursivo(BUCKET_SERVICOS, servicoId);
 
-    const principal = arquivos.find((arquivo) =>
-      arquivo.path.includes(`/${servicoId}/principal/`) ||
-      arquivo.path.startsWith(`${servicoId}/principal/`)
+    const principal = arquivos.find(
+      (arquivo) =>
+        arquivo.path.includes(`/${servicoId}/principal/`) ||
+        arquivo.path.startsWith(`${servicoId}/principal/`)
     );
 
-    const galeria = arquivos.filter((arquivo) =>
-      arquivo.path.includes(`/${servicoId}/galeria/`) ||
-      arquivo.path.startsWith(`${servicoId}/galeria/`)
+    const galeria = arquivos.filter(
+      (arquivo) =>
+        arquivo.path.includes(`/${servicoId}/galeria/`) ||
+        arquivo.path.startsWith(`${servicoId}/galeria/`)
     );
 
     const imagem_principal_url = principal
@@ -273,10 +346,7 @@ export async function deletarTipoServico(req, res) {
         .remove(arquivos.map((arquivo) => arquivo.path));
     }
 
-    const { error } = await supabase
-      .from("tipos_servico")
-      .delete()
-      .eq("id", id);
+    const { error } = await supabase.from("tipos_servico").delete().eq("id", id);
 
     if (error) {
       console.error("Erro ao excluir tipo de serviço:", error);
@@ -305,26 +375,35 @@ export async function uploadImagemPrincipalServico(req, res) {
       return res.status(400).json({ error: "Imagem é obrigatória." });
     }
 
-    const extensao =
-      path.extname(arquivo.originalname || "").toLowerCase() || ".jpg";
-    const nomeArquivo = `${Date.now()}-${slugify(
-      arquivo.originalname || "principal"
-    )}${extensao}`;
     const pastaPrincipal = `${id}/principal`;
+    const existentes = await listarArquivosRecursivo(
+      BUCKET_SERVICOS,
+      pastaPrincipal
+    );
 
-    const existentes = await listarArquivosRecursivo(BUCKET_SERVICOS, pastaPrincipal);
     if (existentes.length) {
       await supabase.storage
         .from(BUCKET_SERVICOS)
         .remove(existentes.map((arquivoExistente) => arquivoExistente.path));
     }
 
+    const arquivoProcessado = await processarArquivoImagem(
+      arquivo,
+      "principal"
+    );
+
+    const nomeArquivo = `${Date.now()}-${arquivoProcessado.nomeBase}${arquivoProcessado.extensao}`;
     const caminho = `${pastaPrincipal}/${nomeArquivo}`;
+
+    console.log("Salvando imagem principal do serviço:", {
+      caminho,
+      contentType: arquivoProcessado.contentType,
+    });
 
     const { error } = await supabase.storage
       .from(BUCKET_SERVICOS)
-      .upload(caminho, arquivo.buffer, {
-        contentType: arquivo.mimetype,
+      .upload(caminho, arquivoProcessado.buffer, {
+        contentType: arquivoProcessado.contentType,
         upsert: false,
       });
 
@@ -374,17 +453,19 @@ export async function uploadImagensServico(req, res) {
     const enviados = [];
 
     for (const arquivo of arquivos) {
-      const extensao =
-        path.extname(arquivo.originalname || "").toLowerCase() || ".jpg";
-      const nomeArquivo = `${Date.now()}-${slugify(
-        arquivo.originalname || "imagem"
-      )}${extensao}`;
+      const arquivoProcessado = await processarArquivoImagem(arquivo, "imagem");
+      const nomeArquivo = `${Date.now()}-${arquivoProcessado.nomeBase}${arquivoProcessado.extensao}`;
       const caminho = `${pastaGaleria}/${nomeArquivo}`;
+
+      console.log("Salvando imagem da galeria do serviço:", {
+        caminho,
+        contentType: arquivoProcessado.contentType,
+      });
 
       const { error } = await supabase.storage
         .from(BUCKET_SERVICOS)
-        .upload(caminho, arquivo.buffer, {
-          contentType: arquivo.mimetype,
+        .upload(caminho, arquivoProcessado.buffer, {
+          contentType: arquivoProcessado.contentType,
           upsert: false,
         });
 
