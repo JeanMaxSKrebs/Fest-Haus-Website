@@ -41,7 +41,18 @@ export default function Perfil() {
             const response = await apiFetch("/api/perfil");
 
             if (!response.ok) {
-                throw new Error("Não foi possível carregar o perfil.");
+                let mensagem = "Não foi possível carregar o perfil.";
+
+                try {
+                    const erroJson = await response.json();
+                    if (erroJson?.error) {
+                        mensagem = erroJson.error;
+                    }
+                } catch {
+                    // mantém a mensagem padrão
+                }
+
+                throw new Error(mensagem);
             }
 
             const data = await response.json();
@@ -53,15 +64,15 @@ export default function Perfil() {
                 telefone: data.telefone || "",
                 created_at: data.created_at || null,
             });
-        } catch (error) {
+        } catch (error: any) {
             console.error("Erro carregarPerfil:", error);
-            setErro("Não foi possível carregar o perfil.");
+            setErro(error?.message || "Não foi possível carregar o perfil.");
         } finally {
             setCarregando(false);
         }
     }
 
-    async function salvarPerfil(e: React.FormEvent) {
+    async function atualizarPerfil(e: React.FormEvent) {
         e.preventDefault();
 
         setSalvando(true);
@@ -83,7 +94,7 @@ export default function Perfil() {
             const data = await response.json();
 
             if (!response.ok) {
-                throw new Error(data?.error || "Não foi possível salvar o perfil.");
+                throw new Error(data?.error || "Não foi possível atualizar o perfil.");
             }
 
             setPerfil((prev) => ({
@@ -93,8 +104,8 @@ export default function Perfil() {
 
             setSucesso("Perfil atualizado com sucesso.");
         } catch (error: any) {
-            console.error("Erro salvarPerfil:", error);
-            setErro(error?.message || "Não foi possível salvar o perfil.");
+            console.error("Erro atualizarPerfil:", error);
+            setErro(error?.message || "Não foi possível atualizar o perfil.");
         } finally {
             setSalvando(false);
         }
@@ -114,7 +125,7 @@ export default function Perfil() {
                 {carregando ? (
                     <p>Carregando perfil...</p>
                 ) : (
-                    <form className="perfil-form" onSubmit={salvarPerfil}>
+                    <form className="perfil-form" onSubmit={atualizarPerfil}>
                         <div className="perfil-field">
                             <label htmlFor="nome">Nome</label>
                             <input
@@ -131,7 +142,7 @@ export default function Perfil() {
                             <input id="email" type="email" value={perfil.email} disabled />
                         </div>
 
-                        <div className="perfil-field">
+                        <div className="perfil-field perfil-field--full">
                             <label htmlFor="telefone">Telefone</label>
                             <input
                                 id="telefone"
@@ -146,9 +157,11 @@ export default function Perfil() {
                             />
                         </div>
 
-                        <button type="submit" className="btn-apresentacao" disabled={salvando}>
-                            {salvando ? "Salvando..." : "Salvar perfil"}
-                        </button>
+                        <div className="perfil-acoes">
+                            <button type="submit" className="btn-apresentacao" disabled={salvando}>
+                                {salvando ? "Atualizando..." : "Atualizar perfil"}
+                            </button>
+                        </div>
                     </form>
                 )}
             </div>

@@ -1,49 +1,144 @@
 .moedas-page {
-    max-width: 800px;
-    margin: 40px auto;
-    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 32px 16px 48px;
+    align-items: stretch;
+    text-align: left;
+}
+
+.moedas-topo {
+    margin-bottom: 28px;
+}
+
+.moedas-topo h2 {
+    font-size: 2rem;
+    margin-bottom: 8px;
+}
+
+.moedas-topo p {
+    color: var(--cor-texto-secundario);
+}
+
+.moedas-msg {
+    margin-bottom: 18px;
+    padding: 12px 14px;
+    border-radius: 12px;
+}
+
+.moedas-msg--erro {
+    background: rgba(220, 38, 38, 0.08);
+    border: 1px solid rgba(220, 38, 38, 0.18);
+}
+
+.moedas-msg--sucesso {
+    background: rgba(22, 163, 74, 0.08);
+    border: 1px solid rgba(22, 163, 74, 0.18);
+}
+
+.moedas-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    column-gap: 18px;
+    row-gap: 18px;
+    margin-top: 18px;
+    margin-bottom: 32px;
 }
 
 .moedas-card {
-    background: linear-gradient(135deg, #240b36, #310c38);
-    border-radius: 20px;
-    padding: 30px;
-    color: #fdd57e;
-    text-align: center;
-    box-shadow: var(--sombra);
-}
-
-.moedas-saldo {
-    font-size: 42px;
-    font-weight: bold;
-    margin: 10px 0;
-}
-
-.moedas-label {
-    font-size: 14px;
-    opacity: 0.8;
-}
-
-.moedas-acoes {
-    margin-top: 25px;
+    background: var(--cor-fundo-secundario);
+    border: 1px solid var(--cor-borda);
+    border-radius: 18px;
+    padding: 22px;
     display: flex;
+    flex-direction: column;
     gap: 12px;
-    justify-content: center;
-    flex-wrap: wrap;
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.05);
 }
 
-.moedas-btn {
-    background: #fdd57e;
-    color: #240b36;
-    border: none;
-    padding: 12px 18px;
-    border-radius: 10px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: 0.3s;
+.moedas-card--saldo {
+    background: linear-gradient(135deg,
+            rgba(124, 58, 237, 0.12),
+            rgba(204, 158, 62, 0.12));
 }
 
-.moedas-btn:hover {
-    transform: translateY(-2px);
-    opacity: 0.9;
+.moedas-icone {
+    font-size: 1.7rem;
+    line-height: 1;
+}
+
+.moedas-card h3 {
+    font-size: 1rem;
+    line-height: 1.3;
+}
+
+.moedas-card strong {
+    font-size: 1.9rem;
+    color: var(--cor-primaria);
+    line-height: 1;
+}
+
+.moedas-card .btn-apresentacao {
+    margin-top: 8px;
+}
+
+.moedas-extrato {
+    background: var(--cor-fundo-secundario);
+    border: 1px solid var(--cor-borda);
+    border-radius: 18px;
+    padding: 22px;
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.05);
+}
+
+.moedas-extrato__topo {
+    margin-bottom: 18px;
+}
+
+.moedas-extrato__topo h3 {
+    margin-bottom: 6px;
+}
+
+.moedas-extrato__topo p {
+    color: var(--cor-texto-secundario);
+}
+
+.moedas-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.moedas-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px;
+    background: var(--cor-fundo);
+    border: 1px solid var(--cor-borda);
+    border-radius: 14px;
+}
+
+.moedas-item__info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.moedas-item__info span {
+    font-size: 0.92rem;
+    color: var(--cor-texto-secundario);
+}
+
+.moedas-item__valor {
+    font-size: 1.05rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.moedas-item__valor.ganho {
+    color: #16a34a;
+}
+
+.moedas-item__valor.gasto {
+    color: #dc2626;
 }
