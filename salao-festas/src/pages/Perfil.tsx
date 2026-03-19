@@ -22,7 +22,7 @@ export default function Perfil() {
     });
 
     const [carregando, setCarregando] = useState(true);
-    const [salvando, setSalvando] = useState(false);
+    const [atualizando, setAtualizando] = useState(false);
     const [erro, setErro] = useState("");
     const [sucesso, setSucesso] = useState("");
 
@@ -38,24 +38,7 @@ export default function Perfil() {
         setSucesso("");
 
         try {
-            const response = await apiFetch("/api/perfil");
-
-            if (!response.ok) {
-                let mensagem = "Não foi possível carregar o perfil.";
-
-                try {
-                    const erroJson = await response.json();
-                    if (erroJson?.error) {
-                        mensagem = erroJson.error;
-                    }
-                } catch {
-                    // mantém a mensagem padrão
-                }
-
-                throw new Error(mensagem);
-            }
-
-            const data = await response.json();
+            const data = await apiFetch("/api/perfil");
 
             setPerfil({
                 id: data.id || user.id,
@@ -75,27 +58,18 @@ export default function Perfil() {
     async function atualizarPerfil(e: React.FormEvent) {
         e.preventDefault();
 
-        setSalvando(true);
+        setAtualizando(true);
         setErro("");
         setSucesso("");
 
         try {
-            const response = await apiFetch("/api/perfil", {
+            const data = await apiFetch("/api/perfil", {
                 method: "PUT",
-                headers: {
-                    "Content-Type": "application/json",
-                },
                 body: JSON.stringify({
                     nome: perfil.nome,
                     telefone: perfil.telefone,
                 }),
             });
-
-            const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(data?.error || "Não foi possível atualizar o perfil.");
-            }
 
             setPerfil((prev) => ({
                 ...prev,
@@ -107,7 +81,7 @@ export default function Perfil() {
             console.error("Erro atualizarPerfil:", error);
             setErro(error?.message || "Não foi possível atualizar o perfil.");
         } finally {
-            setSalvando(false);
+            setAtualizando(false);
         }
     }
 
@@ -132,7 +106,9 @@ export default function Perfil() {
                                 id="nome"
                                 type="text"
                                 value={perfil.nome}
-                                onChange={(e) => setPerfil((prev) => ({ ...prev, nome: e.target.value }))}
+                                onChange={(e) =>
+                                    setPerfil((prev) => ({ ...prev, nome: e.target.value }))
+                                }
                                 required
                             />
                         </div>
@@ -158,8 +134,12 @@ export default function Perfil() {
                         </div>
 
                         <div className="perfil-acoes">
-                            <button type="submit" className="btn-apresentacao" disabled={salvando}>
-                                {salvando ? "Atualizando..." : "Atualizar perfil"}
+                            <button
+                                type="submit"
+                                className="btn-apresentacao"
+                                disabled={atualizando}
+                            >
+                                {atualizando ? "Atualizando..." : "Atualizar perfil"}
                             </button>
                         </div>
                     </form>

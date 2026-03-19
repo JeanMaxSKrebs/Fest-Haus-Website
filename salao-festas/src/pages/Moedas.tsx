@@ -46,21 +46,10 @@ export default function Moedas() {
         setSucesso("");
 
         try {
-            const [resumoResponse, extratoResponse] = await Promise.all([
+            const [resumoData, extratoData] = await Promise.all([
                 apiFetch("/api/moedas/resumo"),
                 apiFetch("/api/moedas/extrato"),
             ]);
-
-            if (!resumoResponse.ok) {
-                throw new Error("Não foi possível carregar o resumo de moedas.");
-            }
-
-            if (!extratoResponse.ok) {
-                throw new Error("Não foi possível carregar o extrato de moedas.");
-            }
-
-            const resumoData = await resumoResponse.json();
-            const extratoData = await extratoResponse.json();
 
             setResumo({
                 saldo: resumoData.saldo ?? 0,
@@ -72,9 +61,9 @@ export default function Moedas() {
             });
 
             setExtrato(Array.isArray(extratoData) ? extratoData : []);
-        } catch (error) {
+        } catch (error: any) {
             console.error("Erro carregarMoedas:", error);
-            setErro("Não foi possível carregar suas moedas.");
+            setErro(error?.message || "Não foi possível carregar suas moedas.");
         } finally {
             setCarregando(false);
         }
@@ -88,15 +77,9 @@ export default function Moedas() {
         setSucesso("");
 
         try {
-            const response = await apiFetch("/api/moedas/checkin", {
+            const data = await apiFetch("/api/moedas/checkin", {
                 method: "POST",
             });
-
-            const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(data?.error || "Não foi possível realizar o check-in.");
-            }
 
             if (data?.bonus_streak > 0) {
                 setSucesso(
@@ -204,7 +187,8 @@ export default function Moedas() {
                                 </div>
 
                                 <div
-                                    className={`moedas-item__valor ${item.tipo === "gasto" ? "gasto" : "ganho"}`}
+                                    className={`moedas-item__valor ${item.tipo === "gasto" ? "gasto" : "ganho"
+                                        }`}
                                 >
                                     {item.tipo === "gasto" ? "-" : "+"} {item.valor}
                                 </div>
