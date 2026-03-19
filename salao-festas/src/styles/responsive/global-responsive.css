@@ -1,0 +1,652 @@
+@media (max-width: 1100px) {
+
+    .grid-modelos,
+    .ajustar-servicos__grid,
+    .ajustar-galeria__grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .admin-home-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 1024px) {
+    .header {
+        grid-template-columns: 1fr;
+        gap: 16px;
+        padding: 16px 20px;
+        text-align: center;
+    }
+
+    .header-brand {
+        justify-content: center;
+    }
+
+    .header-nav {
+        flex-wrap: wrap;
+        gap: 14px 22px;
+    }
+
+    .header-right {
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 12px 18px;
+    }
+
+    .grid {
+        gap: 16px;
+    }
+
+    .card {
+        width: min(100%, 280px);
+    }
+
+    .admin-table {
+        min-width: 760px;
+    }
+}
+
+@media (max-width: 900px) {
+    .admin-sidebar {
+        width: 100%;
+        min-width: 100%;
+        position: relative;
+        height: auto;
+    }
+
+    .admin-layout {
+        flex-direction: column;
+    }
+
+    .admin-content {
+        margin-left: 0;
+        padding: 20px 16px;
+    }
+
+    .admin-modal-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    body {
+        font-size: 15px;
+    }
+
+    .section {
+        padding: 40px 16px;
+    }
+
+    .titulo-secao,
+    .title,
+    .admin-page-title,
+    .admin-home-title {
+        line-height: 1.2;
+    }
+
+    .admin-page-title,
+    .admin-home-title {
+        font-size: 28px;
+    }
+
+    .admin-page-subtitle,
+    .admin-home-subtitle {
+        font-size: 15px;
+    }
+
+    .header {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 14px;
+        padding: 14px 16px;
+    }
+
+    .header-brand {
+        justify-content: center;
+        gap: 12px;
+    }
+
+    .header-logo {
+        width: 48px;
+        height: 48px;
+    }
+
+    .header-title {
+        font-size: 18px;
+        text-align: center;
+    }
+
+    .header-nav {
+        width: 100%;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 10px 14px;
+    }
+
+    .header-nav a,
+    .header-right a,
+    .btn-header {
+        font-size: 15px;
+    }
+
+    .header-right {
+        width: 100%;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .btn-tema,
+    .btn-admin-header,
+    .btn-header {
+        min-height: 42px;
+    }
+
+    .img-logo {
+        width: 140px;
+        height: 140px;
+    }
+
+    .grid {
+        gap: 14px;
+    }
+
+    .card {
+        width: 100%;
+        max-width: 100%;
+        padding: 16px;
+        border-radius: 14px;
+    }
+
+    .img-200 {
+        width: 100%;
+        max-width: 260px;
+        margin: 0 auto;
+    }
+
+    .servicos-home__grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+    }
+
+    .servicos-home__grid .card {
+        max-width: 100%;
+    }
+
+    .grid-modelos,
+    .lista-meus-orcamentos {
+        gap: 14px;
+    }
+
+    .btn-whatsapp,
+    .btn-instagram,
+    .btn-facebook,
+    .btn-apresentacao,
+    .btn-primary,
+    .admin-primary-button {
+        width: 100%;
+        max-width: 100%;
+        min-height: 48px;
+        padding: 12px 18px;
+        font-size: 15px;
+        border-radius: 12px;
+    }
+
+    .btn-aba-orcamento,
+    .btn-acao-modelo {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .acoes-modelo-orcamento {
+        flex-direction: column;
+    }
+
+    .form-group {
+        margin-bottom: 12px;
+    }
+
+    .input,
+    .admin-input,
+    .admin-select,
+    .ajustar-servicos__campo input,
+    .ajustar-servicos__campo textarea,
+    .ajustar-galeria__campo input,
+    .ajustar-galeria__campo select,
+    .ajustar-galeria__select,
+    .perfil-field input {
+        min-height: 46px;
+        font-size: 16px;
+        padding: 12px 14px;
+    }
+
+    textarea.admin-input,
+    .ajustar-servicos__campo textarea {
+        min-height: 110px;
+    }
+
+    button.galeria-home__filtro {
+        border: 1px solid var(--cor-borda);
+        background: var(--cor-fundo-secundario);
+        color: inherit;
+        border-radius: 999px;
+        padding: 10px 16px;
+        cursor: pointer;
+        white-space: nowrap;
+        transition: 0.2s;
+    }
+
+    button.galeria-home__filtro.ativo {
+        background: var(--cor-primaria);
+        color: #fff;
+        border-color: var(--cor-primaria);
+    }
+
+    .galeria-home .galeria-home__filtro:hover,
+    .galeria-home .galeria-home__filtro.ativo {
+        color: #fff;
+        transform: translateY(-1px);
+        font-weight: 600;
+    }
+
+    .galeria-home__filtro:hover,
+    .galeria-home__filtro.ativo {
+        border-color: var(--cor-primaria);
+        color: var(--cor-texto-secundario);
+        font-weight: 600;
+    }
+
+    .galeria-home__filtro:active {
+        transform: scale(0.96);
+    }
+
+    .servico-galeria {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .servico-galeria-img {
+        height: 82px;
+        border-radius: 8px;
+    }
+
+    .agendamento-card {
+        max-width: 100%;
+        margin-bottom: 28px;
+    }
+
+    .calendar-container {
+        margin-top: 28px;
+    }
+
+    .agendamentos-grid {
+        gap: 14px;
+    }
+
+    .agendamento-item {
+        padding: 14px;
+    }
+
+    .admin-home-page {
+        padding: 35px 16px 50px;
+    }
+
+    .admin-home-title {
+        font-size: 30px;
+    }
+
+    .admin-home-subtitle {
+        font-size: 16px;
+    }
+
+    .admin-home-grid {
+        grid-template-columns: 1fr;
+        gap: 18px;
+    }
+
+    .admin-card {
+        min-height: auto;
+        padding: 22px;
+    }
+
+    .admin-card-title {
+        font-size: 20px;
+    }
+
+    .admin-layout {
+        flex-direction: column;
+    }
+
+    .admin-sidebar {
+        position: relative;
+        width: 100%;
+        min-width: 100%;
+        padding: 18px 16px;
+        border-right: none;
+        border-bottom: 1px solid rgba(253, 213, 126, 0.14);
+        box-shadow: none;
+    }
+
+    .admin-sidebar-title {
+        font-size: 20px;
+    }
+
+    .admin-sidebar-subtitle {
+        font-size: 13px;
+        margin-bottom: 18px;
+    }
+
+    .admin-sidebar-nav {
+        gap: 8px;
+    }
+
+    .admin-sidebar-link {
+        padding: 12px 14px;
+        border-radius: 12px;
+        font-size: 14px;
+    }
+
+    .admin-content {
+        margin-left: 0;
+        padding: 18px 14px 24px;
+    }
+
+    .admin-page {
+        max-width: 100%;
+    }
+
+    .admin-panel {
+        padding: 16px;
+        border-radius: 16px;
+    }
+
+    .admin-panel-top {
+        margin-bottom: 16px;
+    }
+
+    .admin-form-group {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+    }
+
+    .admin-input {
+        min-width: 0;
+        width: 100%;
+    }
+
+    .admin-filters-row {
+        gap: 10px;
+    }
+
+    .admin-filter-group {
+        min-width: 0;
+        width: 100%;
+    }
+
+    .admin-table-wrapper {
+        border-radius: 14px;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .admin-table {
+        min-width: 680px;
+    }
+
+    .admin-table th,
+    .admin-table td {
+        padding: 14px 12px;
+    }
+
+    .admin-actions {
+        gap: 8px;
+    }
+
+    .admin-icon-button {
+        min-height: 40px;
+    }
+
+    .admin-modal-overlay,
+    .ajustar-servicos__modal-overlay,
+    .ajustar-galeria__modal-overlay {
+        align-items: flex-end;
+        padding: 0;
+    }
+
+    .admin-modal,
+    .ajustar-servicos__modal,
+    .ajustar-galeria__modal {
+        width: 100%;
+        max-width: 100%;
+        max-height: 90vh;
+        border-radius: 18px 18px 0 0;
+        padding: 18px;
+    }
+
+    .admin-modal-title {
+        font-size: 20px;
+    }
+
+    .admin-modal-subtitle {
+        font-size: 14px;
+        margin-bottom: 16px;
+    }
+
+    .admin-modal-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .admin-modal-scrollable {
+        max-height: 78vh;
+        padding-right: 2px;
+    }
+
+    .ajustar-servicos__modal-header,
+    .ajustar-galeria__modal-header {
+        padding: 16px;
+    }
+
+    .ajustar-servicos__form,
+    .ajustar-galeria__form {
+        padding: 16px;
+    }
+
+    .ajustar-servicos__form-acoes,
+    .ajustar-galeria__form-acoes {
+        flex-direction: column;
+    }
+
+    .ajustar-servicos__botao-secundario,
+    .ajustar-servicos__botao-principal,
+    .ajustar-galeria__botao-secundario,
+    .ajustar-galeria__botao-principal {
+        width: 100%;
+    }
+
+    .ajustar-servicos__topo,
+    .ajustar-galeria__topo {
+        margin-bottom: 16px;
+    }
+
+    .ajustar-servicos__botao-principal,
+    .ajustar-galeria__botao-principal {
+        width: 100%;
+    }
+
+    .ajustar-servicos__grid,
+    .ajustar-galeria__grid {
+        grid-template-columns: 1fr;
+        gap: 14px;
+    }
+
+    .ajustar-servicos__card,
+    .ajustar-galeria__card {
+        border-radius: 16px;
+    }
+
+    .ajustar-servicos__card-topo,
+    .ajustar-galeria__card-topo {
+        gap: 8px;
+    }
+
+    .ajustar-servicos__acoes {
+        flex-direction: column;
+    }
+
+    .ajustar-servicos__botao,
+    .ajustar-servicos__botao-icon {
+        width: 100%;
+    }
+
+    .ajustar-servicos__botao-icon {
+        min-width: 100%;
+        height: 44px;
+    }
+
+    .ajustar-servicos__miniaturas {
+        flex-wrap: wrap;
+    }
+
+    .ajustar-servicos__miniatura {
+        width: 36px;
+        height: 36px;
+    }
+
+    .ajustar-servicos__galeria-item-img {
+        width: 48px;
+        height: 48px;
+    }
+
+    .perfil-page,
+    .moedas-page {
+        padding: 24px 12px 40px;
+    }
+
+    .perfil-card,
+    .moedas-card,
+    .moedas-extrato {
+        padding: 18px;
+    }
+
+    .perfil-topo h2,
+    .moedas-topo h2 {
+        font-size: 1.6rem;
+    }
+
+    .moedas-item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+
+@media (max-width: 700px) {
+
+    .grid-modelos,
+    .ajustar-servicos__grid,
+    .ajustar-galeria__grid {
+        grid-template-columns: 1fr;
+    }
+
+    .acoes-modelo-orcamento {
+        flex-direction: column;
+    }
+
+    .btn-acao-modelo {
+        width: 100%;
+    }
+
+    .servico-galeria {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 640px) {
+
+    .ajustar-servicos__modal,
+    .ajustar-galeria__modal {
+        max-width: 100%;
+    }
+
+    .ajustar-servicos__form-acoes,
+    .ajustar-galeria__form-acoes {
+        flex-direction: column;
+    }
+
+    .ajustar-servicos__botao-secundario,
+    .ajustar-servicos__botao-principal,
+    .ajustar-galeria__botao-secundario,
+    .ajustar-galeria__botao-principal {
+        width: 100%;
+    }
+}
+
+@media (max-width: 520px) {
+    .section {
+        padding: 34px 12px;
+    }
+
+    .header {
+        padding: 12px;
+    }
+
+    .header-title {
+        font-size: 16px;
+    }
+
+    .header-nav {
+        gap: 8px 10px;
+    }
+
+    .header-nav a,
+    .header-right a,
+    .btn-header {
+        font-size: 14px;
+    }
+
+    .btn-whatsapp,
+    .btn-instagram,
+    .btn-facebook,
+    .btn-apresentacao,
+    .btn-primary,
+    .admin-primary-button {
+        font-size: 14px;
+        padding: 11px 16px;
+    }
+
+    .servicos-home__grid {
+        grid-template-columns: 1fr;
+    }
+
+    .servico-galeria {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .servico-galeria-img {
+        height: 88px;
+    }
+
+    .admin-page-title,
+    .admin-home-title {
+        font-size: 24px;
+    }
+
+    .admin-panel,
+    .perfil-card,
+    .moedas-card,
+    .moedas-extrato {
+        padding: 14px;
+    }
+
+    .card,
+    .card-orcamento,
+    .ajustar-servicos__card,
+    .ajustar-galeria__card {
+        padding: 14px;
+    }
+}

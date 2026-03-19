@@ -1,0 +1,224 @@
+.agendamento-card {
+    max-width: 500px;
+    margin: 0 auto 40px auto;
+}
+
+.title {
+    margin-bottom: 20px;
+    color: var(--cor-primaria);
+}
+
+.calendar-container {
+    margin-top: 40px;
+}
+
+.agendamentos-grid {
+    gap: 20px;
+}
+
+.agendamento-item {
+    transition: 0.2s;
+}
+
+.agendamento-item:hover {
+    transform: translateY(-4px);
+}
+
+.data {
+    font-weight: bold;
+    color: var(--cor-primaria);
+}
+
+.empty-text {
+    opacity: 0.6;
+}
+
+.status {
+    font-weight: bold;
+}
+
+.status.aprovado {
+    color: green;
+}
+
+.status.em_processo {
+    color: orange;
+}
+
+.titulo-secao {
+    margin-bottom: 16px;
+}
+
+.grid-modelos {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+    align-items: start;
+}
+
+.card-orcamento {
+    background: var(--cor-fundo-secundario);
+    border: 1px solid var(--cor-borda);
+    border-radius: 14px;
+    padding: 18px;
+    transition: 0.2s;
+}
+
+.card-orcamento.aberto {
+    border: 2px solid var(--cor-primaria);
+}
+
+.card-orcamento-tipo {
+    color: var(--cor-texto-secundario);
+    margin-bottom: 8px;
+}
+
+.card-orcamento-descricao {
+    color: var(--cor-texto-secundario);
+    margin-bottom: 12px;
+}
+
+.card-orcamento-preco {
+    font-weight: 500;
+    margin-bottom: 14px;
+}
+
+.card-itens-modelo {
+    margin-top: 12px;
+    padding: 14px;
+    border-radius: 10px;
+    border: 1px solid var(--cor-borda);
+    background: var(--cor-fundo);
+}
+
+.card-itens-modelo ul {
+    padding-left: 20px;
+    display: grid;
+    gap: 6px;
+}
+
+.acoes-modelo-orcamento {
+    display: flex;
+    gap: 10px;
+    align-items: stretch;
+}
+
+.lista-meus-orcamentos {
+    display: grid;
+    gap: 18px;
+}
+
+.lista-itens-modelo {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.lista-itens-modelo li {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--cor-borda);
+}
+
+.lista-itens-modelo li:nth-child(odd) {
+    background: var(--cor-fundo);
+}
+
+.lista-itens-modelo li:nth-child(even) {
+    background: var(--cor-fundo-secundario);
+}
+
+.lista-itens-modelo li:last-child {
+    border-bottom: none;
+}
+
+.galeria-home__select {
+    border: 1px solid var(--cor-borda);
+    background: var(--cor-fundo-secundario);
+    color: inherit;
+    border-radius: 10px;
+    padding: 10px 12px;
+}
+
+.galeria-home__titulo {
+    margin-bottom: 25px;
+}
+
+button.galeria-home__filtro {
+    border: 1px solid var(--cor-borda);
+    background: var(--cor-fundo-secundario);
+    color: inherit;
+    border-radius: 999px;
+    padding: 10px 16px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: 0.2s;
+}
+
+button.galeria-home__filtro.ativo {
+    background: var(--cor-primaria);
+    color: #fff;
+    border-color: var(--cor-primaria);
+}
+
+.galeria-home .galeria-home__filtro:hover {
+    color: var(--cor-primaria);
+    transform: translateY(-1px);
+}
+
+.galeria-home .galeria-home__filtro.ativo {
+    color: var(--cor-texto);
+    font-weight: 600;
+}
+
+.galeria-home__filtro:hover {
+    border-color: var(--cor-primaria);
+    color: var(--cor-texto-secundario);
+    transform: translateY(-1px);
+}
+
+.galeria-home__filtro.ativo {
+    border-color: var(--cor-primaria);
+    color: var(--cor-texto-secundario);
+    font-weight: 600;
+}
+
+.galeria-home__filtro:active {
+    transform: scale(0.96);
+}
+
+.servico-galeria {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
+    margin-top: 25px;
+    max-width: 600px;
+}
+
+.servico-galeria-img {
+    width: 100%;
+    height: 90px;
+    object-fit: cover;
+    border-radius: 6px;
+    border: 1px solid var(--cor-borda);
+    transition: 0.2s;
+}
+
+.servico-galeria-img:hover {
+    transform: scale(1.05);
+}
+
+.servicos-home__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 20px;
+    width: 100%;
+    margin-top: 20px;
+}
+
+.servicos-home__grid .card {
+    width: 100%;
+    max-width: 260px;
+    margin: 0 auto;
+}

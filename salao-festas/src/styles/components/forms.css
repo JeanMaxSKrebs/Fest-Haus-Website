@@ -1,0 +1,17 @@
+.form-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 15px;
+}
+
+.input {
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    transition: 0.2s;
+}
+
+.input:focus {
+    border-color: var(--cor-primaria);
+    outline: none;
+}

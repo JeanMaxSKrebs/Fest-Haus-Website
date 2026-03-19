@@ -1,0 +1,184 @@
+button {
+    background-color: var(--cor-primaria);
+    color: white;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: 0.3s;
+}
+
+button:hover {
+    background-color: var(--cor-primaria-hover);
+}
+
+.btn-whatsapp {
+    background: var(--cor-botao-whatsapp-bg);
+    color: var(--cor-botao-whatsapp-texto);
+    border: 2px solid var(--cor-botao-whatsapp-borda);
+    padding: 14px 32px;
+    border-radius: 12px;
+    font-size: 18px;
+    font-weight: bold;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: var(--sombra);
+    display: inline-block;
+}
+
+.btn-whatsapp:hover {
+    background: var(--cor-botao-whatsapp-hover);
+    transform: translateY(-3px) scale(1.04);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+}
+
+.btn-whatsapp:active {
+    transform: scale(0.98);
+}
+
+.btn-instagram {
+    background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+    color: white;
+    padding: 14px 28px;
+    border-radius: 12px;
+    font-size: 18px;
+    font-weight: bold;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: var(--sombra);
+}
+
+.btn-instagram:hover {
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
+    filter: brightness(1.1);
+}
+
+.btn-instagram:active {
+    transform: scale(0.98);
+}
+
+.btn-facebook {
+    background-color: #1877f2;
+    color: white;
+    padding: 14px 28px;
+    border-radius: 12px;
+    font-size: 18px;
+    font-weight: bold;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: var(--sombra);
+}
+
+.btn-facebook:hover {
+    background-color: #166fe5;
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
+}
+
+.btn-facebook:active {
+    transform: scale(0.98);
+}
+
+.btn-tema {
+    background: transparent;
+    border: 2px solid var(--cor-header-texto);
+    color: var(--cor-header-texto);
+    padding: 6px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 18px;
+    transition: 0.3s;
+}
+
+.btn-tema:hover {
+    background-color: var(--cor-header-texto);
+    color: var(--cor-header);
+}
+
+.btn-header {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: inherit;
+    font: inherit;
+    font-size: 18px;
+    padding: 8px 12px;
+}
+
+.btn-header:hover {
+    opacity: 0.7;
+}
+
+.btn-apresentacao {
+    background: var(--cor-botao-apresentacao-bg);
+    color: var(--cor-botao-apresentacao-texto);
+    border: 2px solid var(--cor-botao-apresentacao-borda);
+    padding: 14px 32px;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: var(--sombra);
+}
+
+.btn-apresentacao:hover {
+    background: var(--cor-botao-apresentacao-hover);
+    transform: translateY(-3px) scale(1.04);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+}
+
+.btn-apresentacao:active {
+    transform: scale(0.98);
+}
+
+.btn-primary {
+    background: var(--cor-primaria);
+    color: white;
+    padding: 12px;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.btn-primary:hover {
+    opacity: 0.85;
+}
+
+.btn-admin-header {
+    background: transparent;
+    border: 1px solid #c8a96b;
+    color: #c8a96b;
+    padding: 6px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.btn-admin-header:hover {
+    background: #c8a96b;
+    color: #111;
+}
+
+.btn-aba-orcamento {
+    width: auto;
+    min-width: 180px;
+}
+
+.btn-acao-modelo {
+    flex: 1 1 0;
+    min-width: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    white-space: nowrap;
+}

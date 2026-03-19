@@ -15,6 +15,10 @@ import solicitacoesOrcamentoRoutes from "./routes/solicitacoes-orcamento.routes.
 import modelosOrcamentoRoutes from "./routes/modelos-orcamento.routes.js";
 import galeriaRoutes from "./routes/galeria.routes.js";
 
+import perfilRoutes from "./routes/perfil.routes.js";
+import moedasRoutes from "./routes/moedas.routes.js";
+
+
 import { configurarBuckets } from "./config/storage.js";
 
 dotenv.config();
@@ -62,6 +66,10 @@ app.use(tiposServicoRoutes);
 app.use(solicitacoesOrcamentoRoutes);
 app.use(modelosOrcamentoRoutes);
 app.use(galeriaRoutes);
+
+
+app.use(perfilRoutes);
+app.use(moedasRoutes);
 
 app.use(notFoundHandler);
 app.use(errorHandler);

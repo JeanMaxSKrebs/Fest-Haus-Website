@@ -1,13 +1,24 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { apiFetch } from "../lib/api";
 import LoginModal from "./LoginModal";
+
+type ResumoMoedas = {
+  saldo: number;
+  checkinHoje: boolean;
+};
 
 function Header() {
   const { user, signOut, isAdmin, loading } = useAuth();
   const [tema, setTema] = useState("");
   const [abrirLogin, setAbrirLogin] = useState(false);
   const [saindo, setSaindo] = useState(false);
+  const [moedas, setMoedas] = useState<ResumoMoedas>({
+    saldo: 0,
+    checkinHoje: false,
+  });
+  const [carregandoMoedas, setCarregandoMoedas] = useState(false);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -23,6 +34,41 @@ function Header() {
       setTema(temaAtual);
     }
   }, []);
+
+  useEffect(() => {
+    carregarResumoMoedas();
+  }, [user]);
+
+  async function carregarResumoMoedas() {
+    if (!user) {
+      setMoedas({
+        saldo: 0,
+        checkinHoje: false,
+      });
+      return;
+    }
+
+    try {
+      setCarregandoMoedas(true);
+
+      // Ajusta essa rota quando tu criar o backend real
+      const data = await apiFetch("/api/moedas/resumo");
+
+      setMoedas({
+        saldo: Number(data?.saldo || 0),
+        checkinHoje: Boolean(data?.checkinHoje),
+      });
+    } catch (error) {
+      console.error("Erro ao carregar resumo de moedas:", error);
+
+      setMoedas({
+        saldo: 0,
+        checkinHoje: false,
+      });
+    } finally {
+      setCarregandoMoedas(false);
+    }
+  }
 
   function alternarTema() {
     const novoTema = tema === "dark" ? "light" : "dark";
@@ -59,10 +105,31 @@ function Header() {
     }
   }
 
+  const nomeUsuario = useMemo(() => {
+    return user?.user_metadata?.full_name || user?.email || "Usuário";
+  }, [user]);
+
   return (
     <header className="header">
-      <div className="header-left">
-        <Link to="/" className="header-brand">
+      <div
+        className="header-left"
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: "14px",
+        }}
+      >
+        <Link
+          to="/"
+          className="header-brand"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "10px",
+            textDecoration: "none",
+            color: "inherit",
+          }}
+        >
           <img
             src="/logo_noname.jpeg"
             className="header-logo"
@@ -70,6 +137,60 @@ function Header() {
           />
           <h2 className="header-title">FEST HAUS</h2>
         </Link>
+
+        {user && (
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "10px",
+              flexWrap: "wrap",
+            }}
+          >
+            <button
+              type="button"
+              onClick={() => navigate("/moedas")}
+              className="btn-admin-header"
+              style={{
+                marginLeft: "10px",
+                display: "flex",
+                alignItems: "center",
+                gap: "10px",
+              }}
+            >
+              <span aria-hidden="true">🪙</span>
+              <strong>{carregandoMoedas ? "..." : moedas.saldo}</strong>
+              <span>Moedas</span>
+            </button>
+
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "6px",
+                padding: "8px 12px",
+                borderRadius: "999px",
+                border: "1px solid var(--cor-borda)",
+                background: "var(--cor-fundo-secundario)",
+                color: "inherit",
+                boxShadow: "inset 0 0 0 1px rgba(0,0,0,0.04)",
+                fontSize: "0.95rem",
+              }}
+              title={
+                moedas.checkinHoje
+                  ? "Check-in diário já realizado hoje"
+                  : "Check-in diário ainda não realizado hoje"
+              }
+            >
+              <span style={{ fontSize: "0.9rem", opacity: 0.8 }}>
+                {moedas.checkinHoje ? "✅" : "⏳"}
+              </span>
+              <span>
+                {moedas.checkinHoje ? "Check-in hoje" : "Check-in pendente"}
+              </span>
+            </div>
+          </div>
+        )}
       </div>
 
       <nav className="header-nav">
@@ -98,23 +219,50 @@ function Header() {
         </button>
       </nav>
 
-      <div className="header-right">
+      <div
+        className="header-right"
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: "12px",
+          flexWrap: "wrap",
+          justifyContent: "flex-end",
+        }}
+      >
         {loading ? (
-          <span style={{ marginRight: "15px" }}>...</span>
+          <span>...</span>
         ) : user ? (
           <>
-            <span style={{ marginRight: "15px" }}>
-              Olá, {user.user_metadata?.full_name || user.email}
-            </span>
-            
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "10px",
+                flexWrap: "wrap",
+              }}
+            >
+              <span>
+                Olá, <strong>{nomeUsuario}</strong>
+              </span>
+
+                <button
+                  type="button"
+                  onClick={() => navigate("/perfil")}
+                  className="btn-admin-header"
+                >
+                  Perfil
+                </button>
+            </div>
+
             {isAdmin && (
               <button
                 type="button"
                 onClick={() =>
-                  location.pathname === "/admin" ? navigate("/") : navigate("/admin")
+                  location.pathname === "/admin"
+                    ? navigate("/")
+                    : navigate("/admin")
                 }
                 className="btn-admin-header"
-                style={{ marginRight: "15px" }}
               >
                 {location.pathname === "/admin" ? "Visão do Usuário" : "Admin"}
               </button>
@@ -125,7 +273,6 @@ function Header() {
               onClick={handleSignOut}
               disabled={saindo}
               style={{
-                marginRight: "15px",
                 background: "none",
                 border: "none",
                 cursor: "pointer",
@@ -141,7 +288,6 @@ function Header() {
             type="button"
             onClick={() => setAbrirLogin(true)}
             style={{
-              marginRight: "15px",
               background: "none",
               border: "none",
               cursor: "pointer",

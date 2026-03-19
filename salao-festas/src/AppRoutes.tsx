@@ -7,7 +7,8 @@ import Home from "./pages/Home";
 import Agendamento from "./pages/Agendamento";
 import Orcamentos from "./pages/Orcamentos";
 import Visitas from "./pages/Visitas";
-
+import Perfil from "./pages/Perfil";
+import Moedas from "./pages/Moedas";
 import LoginModal from "./components/LoginModal";
 
 import AdminRoute from "./components/Admin/AdminRoute";
@@ -108,6 +109,31 @@ function AppRoutes() {
             user ? (
               <PageTitle title="Orçamentos | Fest Haus">
                 <Orcamentos />
+              </PageTitle>
+            ) : (
+              LoginRequired
+            )
+          }
+        />
+        <Route
+          path="/perfil"
+          element={
+            user ? (
+              <PageTitle title="Meu Perfil | Fest Haus">
+                <Perfil />
+              </PageTitle>
+            ) : (
+              LoginRequired
+            )
+          }
+        />
+
+        <Route
+          path="/moedas"
+          element={
+            user ? (
+              <PageTitle title="Moedas | Fest Haus">
+                <Moedas />
               </PageTitle>
             ) : (
               LoginRequired

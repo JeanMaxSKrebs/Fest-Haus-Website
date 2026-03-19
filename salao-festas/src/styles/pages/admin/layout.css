@@ -1,0 +1,104 @@
+.admin-layout {
+    min-height: 100vh;
+    display: flex;
+    background:
+        radial-gradient(circle at top right, rgba(159, 103, 255, 0.08), transparent 30%),
+        var(--cor-fundo);
+    color: var(--cor-texto);
+}
+
+.admin-sidebar {
+    width: 280px;
+    min-width: 280px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    background: linear-gradient(180deg, #240b36 0%, #1b0c29 100%);
+    border-right: 1px solid rgba(253, 213, 126, 0.14);
+    padding: 28px 20px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 4px 0 18px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+}
+
+.admin-sidebar-header {
+    margin-bottom: 28px;
+}
+
+.admin-sidebar-title {
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--cor-header-texto);
+    margin-bottom: 6px;
+}
+
+.admin-sidebar-subtitle {
+    font-size: 14px;
+    color: #d6c5e3;
+}
+
+.admin-sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.admin-sidebar-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+    color: var(--cor-texto-secundario);
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid transparent;
+    padding: 14px 16px;
+    border-radius: 14px;
+    font-weight: 600;
+    transition: all 0.25s ease;
+}
+
+.admin-sidebar-link:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(253, 213, 126, 0.25);
+    color: var(--cor-header-texto);
+}
+
+.admin-sidebar-link.active {
+    background: rgba(253, 213, 126, 0.12);
+    border-color: rgba(253, 213, 126, 0.35);
+    color: var(--cor-header-texto);
+    box-shadow: inset 0 0 12px rgba(253, 213, 126, 0.08);
+}
+
+.admin-sidebar-footer {
+    margin-top: auto;
+    padding-top: 24px;
+}
+
+.admin-sidebar-back {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    color: var(--cor-header-texto);
+    font-weight: 700;
+    padding: 13px 14px;
+    border-radius: 12px;
+    border: 1px solid rgba(253, 213, 126, 0.2);
+    background: rgba(255, 255, 255, 0.04);
+    transition: all 0.25s ease;
+}
+
+.admin-sidebar-back:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(253, 213, 126, 0.38);
+}
+
+.admin-content {
+    flex: 1;
+    margin-left: 280px;
+    padding: 36px;
+    min-height: 100vh;
+}

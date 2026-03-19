@@ -1,0 +1,55 @@
+body {
+    font-family: "Josefin Slab", serif;
+    background-color: var(--cor-fundo);
+    color: var(--cor-texto);
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.section {
+    width: 100%;
+    padding: 60px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.card {
+    background-color: var(--cor-fundo-secundario);
+    border-radius: 10px;
+    box-shadow: var(--sombra);
+    width: 220px;
+}
+
+.img-200 {
+    width: 200px;
+    height: auto;
+    object-fit: cover;
+    border-radius: 10px;
+    background-color: var(--cor-fundo-secundario);
+}
+
+.img-logo {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    object-fit: cover;
+    cursor: pointer;
+}
+
+.card,
+.admin-panel,
+.admin-modal,
+.ajustar-servicos__card,
+.ajustar-galeria__card,
+.card-orcamento {
+    overflow: hidden;
+}
