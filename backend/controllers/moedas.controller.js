@@ -1,13 +1,31 @@
 import { supabase } from "../config/supabase.js";
 
 async function garantirCarteira(usuarioId) {
-    const { error } = await supabase.rpc("garantir_carteira_usuario", {
-        p_usuario_id: usuarioId,
-    });
+    const { data: existente, error: erroBusca } = await supabase
+        .from("moeda_carteiras")
+        .select("id, usuario_id, saldo")
+        .eq("usuario_id", usuarioId)
+        .maybeSingle();
 
-    if (error) throw error;
+    if (erroBusca) throw erroBusca;
+
+    if (existente) return existente;
+
+    const { data: criada, error: erroCriar } = await supabase
+        .from("moeda_carteiras")
+        .insert([
+            {
+                usuario_id: usuarioId,
+                saldo: 0,
+            },
+        ])
+        .select("id, usuario_id, saldo")
+        .single();
+
+    if (erroCriar) throw erroCriar;
+
+    return criada;
 }
-
 function calcularNovaStreak(ultimoLogin, sequenciaAtual, hoje) {
     if (!ultimoLogin) {
         return 1;
