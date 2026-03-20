@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { apiFetch } from "../lib/api";
 
@@ -26,6 +26,14 @@ export default function Perfil() {
     const [erro, setErro] = useState("");
     const [sucesso, setSucesso] = useState("");
 
+    const provedores = useMemo(() => {
+        return user?.app_metadata?.providers || [];
+    }, [user]);
+
+    const contaSomenteGoogle = useMemo(() => {
+        return provedores.includes("google") && !provedores.includes("email");
+    }, [provedores]);
+
     useEffect(() => {
         carregarPerfil();
     }, [user]);
@@ -42,7 +50,11 @@ export default function Perfil() {
 
             setPerfil({
                 id: data.id || user.id,
-                nome: data.nome || user.user_metadata?.full_name || "",
+                nome:
+                    data.nome ||
+                    user.user_metadata?.full_name ||
+                    user.user_metadata?.name ||
+                    "",
                 email: data.email || user.email || "",
                 telefone: data.telefone || "",
                 created_at: data.created_at || null,
@@ -77,6 +89,7 @@ export default function Perfil() {
             }));
 
             setSucesso("Perfil atualizado com sucesso.");
+            window.dispatchEvent(new Event("perfil-atualizado"));
         } catch (error: any) {
             console.error("Erro atualizarPerfil:", error);
             setErro(error?.message || "Não foi possível atualizar o perfil.");
@@ -93,8 +106,18 @@ export default function Perfil() {
                     <p>Atualize seus dados da conta.</p>
                 </div>
 
+                {contaSomenteGoogle ? (
+                    <div className="perfil-msg perfil-msg--info">
+                        Sua conta está vinculada ao Google. Para entrar no sistema, use o
+                        login com Google. Alteração de e-mail e senha não está disponível
+                        por aqui.
+                    </div>
+                ) : null}
+
                 {erro ? <div className="perfil-msg perfil-msg--erro">{erro}</div> : null}
-                {sucesso ? <div className="perfil-msg perfil-msg--sucesso">{sucesso}</div> : null}
+                {sucesso ? (
+                    <div className="perfil-msg perfil-msg--sucesso">{sucesso}</div>
+                ) : null}
 
                 {carregando ? (
                     <p>Carregando perfil...</p>
@@ -115,7 +138,17 @@ export default function Perfil() {
 
                         <div className="perfil-field">
                             <label htmlFor="email">E-mail</label>
-                            <input id="email" type="email" value={perfil.email} disabled />
+                            <input
+                                id="email"
+                                type="email"
+                                value={perfil.email}
+                                disabled
+                                title={
+                                    contaSomenteGoogle
+                                        ? "Conta vinculada ao Google"
+                                        : "E-mail não pode ser alterado por aqui"
+                                }
+                            />
                         </div>
 
                         <div className="perfil-field perfil-field--full">
