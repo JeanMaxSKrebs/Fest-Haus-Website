@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { apiFetch } from "../lib/api";
+import FestCoin from "../components/coin/FestCoin";
 
 type ResumoMoedas = {
     saldo: number;
@@ -115,7 +116,7 @@ export default function Moedas() {
 
             <div className="moedas-grid">
                 <div className="moedas-card moedas-card--saldo">
-                    <span className="moedas-icone">💵</span>
+                    <FestCoin size={42} />
                     <h3>Saldo atual</h3>
                     <strong>{carregando ? "..." : resumo.saldo}</strong>
                 </div>

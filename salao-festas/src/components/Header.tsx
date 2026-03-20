@@ -3,6 +3,7 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { apiFetch } from "../lib/api";
 import LoginModal from "./LoginModal";
+import FestCoin from "./coin/FestCoin";
 
 type ResumoMoedasApi = {
   saldo: number;
@@ -200,7 +201,6 @@ function Header() {
               display: "flex",
               alignItems: "center",
               gap: "10px",
-              flexWrap: "wrap",
             }}
           >
             <button
@@ -209,14 +209,28 @@ function Header() {
               className="btn-admin-header"
               style={{
                 marginLeft: "10px",
-                display: "flex",
+                display: "inline-flex",
                 alignItems: "center",
-                gap: "10px",
+                justifyContent: "center",
+                gap: "8px",
+                lineHeight: 1,
+                whiteSpace: "nowrap",
               }}
             >
-              <span aria-hidden="true">💰</span>
-              <strong>{carregandoMoedas ? "..." : moedas.saldo}</strong>
-              <span>Moedas</span>
+              <strong
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  lineHeight: 1,
+                  position: "relative",
+                  top: "2px",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {carregandoMoedas ? "..." : moedas.saldo}
+              </strong>
+              <FestCoin size={24} />
+
             </button>
 
             <div
