@@ -9,7 +9,7 @@ type TipoServico = {
 
 type Usuario = {
   id: string;
-  full_name: string | null;
+  nome: string | null;
   email: string | null;
   telefone: string | null;
 };
@@ -150,7 +150,7 @@ export default function SolicitacoesOrcamento() {
                   <tr key={item.id}>
                     <td>
                       <div className="admin-user-name">
-                        {item.usuarios?.full_name || "Sem nome"}
+                        {item.usuarios?.nome || "Sem nome"}
                       </div>
                       <div className="admin-secondary-text">
                         {item.usuarios?.email || "Sem email"}
@@ -227,7 +227,7 @@ export default function SolicitacoesOrcamento() {
               <div className="admin-modal-field">
                 <span className="admin-modal-label">Cliente</span>
                 <div className="admin-modal-value">
-                  {selecionada.usuarios?.full_name || "Sem nome"}
+                  {selecionada.usuarios?.nome || "Sem nome"}
                 </div>
               </div>
 

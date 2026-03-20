@@ -26,6 +26,15 @@ async function garantirCarteira(usuarioId) {
 
     return criada;
 }
+
+async function obterDataBrasil() {
+    const { data, error } = await supabase.rpc("data_brasil");
+
+    if (error) throw error;
+
+    return data;
+}
+
 function calcularNovaStreak(ultimoLogin, sequenciaAtual, hoje) {
     if (!ultimoLogin) {
         return 1;
@@ -157,7 +166,7 @@ export async function fazerCheckinDiario(req, res, next) {
 
         await garantirCarteira(usuarioId);
 
-        const hoje = new Date().toISOString().slice(0, 10);
+        const hoje = await obterDataBrasil();
 
         const { data: loginExistente, error: loginExistenteError } = await supabase
             .from("usuario_logins_diarios")

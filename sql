@@ -121,7 +121,7 @@ create extension if not exists "pgcrypto";
 -- =========================================
 create table if not exists public.usuarios (
     id uuid primary key,
-    full_name text,
+    nome text,
     email text unique,
     telefone text,
     is_admin boolean not null default false,
@@ -130,7 +130,7 @@ create table if not exists public.usuarios (
 
 -- adiciona colunas que possam estar faltando
 alter table public.usuarios
-    add column if not exists full_name text,
+    add column if not exists nome text,
     add column if not exists email text,
     add column if not exists telefone text,
     add column if not exists is_admin boolean not null default false,

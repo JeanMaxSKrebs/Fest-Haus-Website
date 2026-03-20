@@ -46,7 +46,7 @@ export async function listarSolicitacoesOrcamento(_req, res, next) {
         ),
         usuarios (
           id,
-          full_name,
+          nome,
           email,
           telefone
         )
@@ -103,7 +103,7 @@ export async function buscarSolicitacaoOrcamentoPorId(req, res, next) {
         ),
         usuarios (
           id,
-          full_name,
+          nome,
           email,
           telefone
         )

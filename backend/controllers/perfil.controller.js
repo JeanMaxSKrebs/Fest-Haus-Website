@@ -1,5 +1,14 @@
 import { supabase } from "../config/supabase.js";
 
+function obterNomeFallback(user, email) {
+    return (
+        user?.user_metadata?.full_name ||
+        user?.user_metadata?.name ||
+        (email ? String(email).split("@")[0] : "") ||
+        "Usuário"
+    );
+}
+
 export async function buscarMeuPerfil(req, res, next) {
     try {
         const usuarioId = req.user?.id;
@@ -8,6 +17,8 @@ export async function buscarMeuPerfil(req, res, next) {
         if (!usuarioId) {
             return res.status(401).json({ error: "Usuário não autenticado" });
         }
+
+        const nomeFallback = obterNomeFallback(req.user, email);
 
         const { data, error } = await supabase
             .from("usuarios")
@@ -20,7 +31,7 @@ export async function buscarMeuPerfil(req, res, next) {
         if (!data) {
             return res.json({
                 id: usuarioId,
-                nome: req.user?.user_metadata?.full_name || "",
+                nome: nomeFallback,
                 email: email || "",
                 telefone: "",
                 created_at: null,
@@ -29,7 +40,7 @@ export async function buscarMeuPerfil(req, res, next) {
 
         return res.json({
             id: data.id,
-            nome: data.nome || req.user?.user_metadata?.full_name || "",
+            nome: data.nome || nomeFallback,
             email: data.email || email || "",
             telefone: data.telefone || "",
             created_at: data.created_at || null,
@@ -49,17 +60,21 @@ export async function atualizarMeuPerfil(req, res, next) {
             return res.status(401).json({ error: "Usuário não autenticado" });
         }
 
+        const nomeFallback = obterNomeFallback(req.user, email);
         const { nome, telefone } = req.body;
 
-        if (!nome || !String(nome).trim()) {
+        const nomeFinal = String(nome || "").trim() || nomeFallback;
+        const telefoneFinal = String(telefone || "").trim();
+
+        if (!nomeFinal) {
             return res.status(400).json({ error: "Nome é obrigatório" });
         }
 
         const payload = {
             id: usuarioId,
-            nome: String(nome).trim(),
+            nome: nomeFinal,
             email: email || null,
-            telefone: telefone ? String(telefone).trim() : null,
+            telefone: telefoneFinal || null,
         };
 
         const { data, error } = await supabase
@@ -72,7 +87,7 @@ export async function atualizarMeuPerfil(req, res, next) {
 
         return res.json({
             id: data.id,
-            nome: data.nome || "",
+            nome: data.nome || nomeFinal,
             email: data.email || email || "",
             telefone: data.telefone || "",
             created_at: data.created_at || null,

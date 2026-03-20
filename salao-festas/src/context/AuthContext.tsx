@@ -24,8 +24,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  async function buscarAdmin(email?: string) {
-    if (!email) {
+  async function buscarAdmin(usuarioId?: string) {
+    if (!usuarioId) {
       setIsAdmin(false);
       return;
     }
@@ -33,7 +33,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const { data, error } = await supabase
       .from("usuarios")
       .select("is_admin")
-      .eq("email", email)
+      .eq("id", usuarioId)
       .maybeSingle();
 
     if (error) {
@@ -94,7 +94,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
-    buscarAdmin(user?.email ?? undefined);
+    buscarAdmin(user?.id ?? undefined);
   }, [user]);
 
   async function login(email: string, senha: string) {
@@ -115,12 +115,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     nome: string,
     telefone: string
   ) {
-    const { data, error } = await supabase.auth.signUp({
+    const { error } = await supabase.auth.signUp({
       email,
       password: senha,
       options: {
         data: {
           full_name: nome,
+          name: nome,
           phone: telefone,
         },
       },
@@ -129,25 +130,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (error) {
       console.error("Erro no cadastro:", error);
       throw error;
-    }
-
-    const userCriado = data.user;
-
-    if (userCriado) {
-      const { error: insertError } = await supabase.from("usuarios").insert([
-        {
-          id: userCriado.id,
-          nome,
-          telefone,
-          email,
-          is_admin: false,
-        },
-      ]);
-
-      if (insertError) {
-        console.error("Erro ao salvar usuário na tabela usuarios:", insertError);
-        throw insertError;
-      }
     }
   }
 

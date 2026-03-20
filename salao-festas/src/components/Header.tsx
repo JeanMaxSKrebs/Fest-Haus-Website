@@ -1,12 +1,25 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { apiFetch } from "../lib/api";
 import LoginModal from "./LoginModal";
 
+type ResumoMoedasApi = {
+  saldo: number;
+  checkin_hoje: boolean;
+};
+
 type ResumoMoedas = {
   saldo: number;
   checkinHoje: boolean;
+};
+
+type PerfilApi = {
+  id: string;
+  nome: string;
+  email: string;
+  telefone: string;
+  created_at: string | null;
 };
 
 function Header() {
@@ -14,6 +27,7 @@ function Header() {
   const [tema, setTema] = useState("");
   const [abrirLogin, setAbrirLogin] = useState(false);
   const [saindo, setSaindo] = useState(false);
+  const [nomeUsuario, setNomeUsuario] = useState("Usuário");
   const [moedas, setMoedas] = useState<ResumoMoedas>({
     saldo: 0,
     checkinHoje: false,
@@ -37,7 +51,54 @@ function Header() {
 
   useEffect(() => {
     carregarResumoMoedas();
+    carregarNomeUsuario();
+  }, [user, location.pathname]);
+
+  useEffect(() => {
+    function handleMoedasAtualizadas() {
+      carregarResumoMoedas();
+    }
+
+    function handlePerfilAtualizado() {
+      carregarNomeUsuario();
+    }
+
+    window.addEventListener("moedas-atualizadas", handleMoedasAtualizadas);
+    window.addEventListener("perfil-atualizado", handlePerfilAtualizado);
+
+    return () => {
+      window.removeEventListener("moedas-atualizadas", handleMoedasAtualizadas);
+      window.removeEventListener("perfil-atualizado", handlePerfilAtualizado);
+    };
   }, [user]);
+
+  async function carregarNomeUsuario() {
+    if (!user) {
+      setNomeUsuario("Usuário");
+      return;
+    }
+
+    try {
+      const data: PerfilApi = await apiFetch("/api/perfil");
+
+      setNomeUsuario(
+        data?.nome ||
+        user?.user_metadata?.full_name ||
+        user?.user_metadata?.name ||
+        user?.email ||
+        "Usuário"
+      );
+    } catch (error) {
+      console.error("Erro ao carregar perfil no header:", error);
+
+      setNomeUsuario(
+        user?.user_metadata?.full_name ||
+        user?.user_metadata?.name ||
+        user?.email ||
+        "Usuário"
+      );
+    }
+  }
 
   async function carregarResumoMoedas() {
     if (!user) {
@@ -51,12 +112,11 @@ function Header() {
     try {
       setCarregandoMoedas(true);
 
-      // Ajusta essa rota quando tu criar o backend real
-      const data = await apiFetch("/api/moedas/resumo");
+      const data: ResumoMoedasApi = await apiFetch("/api/moedas/resumo");
 
       setMoedas({
         saldo: Number(data?.saldo || 0),
-        checkinHoje: Boolean(data?.checkinHoje),
+        checkinHoje: Boolean(data?.checkin_hoje),
       });
     } catch (error) {
       console.error("Erro ao carregar resumo de moedas:", error);
@@ -104,10 +164,6 @@ function Header() {
       setSaindo(false);
     }
   }
-
-  const nomeUsuario = useMemo(() => {
-    return user?.user_metadata?.full_name || user?.email || "Usuário";
-  }, [user]);
 
   return (
     <header className="header">
@@ -158,7 +214,7 @@ function Header() {
                 gap: "10px",
               }}
             >
-              <span aria-hidden="true">🪙</span>
+              <span aria-hidden="true">💰</span>
               <strong>{carregandoMoedas ? "..." : moedas.saldo}</strong>
               <span>Moedas</span>
             </button>
@@ -245,13 +301,13 @@ function Header() {
                 Olá, <strong>{nomeUsuario}</strong>
               </span>
 
-                <button
-                  type="button"
-                  onClick={() => navigate("/perfil")}
-                  className="btn-admin-header"
-                >
-                  Perfil
-                </button>
+              <button
+                type="button"
+                onClick={() => navigate("/perfil")}
+                className="btn-admin-header"
+              >
+                Perfil
+              </button>
             </div>
 
             {isAdmin && (
@@ -264,7 +320,9 @@ function Header() {
                 }
                 className="btn-admin-header"
               >
-                {location.pathname === "/admin" ? "Visão do Usuário" : "Admin"}
+                {location.pathname.startsWith("/admin")
+                  ? "Visão do Usuário"
+                  : "Admin"}
               </button>
             )}
 

@@ -90,6 +90,7 @@ export default function Moedas() {
             }
 
             await carregarMoedas();
+            window.dispatchEvent(new Event("moedas-atualizadas"));
         } catch (error: any) {
             console.error("Erro fazerCheckin:", error);
             setErro(error?.message || "Não foi possível realizar o check-in.");
@@ -114,7 +115,7 @@ export default function Moedas() {
 
             <div className="moedas-grid">
                 <div className="moedas-card moedas-card--saldo">
-                    <span className="moedas-icone">🪙</span>
+                    <span className="moedas-icone">💵</span>
                     <h3>Saldo atual</h3>
                     <strong>{carregando ? "..." : resumo.saldo}</strong>
                 </div>
