@@ -148,9 +148,11 @@
 @import "./components/header.css";
 @import "./components/forms.css";
 @import "./components/shared.css";
+@import "./components/footer.css";
 
 @import "./pages/perfil.css";
 @import "./pages/moedas.css";
+@import "./pages/suporte.css";
 
 @import "./pages/admin/layout.css";
 @import "./pages/admin/home.css";

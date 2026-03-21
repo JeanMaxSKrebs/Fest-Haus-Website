@@ -1,0 +1,70 @@
+.suporte-page {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 32px 16px 48px;
+    align-items: stretch;
+    text-align: left;
+}
+
+.suporte-card {
+    width: 100%;
+    background: var(--cor-fundo-secundario);
+    border: 1px solid var(--cor-borda);
+    border-radius: 20px;
+    padding: 28px;
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.05);
+}
+
+.suporte-topo {
+    margin-bottom: 24px;
+}
+
+.suporte-topo h2 {
+    margin-bottom: 8px;
+    font-size: 2rem;
+}
+
+.suporte-topo p {
+    color: var(--cor-texto-secundario);
+}
+
+.suporte-box {
+    background: var(--cor-fundo);
+    border: 1px solid var(--cor-borda);
+    border-radius: 16px;
+    padding: 18px;
+    margin-bottom: 16px;
+}
+
+.suporte-box h3 {
+    margin-bottom: 8px;
+}
+
+.suporte-box p {
+    color: var(--cor-texto-secundario);
+    line-height: 1.6;
+}
+
+.suporte-acoes {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 12px;
+}
+
+.suporte-textarea {
+    width: 100%;
+    min-height: 220px;
+    border: 1px solid var(--cor-borda);
+    border-radius: 12px;
+    background: var(--cor-fundo-secundario);
+    color: inherit;
+    padding: 14px;
+    resize: vertical;
+    font: inherit;
+}
+
+.suporte-textarea:focus {
+    outline: none;
+    border-color: var(--cor-primaria);
+}

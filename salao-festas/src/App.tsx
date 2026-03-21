@@ -1,6 +1,7 @@
 import { BrowserRouter } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import AppRoutes from "./AppRoutes";
+import Footer from "./components/Footer";
 
 function App() {
   return (
@@ -15,17 +16,7 @@ function App() {
         >
           <AppRoutes />
 
-          <footer
-            style={{
-              backgroundColor: "#6b21a8",
-              color: "white",
-              padding: 20,
-              textAlign: "center",
-              width: "100%",
-            }}
-          >
-            © 2026 Fest Haus
-          </footer>
+          <Footer />
         </div>
       </BrowserRouter>
     </AuthProvider>

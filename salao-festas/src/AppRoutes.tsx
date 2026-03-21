@@ -9,6 +9,7 @@ import Orcamentos from "./pages/Orcamentos";
 import Visitas from "./pages/Visitas";
 import Perfil from "./pages/Perfil";
 import Moedas from "./pages/Moedas";
+import Suporte from "./pages/Suporte";
 import LoginModal from "./components/LoginModal";
 
 import AdminRoute from "./components/Admin/AdminRoute";
@@ -138,6 +139,15 @@ function AppRoutes() {
             ) : (
               LoginRequired
             )
+          }
+        />
+
+        <Route
+          path="/suporte"
+          element={
+            <PageTitle title="Suporte | Fest Haus">
+              <Suporte />
+            </PageTitle>
           }
         />
 

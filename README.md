@@ -1,59 +1,87 @@
-# Fest-Haus-Website 🎉
+# Fest Haus 🎉
 
-Website oficial do **Fest Haus**, um sistema moderno de gerenciamento e reservas para salão de festas.
-O projeto foi desenvolvido utilizando **React** com foco em escalabilidade, organização e futura conversão para aplicativo mobile usando React Native.
+Sistema completo de gerenciamento para o salão de festas **Fest Haus**, com foco em reservas, galeria interativa, painel administrativo e um sistema gamificado de moedas para usuários.
+
+O projeto foi desenvolvido com **React + Supabase + Node.js**, com arquitetura pensada para evolução contínua e futura conversão para aplicativo mobile.
 
 ---
 
-## 📌 Objetivo
+## 📌 Visão geral
 
-O sistema permite:
+O sistema atualmente permite:
 
-* Criar reservas de eventos
-* Visualizar reservas existentes
-* Gerenciar reservas em um painel administrativo
-* Servir como base para um futuro aplicativo mobile
-* Integração futura com backend e banco de dados
+### 👤 Usuários
+- Login e cadastro (incluindo Google)
+- Visualização de serviços
+- Agendamento de visitas
+- Visualização da galeria por categoria e data
+- Envio de fotos de eventos *(em desenvolvimento)*
+- Sistema de moedas *(em desenvolvimento)*
+
+### 🛠️ Administrador
+- Gerenciar serviços (CRUD completo)
+- Upload de imagens (principal + galeria por serviço)
+- Gerenciar galeria pública
+- Aprovar conteúdos enviados pelos usuários *(em evolução)*
 
 ---
 
 ## 🚀 Tecnologias utilizadas
 
-* React
-* TypeScript
-* Vite
-* Tailwind CSS
-* Node.js
-* JavaScript / ES6+
+### Frontend
+- React
+- TypeScript
+- Vite
+- CSS puro (customizado com variáveis e responsividade)
+- Context API (Auth)
+
+### Backend
+- Node.js
+- Express
+- Supabase (Auth + Database + Storage)
+
+### Outros
+- Multer (upload de imagens)
+- HEIC convert (compatibilidade com iPhone)
+- Supabase Storage
 
 ---
 
-## 📂 Estrutura do projeto
+## 🎨 Estilo e UI
 
-```
+O projeto utiliza **CSS próprio**, com:
+
+- Variáveis globais (`:root`)
+- Suporte a tema claro/escuro
+- Layout responsivo
+- Componentização visual consistente (cards, botões, grids)
+- Design moderno focado em UX simples
+
+---
+
+## 📂 Estrutura do projeto (resumida)
+
+```bash
 Fest-Haus-Website/
 │
-├── src/
-│   ├── components/
-│   │   ├── ReservaForm.tsx
-│   │   └── ReservaList.tsx
-│   │
-│   ├── pages/
-│   │   ├── Home.tsx
-│   │   └── Admin.tsx
-│   │
-│   ├── services/
-│   │   └── api.ts
-│   │
-│   ├── types/
-│   │   └── Reserva.ts
-│   │
-│   ├── App.tsx
-│   └── main.tsx
+├── frontend/
+│   ├── src/
+│   │   ├── components/
+│   │   ├── pages/
+│   │   ├── context/
+│   │   ├── lib/
+│   │   ├── styles/
+│   │   └── App.tsx
 │
-├── index.html
-├── package.json
-└── README.md
+├── backend/
+│   ├── controllers/
+│   ├── routes/
+│   ├── services/
+│   ├── middlewares/
+│   └── app.js
+│
+├── supabase/
+│   └── (banco + storage)
 ```
 
 ---
@@ -63,85 +91,137 @@ Fest-Haus-Website/
 ### 1. Clonar o repositório
 
 ```bash
-git clone https://github.com/seu-usuario/Fest-Haus-Website.git
-```
-
-### 2. Entrar na pasta
-
-```bash
+git clone https://github.com/JeanMaxSKrebs/Fest-Haus-Website
 cd Fest-Haus-Website
 ```
 
-### 3. Instalar dependências
+### 2. Instalar frontend
 
 ```bash
+cd frontend
 npm install
-```
-
-### 4. Executar o projeto
-
-```bash
 npm run dev
 ```
 
----
+### 3. Instalar backend
 
-## 🌐 Acessar no navegador
-
+```bash
+cd backend
+npm install
+node server.js
 ```
-http://localhost:5173
+
+---
+
+## 🌐 Acessos
+
+Frontend: http://localhost:5173  
+Backend: http://localhost:3001  
+
+---
+
+## 🧠 Funcionalidades atuais
+
+### 🔹 Serviços
+- Cadastro via admin
+- Imagem principal + galeria (até 5 imagens)
+- Ativação/desativação
+
+### 🔹 Galeria pública
+- Filtro por categoria
+- Filtro por data (mês/ano)
+- Upload com categorização
+- Organização automática no storage
+
+### 🔹 Autenticação
+- Login com email/senha
+- Login com Google
+- Controle de admin
+
+### 🔹 Visitas
+- Agendamento pelo usuário
+- Integração com Google Calendar
+
+---
+
+## 💰 Sistema de Moedas *(em desenvolvimento)*
+
+Sistema gamificado vinculado ao usuário com:
+
+- Saldo de moedas
+- Histórico de ganhos/gastos
+
+### Missões
+- 📸 Upload de fotos *(com aprovação)*
+- 🎉 Eventos realizados
+- ⭐ Destaque do mês
+- 🔁 Login diário
+
+### Recursos planejados
+- Tiers de recompensa
+- Sistema de streak
+- Página de perfil com progresso
+- Loja futura (uso das moedas)
+
+---
+
+## 📸 Upload de imagens
+
+### Suporte a:
+- JPG
+- PNG
+- WEBP
+- HEIC *(convertido automaticamente)*
+
+### Organização no Supabase Storage:
+
+```bash
+servicos/
+  casamento/
+    principal/
+    galeria/
+
+galeria/
+  categoria/
+    2026-03/
 ```
 
 ---
 
-## 👨‍💼 Funcionalidades
+## 🔮 Próximos passos
 
-### Usuário
-
-* Criar reserva
-* Informar nome, telefone, data e tipo de evento
-
-### Administrador
-
-* Visualizar lista de reservas
-* Gerenciar eventos
-
----
-
-## 🔮 Futuras melhorias
-
-* Integração com banco de dados (PostgreSQL / MySQL)
-* Backend com Node.js
-* Sistema de login
-* Calendário visual
-* Integração com WhatsApp
-* Conversão para aplicativo mobile com React Native
-* Deploy online
+- [ ] Sistema completo de moedas funcional
+- [ ] Página de perfil do usuário
+- [ ] Aprovação de fotos por admin
+- [ ] Destaque do mês integrado com Instagram
+- [ ] Dashboard administrativo avançado
+- [ ] Notificações
+- [ ] Otimização de imagens (thumbnails)
+- [ ] Deploy em produção
 
 ---
 
-## 📱 Compatibilidade futura com App Mobile
+## 📱 Futuro Mobile
 
-Este projeto foi estruturado para permitir reutilização de:
+O projeto foi estruturado para facilitar migração para:
 
-* types/
-* services/
-* lógica de negócio
+- React Native
+- Aplicativo Android/iOS
 
-Facilitando conversão para:
-
-* React Native
-* Android
-* iOS
+Reutilizando:
+- lógica de negócio
+- serviços API
+- estrutura de dados
 
 ---
 
 ## 👨‍💻 Autor
 
-Projeto desenvolvido para gerenciamento do salão de festas **Fest Haus**.
+Desenvolvido por **Jean Max**  
+Projeto real para o salão **Fest Haus**
 
 ---
 
 ## 📄 Licença
 
-Este projeto é de uso privado e educacional.
+Projeto de uso privado.

@@ -18,6 +18,8 @@ import galeriaRoutes from "./routes/galeria.routes.js";
 import perfilRoutes from "./routes/perfil.routes.js";
 import moedasRoutes from "./routes/moedas.routes.js";
 
+import { iniciarJobLimpezaUsuarios } from "./jobs/cleanup.job.js";
+import maintenanceRoutes from "./routes/maintenance.routes.js";
 
 import { configurarBuckets } from "./config/storage.js";
 
@@ -56,6 +58,8 @@ app.get("/", (_req, res) => {
   res.send("Fest Haus API rodando 🚀");
 });
 
+app.use(maintenanceRoutes);
+
 app.use(authRoutes);
 app.use(googleCalendarRoutes);
 app.use(adminsRoutes);
@@ -75,5 +79,6 @@ app.use(notFoundHandler);
 app.use(errorHandler);
 
 configurarBuckets();
+iniciarJobLimpezaUsuarios();
 
 export default app;

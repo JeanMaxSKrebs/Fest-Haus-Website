@@ -97,3 +97,37 @@ export async function atualizarMeuPerfil(req, res, next) {
         next(error);
     }
 }
+
+export async function excluirMinhaConta(req, res, next) {
+    try {
+        const usuarioId = req.user?.id;
+
+        if (!usuarioId) {
+            return res.status(401).json({ error: "Usuário não autenticado" });
+        }
+
+        const agora = new Date();
+        const dataExclusao = new Date();
+        dataExclusao.setDate(agora.getDate() + 30);
+
+        const { error } = await supabase
+            .from("usuarios")
+            .update({
+                status_conta: "pendente_exclusao",
+                exclusao_solicitada_em: agora.toISOString(),
+                excluir_definitivamente_em: dataExclusao.toISOString(),
+            })
+            .eq("id", usuarioId);
+
+        if (error) throw error;
+
+        return res.json({
+            sucesso: true,
+            mensagem:
+                "Conta marcada para exclusão. A recuperação só pode ser feita pelo suporte em até 30 dias.",
+        });
+    } catch (error) {
+        console.error("Erro excluirMinhaConta:", error);
+        next(error);
+    }
+}
