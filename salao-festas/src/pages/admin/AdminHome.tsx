@@ -6,6 +6,7 @@ import {
   MapPin,
   Wrench,
   Image,
+  PartyPopper,
 } from "lucide-react";
 
 export function AdminHome() {
@@ -27,6 +28,13 @@ export function AdminHome() {
       description: "Gerencie agendamentos solicitados.",
       icon: Calendar,
       path: "/admin/ver-agendamentos",
+    },
+    {
+      title: "Ver Festas",
+      description:
+        "Acompanhe o status das festas e libere envio de imagens.",
+      icon: PartyPopper,
+      path: "/admin/ver-festas",
     },
     {
       title: "Ver Visitas",
@@ -66,7 +74,11 @@ export function AdminHome() {
             const Icon = option.icon;
 
             return (
-              <Link key={option.path} to={option.path} className="admin-card-link">
+              <Link
+                key={option.path}
+                to={option.path}
+                className="admin-card-link"
+              >
                 <article className="admin-card">
                   <div className="admin-card-top">
                     <div className="admin-card-icon">
@@ -74,13 +86,19 @@ export function AdminHome() {
                     </div>
 
                     <div className="admin-card-content">
-                      <h2 className="admin-card-title">{option.title}</h2>
-                      <p className="admin-card-description">{option.description}</p>
+                      <h2 className="admin-card-title">
+                        {option.title}
+                      </h2>
+                      <p className="admin-card-description">
+                        {option.description}
+                      </p>
                     </div>
                   </div>
 
                   <div className="admin-card-footer">
-                    <span className="admin-card-action">Acessar área →</span>
+                    <span className="admin-card-action">
+                      Acessar área →
+                    </span>
                   </div>
                 </article>
               </Link>

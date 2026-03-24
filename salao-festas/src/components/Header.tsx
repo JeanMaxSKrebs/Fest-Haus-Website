@@ -230,7 +230,6 @@ function Header() {
                 {carregandoMoedas ? "..." : moedas.saldo}
               </strong>
               <FestCoin size={24} />
-
             </button>
 
             <div
@@ -321,6 +320,14 @@ function Header() {
                 className="btn-admin-header"
               >
                 Perfil
+              </button>
+
+              <button
+                type="button"
+                onClick={() => navigate("/minhas-festas")}
+                className="btn-admin-header"
+              >
+                Minhas Festas
               </button>
             </div>
 

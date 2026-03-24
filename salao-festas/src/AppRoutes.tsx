@@ -8,6 +8,8 @@ import Agendamento from "./pages/Agendamento";
 import Orcamentos from "./pages/Orcamentos";
 import Visitas from "./pages/Visitas";
 import Perfil from "./pages/Perfil";
+import MinhasFestas from "./pages/MinhasFestas";
+import MinhasFestasDetalhe from "./pages/MinhasFestasDetalhe";
 import Moedas from "./pages/Moedas";
 import Suporte from "./pages/Suporte";
 import LoginModal from "./components/LoginModal";
@@ -17,6 +19,7 @@ import AdminLayout from "./components/Admin/AdminLayout";
 import { AdminHome } from "./pages/admin/AdminHome";
 import AdicionarAdmins from "./pages/admin/AdicionarAdmins";
 import VerAgendamentos from "./pages/admin/VerAgendamentos";
+import VerFestas from "./pages/admin/VerFestas";
 import AjustarOrcamentos from "./pages/admin/orcamento/AjustarOrcamentos";
 import SolicitacoesOrcamento from "./pages/admin/orcamento/SolicitacoesOrcamento";
 import ModelosOrcamento from "./pages/admin/orcamento/ModelosOrcamento";
@@ -41,6 +44,9 @@ function PageTitle({ title, children }: PageTitleProps) {
 function AppRoutes() {
   const { user } = useAuth();
   const [mostrarLogin, setMostrarLogin] = useState(false);
+  const [minhasFestasDetalheTitle, setMinhasFestasDetalheTitle] = useState(
+    "Detalhe da Festa | Fest Haus"
+  );
 
   const LoginRequired = (
     <PageTitle title="Login necessário | Fest Haus">
@@ -77,6 +83,7 @@ function AppRoutes() {
             </PageTitle>
           }
         />
+
 
         <Route
           path="/agendamento"
@@ -116,12 +123,41 @@ function AppRoutes() {
             )
           }
         />
+
         <Route
           path="/perfil"
           element={
             user ? (
               <PageTitle title="Meu Perfil | Fest Haus">
                 <Perfil />
+              </PageTitle>
+            ) : (
+              LoginRequired
+            )
+          }
+        />
+
+        <Route
+          path="/minhas-festas"
+          element={
+            user ? (
+              <PageTitle title="Minhas Festas | Fest Haus">
+                <MinhasFestas />
+              </PageTitle>
+            ) : (
+              LoginRequired
+            )
+          }
+        />
+
+        <Route
+          path="/minhas-festas/:id"
+          element={
+            user ? (
+              <PageTitle title={minhasFestasDetalheTitle}>
+                <MinhasFestasDetalhe
+                  setPageTitle={setMinhasFestasDetalheTitle}
+                />
               </PageTitle>
             ) : (
               LoginRequired
@@ -141,6 +177,7 @@ function AppRoutes() {
             )
           }
         />
+
 
         <Route
           path="/suporte"
@@ -169,6 +206,7 @@ function AppRoutes() {
               </PageTitle>
             }
           />
+
           <Route
             path="adicionar-admins"
             element={
@@ -177,6 +215,7 @@ function AppRoutes() {
               </PageTitle>
             }
           />
+
           <Route
             path="ajustar-orcamentos"
             element={
@@ -185,6 +224,7 @@ function AppRoutes() {
               </PageTitle>
             }
           />
+
           <Route
             path="orcamentos"
             element={
@@ -193,6 +233,7 @@ function AppRoutes() {
               </PageTitle>
             }
           />
+
           <Route
             path="orcamentos/solicitacoes"
             element={
@@ -201,6 +242,7 @@ function AppRoutes() {
               </PageTitle>
             }
           />
+
           <Route
             path="orcamentos/modelos"
             element={
@@ -209,6 +251,7 @@ function AppRoutes() {
               </PageTitle>
             }
           />
+
           <Route
             path="orcamentos/itens"
             element={
@@ -217,6 +260,7 @@ function AppRoutes() {
               </PageTitle>
             }
           />
+
           <Route
             path="ver-agendamentos"
             element={
@@ -225,6 +269,16 @@ function AppRoutes() {
               </PageTitle>
             }
           />
+
+          <Route
+            path="ver-festas"
+            element={
+              <PageTitle title="Ver Festas | Fest Haus">
+                <VerFestas />
+              </PageTitle>
+            }
+          />
+
           <Route
             path="ver-visitas"
             element={
@@ -233,6 +287,7 @@ function AppRoutes() {
               </PageTitle>
             }
           />
+
           <Route
             path="ajustar-servicos"
             element={
@@ -241,6 +296,10 @@ function AppRoutes() {
               </PageTitle>
             }
           />
+
+
+
+
           <Route
             path="ajustar-galeria"
             element={

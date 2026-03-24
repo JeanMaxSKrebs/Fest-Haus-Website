@@ -1,0 +1,305 @@
+.minhas-festas-page {
+    min-height: 100vh;
+    background:
+        radial-gradient(circle at top, rgba(159, 103, 255, 0.12), transparent 35%),
+        linear-gradient(180deg, var(--cor-fundo) 0%, #18121f 100%);
+    color: var(--cor-texto);
+    padding: 50px 20px 70px;
+}
+
+.minhas-festas-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.minhas-festas-header {
+    text-align: center;
+    margin-bottom: 50px;
+}
+
+.minhas-festas-badge {
+    display: inline-block;
+    margin-bottom: 16px;
+    padding: 8px 16px;
+    border-radius: 999px;
+    background: rgba(253, 213, 126, 0.08);
+    border: 1px solid rgba(253, 213, 126, 0.28);
+    color: var(--cor-header-texto);
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+}
+
+.minhas-festas-title {
+    font-size: 42px;
+    font-weight: 800;
+    margin-bottom: 14px;
+    color: var(--cor-texto);
+}
+
+.minhas-festas-subtitle {
+    max-width: 760px;
+    margin: 0 auto;
+    font-size: 18px;
+    line-height: 1.6;
+    color: var(--cor-texto-secundario);
+}
+
+.minhas-festas-erro,
+.minhas-festas-vazio {
+    max-width: 900px;
+    margin: 0 auto 24px;
+    background: linear-gradient(180deg, rgba(99, 23, 153, 0.92) 0%, rgba(29, 29, 29, 0.96) 100%);
+    border: 1px solid rgba(253, 213, 126, 0.14);
+    border-radius: 22px;
+    padding: 24px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+}
+
+.minhas-festas-erro {
+    color: #ffd3d3;
+}
+
+.minhas-festas-vazio h2 {
+    margin-bottom: 10px;
+    color: var(--cor-texto);
+}
+
+.minhas-festas-vazio p {
+    color: var(--cor-texto-secundario);
+    line-height: 1.6;
+}
+
+.minhas-festas-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 24px;
+}
+
+.minhas-festas-card {
+    height: 100%;
+    background: linear-gradient(180deg, rgba(99, 23, 153, 0.92) 0%, rgba(29, 29, 29, 0.96) 100%);
+    border: 1px solid rgba(253, 213, 126, 0.14);
+    border-radius: 22px;
+    padding: 28px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 320px;
+    position: relative;
+    overflow: hidden;
+}
+
+.minhas-festas-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(253, 213, 126, 0.05), transparent 45%, rgba(159, 103, 255, 0.05));
+    pointer-events: none;
+}
+
+.minhas-festas-card:hover {
+    transform: translateY(-6px);
+    border-color: rgba(253, 213, 126, 0.42);
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
+}
+
+.minhas-festas-card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 14px;
+    position: relative;
+    z-index: 1;
+    margin-bottom: 18px;
+}
+
+.minhas-festas-status {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    padding: 7px 14px;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.minhas-festas-status.realizada {
+    background: rgba(34, 197, 94, 0.16);
+    color: #86efac;
+    border: 1px solid rgba(134, 239, 172, 0.22);
+}
+
+.minhas-festas-status.agendada {
+    background: rgba(59, 130, 246, 0.16);
+    color: #93c5fd;
+    border: 1px solid rgba(147, 197, 253, 0.22);
+}
+
+.minhas-festas-status.aguardando {
+    background: rgba(245, 158, 11, 0.16);
+    color: #fcd34d;
+    border: 1px solid rgba(252, 211, 77, 0.22);
+}
+
+.minhas-festas-status.hoje {
+    background: rgba(168, 85, 247, 0.18);
+    color: #e9d5ff;
+    border: 1px solid rgba(233, 213, 255, 0.24);
+}
+
+.minhas-festas-card-content {
+    flex: 1;
+    position: relative;
+    z-index: 1;
+}
+
+.minhas-festas-card-title {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    color: var(--cor-texto);
+    line-height: 1.3;
+}
+
+.minhas-festas-card-description {
+    font-size: 15px;
+    line-height: 1.6;
+    color: var(--cor-texto-secundario);
+    margin-bottom: 18px;
+}
+
+.minhas-festas-info {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.minhas-festas-info p {
+    font-size: 15px;
+    line-height: 1.55;
+    color: var(--cor-texto-secundario);
+}
+
+.minhas-festas-info strong {
+    color: var(--cor-texto);
+}
+
+.minhas-festas-resumo {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.minhas-festas-resumo-item {
+    border-radius: 16px;
+    padding: 14px 10px;
+    text-align: center;
+    background: linear-gradient(135deg, rgba(253, 213, 126, 0.08), rgba(159, 103, 255, 0.1));
+    border: 1px solid rgba(253, 213, 126, 0.18);
+    box-shadow: inset 0 0 12px rgba(253, 213, 126, 0.04);
+}
+
+.minhas-festas-resumo-numero {
+    display: block;
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--cor-texto);
+    margin-bottom: 4px;
+}
+
+.minhas-festas-resumo-label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--cor-texto-secundario);
+    line-height: 1.4;
+}
+
+.minhas-festas-card-footer {
+    margin-top: 28px;
+    padding-top: 18px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    position: relative;
+    z-index: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.minhas-festas-card-action {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--cor-header-texto);
+    transition: transform 0.2s ease;
+    display: inline-block;
+}
+
+.minhas-festas-card:hover .minhas-festas-card-action {
+    transform: translateX(4px);
+}
+
+.minhas-festas-botao {
+    border: none;
+    border-radius: 14px;
+    padding: 12px 18px;
+    background: var(--cor-primaria);
+    color: #fff;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 700;
+    transition: all 0.25s ease;
+    box-shadow: 0 8px 20px rgba(124, 58, 237, 0.28);
+}
+
+.minhas-festas-botao:hover {
+    background: var(--cor-primaria-hover);
+    transform: translateY(-2px);
+}
+
+.minhas-festas-loading {
+    text-align: center;
+    color: var(--cor-texto-secundario);
+    font-size: 16px;
+}
+
+@media (max-width: 1100px) {
+    .minhas-festas-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 768px) {
+    .minhas-festas-page {
+        padding: 32px 16px 50px;
+    }
+
+    .minhas-festas-title {
+        font-size: 32px;
+    }
+
+    .minhas-festas-subtitle {
+        font-size: 16px;
+    }
+
+    .minhas-festas-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .minhas-festas-resumo {
+        grid-template-columns: 1fr;
+    }
+
+    .minhas-festas-card {
+        padding: 22px;
+        min-height: auto;
+    }
+}

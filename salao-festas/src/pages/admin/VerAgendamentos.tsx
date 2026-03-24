@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Check, X, Clock, Trash2 } from "lucide-react";
+import { Check, X, Clock, Trash2, Loader2 } from "lucide-react";
 import { apiFetch } from "../../lib/api";
 
 type Agendamento = {
@@ -9,6 +9,9 @@ type Agendamento = {
   status?: string | null;
   mensagem?: string | null;
   usuario_id?: string | null;
+  festa_id?: string | null;
+  festa_registrada?: boolean;
+  festa_realizada?: boolean;
   usuario?: {
     id: string;
     nome?: string | null;
@@ -22,6 +25,8 @@ export default function VerAgendamentos() {
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState("");
   const [sucesso, setSucesso] = useState("");
+  const [processandoId, setProcessandoId] = useState<string | null>(null);
+  const [mensagemProcessando, setMensagemProcessando] = useState("");
 
   async function buscarAgendamentos() {
     try {
@@ -48,6 +53,8 @@ export default function VerAgendamentos() {
     try {
       setErro("");
       setSucesso("");
+      setProcessandoId(id);
+      setMensagemProcessando("Criando a festa e organizando tudo...");
 
       const resposta = await apiFetch(`/api/agendamentos/${id}/aprovar`, {
         method: "PUT",
@@ -63,6 +70,9 @@ export default function VerAgendamentos() {
     } catch (error) {
       console.error("Erro ao aprovar agendamento:", error);
       setErro("Não foi possível aprovar o agendamento.");
+    } finally {
+      setProcessandoId(null);
+      setMensagemProcessando("");
     }
   }
 
@@ -70,6 +80,8 @@ export default function VerAgendamentos() {
     try {
       setErro("");
       setSucesso("");
+      setProcessandoId(id);
+      setMensagemProcessando("Atualizando o status do agendamento...");
 
       const resposta = await apiFetch(`/api/agendamentos/${id}/rejeitar`, {
         method: "PUT",
@@ -85,6 +97,9 @@ export default function VerAgendamentos() {
     } catch (error) {
       console.error("Erro ao rejeitar agendamento:", error);
       setErro("Não foi possível rejeitar o agendamento.");
+    } finally {
+      setProcessandoId(null);
+      setMensagemProcessando("");
     }
   }
 
@@ -98,6 +113,8 @@ export default function VerAgendamentos() {
     try {
       setErro("");
       setSucesso("");
+      setProcessandoId(id);
+      setMensagemProcessando("Excluindo o agendamento...");
 
       await apiFetch(`/api/agendamentos/${id}`, {
         method: "DELETE",
@@ -108,6 +125,9 @@ export default function VerAgendamentos() {
     } catch (error) {
       console.error("Erro ao excluir agendamento:", error);
       setErro("Não foi possível excluir o agendamento.");
+    } finally {
+      setProcessandoId(null);
+      setMensagemProcessando("");
     }
   }
 
@@ -183,6 +203,10 @@ export default function VerAgendamentos() {
         {erro && <p className="admin-message-error">{erro}</p>}
         {sucesso && <p className="admin-message-success">{sucesso}</p>}
 
+        {processandoId && mensagemProcessando ? (
+          <p className="admin-message-info">{mensagemProcessando}</p>
+        ) : null}
+
         {loading ? (
           <p className="admin-message-info">Carregando agendamentos...</p>
         ) : agendamentos.length === 0 ? (
@@ -197,6 +221,7 @@ export default function VerAgendamentos() {
                   <th>Data</th>
                   <th>Hora</th>
                   <th>Status</th>
+                  <th>Festa</th>
                   <th>Ações</th>
                 </tr>
               </thead>
@@ -204,6 +229,7 @@ export default function VerAgendamentos() {
               <tbody>
                 {agendamentos.map((ag) => {
                   const dataHora = parseDataEvento(ag.data_evento);
+                  const emProcessamento = processandoId === ag.id;
 
                   return (
                     <tr key={ag.id}>
@@ -233,20 +259,40 @@ export default function VerAgendamentos() {
                       </td>
 
                       <td>
+                        {ag.festa_registrada ? (
+                          <span className="admin-role-badge aprovado">
+                            Festa criada
+                          </span>
+                        ) : (
+                          <span className="admin-role-badge pendente">
+                            Sem festa
+                          </span>
+                        )}
+                      </td>
+
+                      <td>
                         <div className="admin-actions">
                           <button
                             className="admin-icon-button edit"
                             title="Aprovar"
                             onClick={() => aprovarAgendamento(ag.id)}
+                            disabled={emProcessamento}
                           >
-                            <Check size={16} />
-                            <span>Aprovar</span>
+                            {emProcessamento ? (
+                              <Loader2 size={16} className="spin" />
+                            ) : (
+                              <Check size={16} />
+                            )}
+                            <span>
+                              {emProcessamento ? "Organizando..." : "Aprovar"}
+                            </span>
                           </button>
 
                           <button
                             className="admin-icon-button danger"
                             title="Rejeitar"
                             onClick={() => rejeitarAgendamento(ag.id)}
+                            disabled={emProcessamento}
                           >
                             <X size={16} />
                             <span>Rejeitar</span>
@@ -256,6 +302,7 @@ export default function VerAgendamentos() {
                             className="admin-icon-button danger"
                             title="Excluir"
                             onClick={() => excluirAgendamento(ag.id)}
+                            disabled={emProcessamento}
                           >
                             <Trash2 size={16} />
                             <span>Excluir</span>

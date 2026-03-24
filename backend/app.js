@@ -15,12 +15,17 @@ import solicitacoesOrcamentoRoutes from "./routes/solicitacoes-orcamento.routes.
 import modelosOrcamentoRoutes from "./routes/modelos-orcamento.routes.js";
 import galeriaRoutes from "./routes/galeria.routes.js";
 
+import notificacoesRoutes from "./routes/notificacoes.routes.js";
+import fotosFestaRoutes from "./routes/fotos-festa.routes.js";
+import festasRoutes from "./routes/festas.routes.js";
 import perfilRoutes from "./routes/perfil.routes.js";
 import moedasRoutes from "./routes/moedas.routes.js";
 
 import { iniciarJobLimpezaUsuarios } from "./jobs/cleanup.job.js";
 import maintenanceRoutes from "./routes/maintenance.routes.js";
+import festasAdminRoutes from "./routes/festas-admin.routes.js";
 
+import { iniciarJobFestas } from "./jobs/festas.job.js";
 import { configurarBuckets } from "./config/storage.js";
 
 dotenv.config();
@@ -59,7 +64,7 @@ app.get("/", (_req, res) => {
 });
 
 app.use(maintenanceRoutes);
-
+app.use(festasAdminRoutes);
 app.use(authRoutes);
 app.use(googleCalendarRoutes);
 app.use(adminsRoutes);
@@ -71,13 +76,17 @@ app.use(solicitacoesOrcamentoRoutes);
 app.use(modelosOrcamentoRoutes);
 app.use(galeriaRoutes);
 
+app.use(notificacoesRoutes);
 
+app.use(fotosFestaRoutes);
+app.use(festasRoutes);
 app.use(perfilRoutes);
 app.use(moedasRoutes);
 
 app.use(notFoundHandler);
 app.use(errorHandler);
 
+iniciarJobFestas();
 configurarBuckets();
 iniciarJobLimpezaUsuarios();
 
