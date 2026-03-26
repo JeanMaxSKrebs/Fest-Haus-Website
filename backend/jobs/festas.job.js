@@ -1,4 +1,4 @@
-import { processarFestasParaAguardandoImagens } from "../controllers/festas-admin.controller.js";
+import { processarFestasAutomaticamente } from "../controllers/festas-admin.controller.js";
 
 let intervaloFestas = null;
 
@@ -7,10 +7,11 @@ export function iniciarJobFestas() {
 
     async function executar() {
         try {
-            const resultado = await processarFestasParaAguardandoImagens();
+            const resultado = await processarFestasAutomaticamente();
+
             if (resultado?.total_processadas) {
                 console.log(
-                    `[festas.job] ${resultado.total_processadas} festa(s) movida(s) para aguardando_imagens`
+                    `[festas.job] ${resultado.total_processadas} festa(s) processada(s) automaticamente`
                 );
             }
         } catch (error) {

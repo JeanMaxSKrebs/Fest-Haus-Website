@@ -1,5 +1,8 @@
 import { supabase } from "../config/supabase.js";
 
+const FESTA_SELECT =
+    "id, usuario_id, agendamento_id, titulo, data_festa, criado_pelo_site, realizada, status, situacao_imagens, processar_automaticamente, created_at";
+
 function usuarioLogadoId(req) {
     return req.user?.id || req.usuario?.id || req.auth?.user?.id || null;
 }
@@ -21,7 +24,7 @@ async function usuarioEhAdmin(userId) {
 async function buscarFestaBase(id) {
     const { data, error } = await supabase
         .from("festas_usuario")
-        .select("id, usuario_id, agendamento_id, titulo, data_festa, criado_pelo_site, realizada, created_at")
+        .select(FESTA_SELECT)
         .eq("id", id)
         .single();
 
@@ -102,6 +105,9 @@ export async function criarFesta(req, res, next) {
             data_festa = null,
             criado_pelo_site = true,
             realizada = false,
+            status = "agendada",
+            situacao_imagens = "bloqueada",
+            processar_automaticamente = false,
         } = req.body;
 
         const { data, error } = await supabase
@@ -114,9 +120,12 @@ export async function criarFesta(req, res, next) {
                     data_festa,
                     criado_pelo_site,
                     realizada,
+                    status,
+                    situacao_imagens,
+                    processar_automaticamente,
                 },
             ])
-            .select("id, usuario_id, agendamento_id, titulo, data_festa, criado_pelo_site, realizada, created_at")
+            .select(FESTA_SELECT)
             .single();
 
         if (error) {
@@ -145,7 +154,7 @@ export async function listarMinhasFestas(req, res, next) {
 
         const { data, error } = await supabase
             .from("festas_usuario")
-            .select("id, usuario_id, agendamento_id, titulo, data_festa, criado_pelo_site, realizada, created_at")
+            .select(FESTA_SELECT)
             .eq("usuario_id", userId)
             .order("data_festa", { ascending: false, nullsFirst: false })
             .order("created_at", { ascending: false });
@@ -172,7 +181,7 @@ export async function listarFestasPorUsuario(req, res, next) {
 
         const { data, error } = await supabase
             .from("festas_usuario")
-            .select("id, usuario_id, agendamento_id, titulo, data_festa, criado_pelo_site, realizada, created_at")
+            .select(FESTA_SELECT)
             .eq("usuario_id", usuario_id)
             .order("data_festa", { ascending: false, nullsFirst: false })
             .order("created_at", { ascending: false });
@@ -193,7 +202,7 @@ export async function listarTodasFestas(req, res, next) {
     try {
         const { data, error } = await supabase
             .from("festas_usuario")
-            .select("id, usuario_id, agendamento_id, titulo, data_festa, criado_pelo_site, realizada, created_at")
+            .select(FESTA_SELECT)
             .order("created_at", { ascending: false });
 
         if (error) {
@@ -269,6 +278,9 @@ export async function atualizarFesta(req, res, next) {
             "data_festa",
             "criado_pelo_site",
             "realizada",
+            "status",
+            "situacao_imagens",
+            "processar_automaticamente",
         ];
 
         for (const campo of camposPermitidos) {
@@ -281,7 +293,7 @@ export async function atualizarFesta(req, res, next) {
             .from("festas_usuario")
             .update(payload)
             .eq("id", id)
-            .select("id, usuario_id, agendamento_id, titulo, data_festa, criado_pelo_site, realizada, created_at")
+            .select(FESTA_SELECT)
             .single();
 
         if (error) {

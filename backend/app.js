@@ -24,6 +24,7 @@ import moedasRoutes from "./routes/moedas.routes.js";
 import { iniciarJobLimpezaUsuarios } from "./jobs/cleanup.job.js";
 import maintenanceRoutes from "./routes/maintenance.routes.js";
 import festasAdminRoutes from "./routes/festas-admin.routes.js";
+import fotosFestaAdminRoutes from "./routes/fotos-festa-admin.routes.js";
 
 import { iniciarJobFestas } from "./jobs/festas.job.js";
 import { configurarBuckets } from "./config/storage.js";
@@ -64,7 +65,7 @@ app.get("/", (_req, res) => {
 });
 
 app.use(maintenanceRoutes);
-app.use(festasAdminRoutes);
+
 app.use(authRoutes);
 app.use(googleCalendarRoutes);
 app.use(adminsRoutes);
@@ -77,6 +78,9 @@ app.use(modelosOrcamentoRoutes);
 app.use(galeriaRoutes);
 
 app.use(notificacoesRoutes);
+
+app.use(festasAdminRoutes);
+app.use(fotosFestaAdminRoutes);
 
 app.use(fotosFestaRoutes);
 app.use(festasRoutes);

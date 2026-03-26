@@ -1,8 +1,12 @@
 import { Router } from "express";
 import {
     listarFestasAdmin,
+    buscarFestaAdminPorId,
     marcarFestaComoRealizada,
-    processarAguardandoImagensAutomatico,
+    voltarFestaParaAgendada,
+    atualizarProcessamentoAutomatico,
+    atualizarProcessamentoAutomaticoGlobal,
+    atualizarSituacaoImagens,
 } from "../controllers/festas-admin.controller.js";
 import {
     authenticateToken,
@@ -18,6 +22,13 @@ router.get(
     listarFestasAdmin
 );
 
+router.get(
+    "/api/admin/festas/:id",
+    authenticateToken,
+    requireAdmin,
+    buscarFestaAdminPorId
+);
+
 router.put(
     "/api/admin/festas/:id/realizada",
     authenticateToken,
@@ -25,11 +36,32 @@ router.put(
     marcarFestaComoRealizada
 );
 
-router.post(
-    "/api/admin/festas/processar-aguardando-imagens",
+router.put(
+    "/api/admin/festas/:id/agendada",
     authenticateToken,
     requireAdmin,
-    processarAguardandoImagensAutomatico
+    voltarFestaParaAgendada
+);
+
+router.put(
+    "/api/admin/festas/:id/automatico",
+    authenticateToken,
+    requireAdmin,
+    atualizarProcessamentoAutomatico
+);
+
+router.put(
+    "/api/admin/festas/automatico-global",
+    authenticateToken,
+    requireAdmin,
+    atualizarProcessamentoAutomaticoGlobal
+);
+
+router.put(
+    "/api/admin/festas/:id/situacao-imagens",
+    authenticateToken,
+    requireAdmin,
+    atualizarSituacaoImagens
 );
 
 export default router;

@@ -1,31 +1,10 @@
 import { supabase } from "../config/supabase.js";
+import { processarImagemUpload } from "../utils/processar-imagem-upload.js";
 
 const BUCKET_FESTAS = "festas-usuarios";
 
 function usuarioLogadoId(req) {
     return req.user?.id || req.usuario?.id || req.auth?.user?.id || null;
-}
-
-function nomeArquivoSeguro(nome = "foto") {
-    return String(nome)
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .replace(/\s+/g, "-")
-        .replace(/[^a-zA-Z0-9._-]/g, "")
-        .toLowerCase();
-}
-
-function extensaoPorMime(mimetype = "") {
-    const mapa = {
-        "image/jpeg": "jpg",
-        "image/png": "png",
-        "image/webp": "webp",
-        "image/heic": "heic",
-        "image/heif": "heif",
-        "application/octet-stream": "jpg",
-    };
-
-    return mapa[mimetype] || "jpg";
 }
 
 async function usuarioEhAdmin(userId) {
@@ -45,7 +24,9 @@ async function usuarioEhAdmin(userId) {
 async function buscarFestaPorId(festaId) {
     const { data, error } = await supabase
         .from("festas_usuario")
-        .select("id, usuario_id, titulo, data_festa, realizada")
+        .select(
+            "id, usuario_id, titulo, data_festa, realizada, status, situacao_imagens"
+        )
         .eq("id", festaId)
         .single();
 
@@ -98,20 +79,26 @@ export async function uploadFotoFesta(req, res, next) {
         }
 
         if (festa.usuario_id !== userId) {
-            return res.status(403).json({ error: "Você não pode enviar foto para esta festa" });
+            return res
+                .status(403)
+                .json({ error: "Você não pode enviar foto para esta festa" });
         }
 
-        const ext = extensaoPorMime(req.file.mimetype);
-        const nomeBase = nomeArquivoSeguro(
-            req.file.originalname?.replace(/\.[^/.]+$/, "") || "foto"
-        );
-        const nomeFinal = `${Date.now()}-${nomeBase}.${ext}`;
-        const storagePath = `usuarios/${userId}/festas/${festa_id}/${nomeFinal}`;
+        if (festa.situacao_imagens !== "aguardando_imagens") {
+            return res.status(400).json({
+                error:
+                    "O envio de imagens ainda não está liberado para esta festa.",
+            });
+        }
+
+        const arquivoProcessado = await processarImagemUpload(req.file);
+
+        const storagePath = `${festa_id}/${arquivoProcessado.fileName}`;
 
         const { error: uploadError } = await supabase.storage
             .from(BUCKET_FESTAS)
-            .upload(storagePath, req.file.buffer, {
-                contentType: req.file.mimetype,
+            .upload(storagePath, arquivoProcessado.buffer, {
+                contentType: arquivoProcessado.contentType,
                 upsert: false,
             });
 
@@ -173,7 +160,7 @@ export async function listarFotosDaFesta(req, res, next) {
         const { data, error } = await supabase
             .from("fotos_festa_usuario")
             .select(
-                "id, usuario_id, festa_id, storage_path, status, aprovada_para_coin, destaque_habilitado, created_at, approved_at"
+                "id, usuario_id, festa_id, storage_path, status, aprovada_para_coin, destaque_habilitado, created_at, approved_at, aprovada_para_galeria"
             )
             .eq("festa_id", festa_id)
             .order("created_at", { ascending: false });
@@ -201,7 +188,7 @@ export async function listarMinhasFotosFesta(req, res, next) {
         const { data, error } = await supabase
             .from("fotos_festa_usuario")
             .select(
-                "id, usuario_id, festa_id, storage_path, status, aprovada_para_coin, destaque_habilitado, created_at, approved_at"
+                "id, usuario_id, festa_id, storage_path, status, aprovada_para_coin, destaque_habilitado, created_at, approved_at, aprovada_para_galeria"
             )
             .eq("usuario_id", userId)
             .order("created_at", { ascending: false });
@@ -230,7 +217,7 @@ export async function aprovarFotoFesta(req, res, next) {
             })
             .eq("id", id)
             .select(
-                "id, usuario_id, festa_id, storage_path, status, aprovada_para_coin, destaque_habilitado, created_at, approved_at"
+                "id, usuario_id, festa_id, storage_path, status, aprovada_para_coin, destaque_habilitado, created_at, approved_at, aprovada_para_galeria"
             )
             .single();
 
@@ -260,7 +247,7 @@ export async function rejeitarFotoFesta(req, res, next) {
             })
             .eq("id", id)
             .select(
-                "id, usuario_id, festa_id, storage_path, status, aprovada_para_coin, destaque_habilitado, created_at, approved_at"
+                "id, usuario_id, festa_id, storage_path, status, aprovada_para_coin, destaque_habilitado, created_at, approved_at, aprovada_para_galeria"
             )
             .single();
 
@@ -287,7 +274,7 @@ export async function habilitarFotoParaCoin(req, res, next) {
             })
             .eq("id", id)
             .select(
-                "id, usuario_id, festa_id, storage_path, status, aprovada_para_coin, destaque_habilitado, created_at, approved_at"
+                "id, usuario_id, festa_id, storage_path, status, aprovada_para_coin, destaque_habilitado, created_at, approved_at, aprovada_para_galeria"
             )
             .single();
 
@@ -298,6 +285,80 @@ export async function habilitarFotoParaCoin(req, res, next) {
         const fotoComUrl = await montarFotoComUrl(data);
 
         res.json(fotoComUrl);
+    } catch (error) {
+        next(error);
+    }
+}
+
+export async function enviarFotosParaDestaque(req, res, next) {
+    try {
+        const userId = usuarioLogadoId(req);
+        const { festa_id, fotos_ids } = req.body;
+
+        if (!userId) {
+            return res.status(401).json({ error: "Usuário não autenticado" });
+        }
+
+        if (!festa_id || !Array.isArray(fotos_ids) || fotos_ids.length === 0) {
+            return res.status(400).json({
+                error: "festa_id e fotos_ids são obrigatórios.",
+            });
+        }
+
+        if (fotos_ids.length > 3) {
+            return res.status(400).json({
+                error: "Você pode selecionar no máximo 3 fotos para destaque.",
+            });
+        }
+
+        const { data: festa, error: festaError } = await buscarFestaPorId(festa_id);
+
+        if (festaError || !festa) {
+            return res.status(404).json({ error: "Festa não encontrada" });
+        }
+
+        if (festa.usuario_id !== userId) {
+            return res.status(403).json({ error: "Acesso negado." });
+        }
+
+        if (festa.situacao_imagens !== "aguardando_imagens") {
+            return res.status(400).json({
+                error: "O destaque só pode ser enviado quando a festa estiver aguardando imagens.",
+            });
+        }
+
+        const { data: fotos, error: fotosError } = await supabase
+            .from("fotos_festa_usuario")
+            .select("id, usuario_id, festa_id")
+            .in("id", fotos_ids)
+            .eq("festa_id", festa_id)
+            .eq("usuario_id", userId);
+
+        if (fotosError) {
+            return res.status(400).json({ error: fotosError.message });
+        }
+
+        if (!fotos || fotos.length !== fotos_ids.length) {
+            return res.status(400).json({
+                error: "Uma ou mais fotos informadas não pertencem a esta festa.",
+            });
+        }
+
+        const { error } = await supabase
+            .from("fotos_festa_usuario")
+            .update({
+                destaque_habilitado: true,
+                status: "concorrendo_destaque",
+            })
+            .in("id", fotos_ids);
+
+        if (error) {
+            return res.status(400).json({ error: error.message });
+        }
+
+        res.json({
+            message: "Fotos enviadas para destaque com sucesso.",
+        });
     } catch (error) {
         next(error);
     }
@@ -315,7 +376,7 @@ export async function deletarFotoFesta(req, res, next) {
         const { data: foto, error: fotoError } = await supabase
             .from("fotos_festa_usuario")
             .select(
-                "id, usuario_id, festa_id, storage_path, status, aprovada_para_coin, destaque_habilitado, created_at, approved_at"
+                "id, usuario_id, festa_id, storage_path, status, aprovada_para_coin, destaque_habilitado, created_at, approved_at, aprovada_para_galeria"
             )
             .eq("id", id)
             .single();

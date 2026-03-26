@@ -7,6 +7,7 @@ import {
     aprovarFotoFesta,
     rejeitarFotoFesta,
     habilitarFotoParaCoin,
+    enviarFotosParaDestaque,
     deletarFotoFesta,
 } from "../controllers/fotos-festa.controller.js";
 import {
@@ -28,6 +29,12 @@ router.post(
     authenticateToken,
     upload.single("foto"),
     uploadFotoFesta
+);
+
+router.post(
+    "/api/fotos-festa/destaque",
+    authenticateToken,
+    enviarFotosParaDestaque
 );
 
 router.get(

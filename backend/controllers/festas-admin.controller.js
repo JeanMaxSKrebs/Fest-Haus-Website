@@ -1,14 +1,18 @@
 import { supabase } from "../config/supabase.js";
 import { criarNotificacao } from "../services/notificacoes.service.js";
 import { enviarEmail } from "../services/email.service.js";
+import { formatarDataPtBR } from "../utils/formatarData.js";
 import {
     listarFestasAdminService,
     buscarFestaPorIdService,
     atualizarFestaParaRealizadaService,
-    buscarFestasParaAguardarImagensService,
-    atualizarFestaParaAguardandoImagensService,
-} from "../services/festas.service.js"; 
-import { formatarDataPtBR } from "../utils/formatarData.js";
+    atualizarFestaParaAgendadaService,
+    atualizarProcessamentoAutomaticoService,
+    atualizarProcessamentoAutomaticoGlobalService,
+    buscarFestasAutomaticasParaProcessamentoService,
+    atualizarSituacaoImagensParaAguardandoService,
+    atualizarSituacaoImagensService,
+} from "../services/festas.service.js";
 
 const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";
 const SUPABASE_URL = process.env.SUPABASE_URL || "";
@@ -40,7 +44,6 @@ function montarCardFestCoinHtml() {
       `
             : ""
         }
-
       <p style="margin: 0; font-size: 16px; font-weight: 700; color: #4a2a67;">
         Ganhe algumas FestCoins adicionando as fotos da sua festa
       </p>
@@ -61,7 +64,6 @@ function montarTemplateEmail({
     return `
     <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #1f1726; background: #f8f5fc; padding: 24px;">
       <div style="max-width: 640px; margin: 0 auto; background: #ffffff; border-radius: 18px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.08); border: 1px solid rgba(124, 58, 237, 0.08);">
-        
         <div style="background: linear-gradient(135deg, #3b0a57 0%, #6d28d9 100%); padding: 28px 24px; text-align: center;">
           <h1 style="margin: 0; font-size: 26px; color: #ffffff;">
             ${titulo}
@@ -150,6 +152,134 @@ async function anexarUsuarios(festas = []) {
     }));
 }
 
+async function enviarNotificacaoEEmailFestaRealizada(festa) {
+    try {
+        await criarNotificacao({
+            usuario_id: festa.usuario_id,
+            tipo: "festa_realizada",
+            titulo: "Sua festa foi marcada como realizada",
+            mensagem: `Sua festa${montarTituloFesta(
+                festa.titulo
+            )} foi marcada como realizada com sucesso pela equipe da Fest Haus.`,
+            link: `/minhas-festas/${festa.id}`,
+            referencia_id: festa.id,
+        });
+    } catch (error) {
+        console.error("Erro ao criar notificação de festa realizada:", error);
+    }
+
+    try {
+        const { data: usuario } = await supabase
+            .from("usuarios")
+            .select("nome, email")
+            .eq("id", festa.usuario_id)
+            .single();
+
+        if (usuario?.email) {
+            const linkCompleto = montarLinkFesta(festa.id);
+            const dataFormatada = formatarDataPtBR(festa.data_festa);
+
+            await enviarEmail({
+                to: usuario.email,
+                subject: "Sua festa foi marcada como realizada 🎉",
+                text: `Olá${usuario?.nome ? `, ${usuario.nome}` : ""}!
+
+Sua festa${montarTituloFesta(
+                    festa.titulo
+                )} foi marcada como realizada com sucesso pela equipe da Fest Haus.
+
+Data da festa: ${dataFormatada}
+
+Acesse sua área:
+${linkCompleto}
+
+Ganhe algumas FestCoins adicionando as fotos da sua festa.
+
+Equipe Fest Haus`,
+                html: montarTemplateEmail({
+                    titulo: "🎉 Sua festa foi marcada como realizada",
+                    saudacaoNome: usuario?.nome || "",
+                    textoPrincipal: `Sua festa${montarTituloFesta(
+                        festa.titulo
+                    )} foi marcada como realizada com sucesso pela equipe da Fest Haus.`,
+                    dataLabel: "📅 Data da festa:",
+                    dataValor: dataFormatada,
+                    botaoLabel: "Acessar Minhas Festas",
+                    botaoHref: linkCompleto,
+                    textoFinal:
+                        "Pela sua área do usuário, você poderá mandar fotos da sua festa, para receber algumas Fest Coins.",
+                }),
+            });
+        }
+    } catch (error) {
+        console.error("Erro ao enviar email de festa realizada:", error);
+    }
+}
+
+async function enviarNotificacaoEEmailAguardandoImagens(festa) {
+    try {
+        await criarNotificacao({
+            usuario_id: festa.usuario_id,
+            tipo: "enviar_imagens_festa",
+            titulo: "Agora você já pode enviar as fotos da sua festa",
+            mensagem: `Sua festa${montarTituloFesta(
+                festa.titulo
+            )} já pode receber imagens. Envie suas fotos para participar das próximas etapas.`,
+            link: `/minhas-festas/${festa.id}`,
+            referencia_id: festa.id,
+        });
+    } catch (error) {
+        console.error("Erro ao criar notificação de imagens:", error);
+    }
+
+    try {
+        const { data: usuario } = await supabase
+            .from("usuarios")
+            .select("nome, email")
+            .eq("id", festa.usuario_id)
+            .single();
+
+        if (usuario?.email) {
+            const linkCompleto = montarLinkFesta(festa.id);
+            const dataFormatada = formatarDataPtBR(festa.data_festa);
+
+            await enviarEmail({
+                to: usuario.email,
+                subject: "📸 Envie as fotos da sua festa",
+                text: `Olá${usuario?.nome ? `, ${usuario.nome}` : ""}!
+
+Sua festa${montarTituloFesta(
+                    festa.titulo
+                )} já está pronta para receber imagens.
+
+Data da festa: ${dataFormatada}
+
+Envie suas fotos por aqui:
+${linkCompleto}
+
+Ganhe algumas FestCoins adicionando as fotos da sua festa.
+
+Equipe Fest Haus`,
+                html: montarTemplateEmail({
+                    titulo: "📸 Envie as fotos da sua festa",
+                    saudacaoNome: usuario?.nome || "",
+                    textoPrincipal: `Sua festa${montarTituloFesta(
+                        festa.titulo
+                    )} já está pronta para receber imagens.`,
+                    dataLabel: "📅 Data da festa:",
+                    dataValor: dataFormatada,
+                    botaoLabel: "Enviar fotos da festa",
+                    botaoHref: linkCompleto,
+                    textoFinal:
+                        "Pela sua área do usuário, você pode adicionar as imagens da sua festa e acompanhar as próximas etapas do sistema.",
+                }),
+            });
+        }
+    } catch (error) {
+        console.error("Erro ao enviar email para envio de imagens:", error);
+    }
+}
+
 export async function listarFestasAdmin(_req, res, next) {
     try {
         const { data, error } = await listarFestasAdminService();
@@ -159,6 +289,23 @@ export async function listarFestasAdmin(_req, res, next) {
         }
 
         const resultado = await anexarUsuarios(data || []);
+        res.json(resultado);
+    } catch (error) {
+        next(error);
+    }
+}
+
+export async function buscarFestaAdminPorId(req, res, next) {
+    try {
+        const { id } = req.params;
+
+        const { data, error } = await buscarFestaPorIdService(id);
+
+        if (error || !data) {
+            return res.status(404).json({ error: "Festa não encontrada" });
+        }
+
+        const [resultado] = await anexarUsuarios([data]);
         res.json(resultado);
     } catch (error) {
         next(error);
@@ -184,70 +331,7 @@ export async function marcarFestaComoRealizada(req, res, next) {
             return res.status(400).json({ error: error.message });
         }
 
-        try {
-            await criarNotificacao({
-                usuario_id: data.usuario_id,
-                tipo: "festa_realizada",
-                titulo: "Sua festa foi marcada como realizada",
-                mensagem: `Sua festa${montarTituloFesta(
-                    data.titulo
-                )} foi marcada como realizada com sucesso pela equipe da Fest Haus.`,
-                link: `/minhas-festas/${data.id}`,
-                referencia_id: data.id,
-            });
-        } catch (notificacaoError) {
-            console.error(
-                "Erro ao criar notificação de festa realizada:",
-                notificacaoError
-            );
-        }
-
-        try {
-            const { data: usuario } = await supabase
-                .from("usuarios")
-                .select("nome, email")
-                .eq("id", data.usuario_id)
-                .single();
-
-            if (usuario?.email) {
-                const linkCompleto = montarLinkFesta(data.id);
-                const dataFormatada = formatarDataPtBR(data.data_festa);
-
-                await enviarEmail({
-                    to: usuario.email,
-                    subject: "Sua festa foi marcada como realizada 🎉",
-                    text: `Olá${usuario?.nome ? `, ${usuario.nome}` : ""}!
-
-Sua festa${montarTituloFesta(
-                        data.titulo
-                    )} foi marcada como realizada com sucesso pela equipe da Fest Haus.
-
-Data da festa: ${dataFormatada}
-
-Acesse sua área:
-${linkCompleto}
-
-Ganhe algumas FestCoins adicionando as fotos da sua festa.
-
-Equipe Fest Haus`,
-                    html: montarTemplateEmail({
-                        titulo: "🎉 Sua festa foi marcada como realizada",
-                        saudacaoNome: usuario?.nome || "",
-                        textoPrincipal: `Sua festa${montarTituloFesta(
-                            data.titulo
-                        )} foi marcada como realizada com sucesso pela equipe da Fest Haus.`,
-                        dataLabel: "📅 Data da festa:",
-                        dataValor: dataFormatada,
-                        botaoLabel: "Acessar Minhas Festas",
-                        botaoHref: linkCompleto,
-                        textoFinal:
-                            "Pela sua área do usuário, você poderá mandar fotos da sua festa, para receber algumas Fest Coins.",
-                    }),
-                });
-            }
-        } catch (emailError) {
-            console.error("Erro ao enviar email de festa realizada:", emailError);
-        }
+        await enviarNotificacaoEEmailFestaRealizada(data);
 
         const [resultado] = await anexarUsuarios([data]);
 
@@ -260,122 +344,203 @@ Equipe Fest Haus`,
     }
 }
 
-export async function processarAguardandoImagensAutomatico(_req, res, next) {
+export async function voltarFestaParaAgendada(req, res, next) {
     try {
-        const resultado = await processarFestasParaAguardandoImagens();
+        const { id } = req.params;
+
+        const { data: festaAtual, error: erroBusca } =
+            await buscarFestaPorIdService(id);
+
+        if (erroBusca || !festaAtual) {
+            return res.status(404).json({ error: "Festa não encontrada" });
+        }
+
+        const { data, error } = await atualizarFestaParaAgendadaService(id);
+
+        if (error) {
+            return res.status(400).json({ error: error.message });
+        }
+
+        const [resultado] = await anexarUsuarios([data]);
+
         res.json({
-            message: "Processamento automático concluído.",
-            ...resultado,
+            message: "Festa voltou para agendada com sucesso.",
+            data: resultado,
         });
     } catch (error) {
         next(error);
     }
 }
 
-export async function processarFestasParaAguardandoImagens() {
+export async function atualizarProcessamentoAutomatico(req, res, next) {
+    try {
+        const { id } = req.params;
+        const { processar_automaticamente } = req.body;
+
+        const { data: festaAtual, error: erroBusca } =
+            await buscarFestaPorIdService(id);
+
+        if (erroBusca || !festaAtual) {
+            return res.status(404).json({ error: "Festa não encontrada" });
+        }
+
+        const { data, error } = await atualizarProcessamentoAutomaticoService(
+            id,
+            Boolean(processar_automaticamente)
+        );
+
+        if (error) {
+            return res.status(400).json({ error: error.message });
+        }
+
+        res.json({
+            message: "Processamento automático atualizado com sucesso.",
+            data,
+        });
+    } catch (error) {
+        next(error);
+    }
+}
+
+export async function atualizarProcessamentoAutomaticoGlobal(req, res, next) {
+    try {
+        const { processar_automaticamente } = req.body;
+
+        const { error } = await atualizarProcessamentoAutomaticoGlobalService(
+            Boolean(processar_automaticamente)
+        );
+
+        if (error) {
+            return res.status(400).json({ error: error.message });
+        }
+
+        res.json({
+            message: "Processamento automático global atualizado com sucesso.",
+            data: {
+                processar_automaticamente: Boolean(processar_automaticamente),
+            },
+        });
+    } catch (error) {
+        next(error);
+    }
+}
+
+export async function processarFestasAutomaticamente() {
     const hoje = new Date();
     hoje.setHours(0, 0, 0, 0);
 
     const { data: festas, error } =
-        await buscarFestasParaAguardarImagensService();
+        await buscarFestasAutomaticasParaProcessamentoService();
 
     if (error) {
         throw error;
     }
 
-    let processadas = 0;
+    let totalProcessadas = 0;
 
     for (const festa of festas || []) {
-        const baseData = festa.realizada_em || festa.data_festa;
-        if (!baseData) continue;
+        if (!festa.data_festa) continue;
 
-        const referencia = new Date(baseData);
-        referencia.setHours(0, 0, 0, 0);
+        const dataFesta = new Date(festa.data_festa);
+        dataFesta.setHours(0, 0, 0, 0);
 
-        const diaSeguinte = new Date(referencia);
-        diaSeguinte.setDate(diaSeguinte.getDate() + 1);
+        const dataLimite = new Date(dataFesta);
+        dataLimite.setDate(dataLimite.getDate() + 2);
 
-        if (hoje < diaSeguinte) {
+        if (hoje < dataLimite) {
             continue;
         }
 
-        const { error: updateError } =
-            await atualizarFestaParaAguardandoImagensService(festa.id);
+        let festaAtualizada = festa;
 
-        if (updateError) {
-            console.error(
-                "Erro ao atualizar festa para aguardando_imagens:",
-                updateError
-            );
-            continue;
-        }
+        if (festa.status === "agendada") {
+            const { data: realizadaData, error: realizadaError } =
+                await atualizarFestaParaRealizadaService(
+                    festa.id,
+                    new Date().toISOString()
+                );
 
-        try {
-            await criarNotificacao({
-                usuario_id: festa.usuario_id,
-                tipo: "enviar_imagens_festa",
-                titulo: "Agora você já pode enviar as fotos da sua festa",
-                mensagem: `Sua festa ${festa.titulo ? `"${festa.titulo}" ` : ""
-                    }já pode receber imagens. Envie suas fotos para participar das próximas etapas.`,
-                link: `/minhas-festas/${festa.id}`,
-                referencia_id: festa.id,
-            });
-        } catch (notificacaoError) {
-            console.error("Erro ao criar notificação de imagens:", notificacaoError);
-        }
-
-        try {
-            const { data: usuario } = await supabase
-                .from("usuarios")
-                .select("nome, email")
-                .eq("id", festa.usuario_id)
-                .single();
-
-            if (usuario?.email) {
-                const linkCompleto = montarLinkFesta(festa.id);
-                const dataFormatada = formatarDataPtBR(festa.data_festa);
-
-                await enviarEmail({
-                    to: usuario.email,
-                    subject: "📸 Envie as fotos da sua festa",
-                    text: `Olá${usuario?.nome ? `, ${usuario.nome}` : ""}!
-
-Sua festa${montarTituloFesta(
-                        festa.titulo
-                    )} já está pronta para receber imagens.
-
-Data da festa: ${dataFormatada}
-
-Envie suas fotos por aqui:
-${linkCompleto}
-
-Ganhe algumas FestCoins adicionando as fotos da sua festa.
-
-Equipe Fest Haus`,
-                    html: montarTemplateEmail({
-                        titulo: "📸 Envie as fotos da sua festa",
-                        saudacaoNome: usuario?.nome || "",
-                        textoPrincipal: `Sua festa${montarTituloFesta(
-                            festa.titulo
-                        )} já está pronta para receber imagens.`,
-                        dataLabel: "📅 Data da festa:",
-                        dataValor: dataFormatada,
-                        botaoLabel: "Enviar fotos da festa",
-                        botaoHref: linkCompleto,
-                        textoFinal:
-                            "Pela sua área do usuário, você pode adicionar as imagens da sua festa e acompanhar as próximas etapas do sistema.",
-                    }),
-                });
+            if (realizadaError || !realizadaData) {
+                console.error(
+                    "[festas-auto] erro ao marcar como realizada:",
+                    realizadaError
+                );
+                continue;
             }
-        } catch (emailError) {
-            console.error("Erro ao enviar email para envio de imagens:", emailError);
+
+            festaAtualizada = realizadaData;
+            await enviarNotificacaoEEmailFestaRealizada(festaAtualizada);
         }
 
-        processadas += 1;
+        if (festaAtualizada.situacao_imagens !== "aguardando_imagens") {
+            const { data: imagensData, error: imagensError } =
+                await atualizarSituacaoImagensParaAguardandoService(festa.id);
+
+            if (imagensError || !imagensData) {
+                console.error(
+                    "[festas-auto] erro ao liberar imagens:",
+                    imagensError
+                );
+                continue;
+            }
+
+            festaAtualizada = imagensData;
+            await enviarNotificacaoEEmailAguardandoImagens(festaAtualizada);
+        }
+
+        totalProcessadas += 1;
     }
 
     return {
         total_encontradas: (festas || []).length,
-        total_processadas: processadas,
+        total_processadas: totalProcessadas,
     };
+}
+
+export async function atualizarSituacaoImagens(req, res, next) {
+    try {
+        const { id } = req.params;
+        const { situacao_imagens } = req.body;
+
+        const situacoesPermitidas = [
+            "bloqueada",
+            "aguardando_imagens",
+            "em_analise",
+            "liberadas",
+        ];
+
+        if (!situacoesPermitidas.includes(situacao_imagens)) {
+            return res.status(400).json({
+                error:
+                    "situacao_imagens inválida. Use: bloqueada, aguardando_imagens, em_analise ou liberadas.",
+            });
+        }
+
+        const { data: festaAtual, error: erroBusca } =
+            await buscarFestaPorIdService(id);
+
+        if (erroBusca || !festaAtual) {
+            return res.status(404).json({ error: "Festa não encontrada" });
+        }
+
+        const { data, error } = await atualizarSituacaoImagensService(
+            id,
+            situacao_imagens
+        );
+
+        if (error || !data) {
+            return res.status(400).json({
+                error: error?.message || "Não foi possível atualizar a situação das imagens.",
+            });
+        }
+
+        const [resultado] = await anexarUsuarios([data]);
+
+        res.json({
+            message: "Situação das imagens atualizada com sucesso.",
+            data: resultado,
+        });
+    } catch (error) {
+        next(error);
+    }
 }
