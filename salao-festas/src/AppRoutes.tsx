@@ -28,6 +28,11 @@ import VerVisitas from "./pages/admin/VerVisitas";
 import AjustarServicos from "./pages/admin/AjustarServicos";
 import AjustarGaleria from "./pages/admin/AjustarGaleria";
 
+import Missoes from "./pages/Missoes";
+import Tiers from "./pages/Tiers";
+
+import PoliticaPrivacidade from "./pages/PoliticaPrivacidade";
+
 type PageTitleProps = {
   title: string;
   children: ReactNode;
@@ -178,12 +183,47 @@ function AppRoutes() {
           }
         />
 
+        <Route
+          path="/missoes"
+          element={
+            user ? (
+              <PageTitle title="Missões | Fest Haus">
+                <Missoes />
+              </PageTitle>
+            ) : (
+              LoginRequired
+            )
+          }
+        />
+
+        <Route
+          path="/tiers"
+          element={
+            user ? (
+              <PageTitle title="Tiers | Fest Haus">
+                <Tiers />
+              </PageTitle>
+            ) : (
+              LoginRequired
+            )
+          }
+        />
+
 
         <Route
           path="/suporte"
           element={
             <PageTitle title="Suporte | Fest Haus">
               <Suporte />
+            </PageTitle>
+          }
+        />
+
+        <Route
+          path="/politica-de-privacidade"
+          element={
+            <PageTitle title="Política de Privacidade | Fest Haus">
+              <PoliticaPrivacidade />
             </PageTitle>
           }
         />
