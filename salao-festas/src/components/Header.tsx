@@ -199,64 +199,112 @@ function Header() {
           <div
             style={{
               display: "flex",
-              alignItems: "center",
-              gap: "10px",
+              flexDirection: "column",
+              alignItems: "flex-start",
+              gap: "8px",
             }}
           >
-            <button
-              type="button"
-              onClick={() => navigate("/moedas")}
-              className="btn-admin-header"
+            <div
               style={{
-                marginLeft: "10px",
-                display: "inline-flex",
+                display: "flex",
                 alignItems: "center",
-                justifyContent: "center",
-                gap: "8px",
-                lineHeight: 1,
-                whiteSpace: "nowrap",
+                gap: "10px",
+                flexWrap: "wrap",
               }}
             >
-              <strong
+              <button
+                type="button"
+                onClick={() => navigate("/moedas")}
+                className="btn-admin-header"
                 style={{
+                  marginLeft: "10px",
                   display: "inline-flex",
                   alignItems: "center",
+                  justifyContent: "center",
+                  gap: "8px",
                   lineHeight: 1,
-                  position: "relative",
-                  top: "2px",
                   whiteSpace: "nowrap",
                 }}
+                title="Ir para Moedas"
               >
-                {carregandoMoedas ? "..." : moedas.saldo}
-              </strong>
-              <FestCoin size={24} />
-            </button>
+                <strong
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    lineHeight: 1,
+                    position: "relative",
+                    top: "2px",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {carregandoMoedas ? "..." : moedas.saldo}
+                </strong>
+                <FestCoin size={24} />
+              </button>
+
+              <div
+                onClick={() => navigate("/moedas")}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    navigate("/moedas");
+                  }
+                }}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "6px",
+                  padding: "8px 12px",
+                  borderRadius: "999px",
+                  border: "1px solid var(--cor-borda)",
+                  background: "var(--cor-fundo-secundario)",
+                  color: "inherit",
+                  boxShadow: "inset 0 0 0 1px rgba(0,0,0,0.04)",
+                  fontSize: "0.95rem",
+                  cursor: "pointer",
+                }}
+                title={
+                  moedas.checkinHoje
+                    ? "Check-in diário já realizado hoje"
+                    : "Check-in diário ainda não realizado hoje"
+                }
+              >
+                <span style={{ fontSize: "0.9rem", opacity: 0.8 }}>
+                  {moedas.checkinHoje ? "✅" : "⏳"}
+                </span>
+                <span>
+                  {moedas.checkinHoje ? "Check-in hoje" : "Check-in pendente"}
+                </span>
+              </div>
+            </div>
 
             <div
               style={{
                 display: "flex",
                 alignItems: "center",
-                gap: "6px",
-                padding: "8px 12px",
-                borderRadius: "999px",
-                border: "1px solid var(--cor-borda)",
-                background: "var(--cor-fundo-secundario)",
-                color: "inherit",
-                boxShadow: "inset 0 0 0 1px rgba(0,0,0,0.04)",
-                fontSize: "0.95rem",
+                gap: "10px",
+                flexWrap: "wrap",
+                marginLeft: "10px",
               }}
-              title={
-                moedas.checkinHoje
-                  ? "Check-in diário já realizado hoje"
-                  : "Check-in diário ainda não realizado hoje"
-              }
             >
-              <span style={{ fontSize: "0.9rem", opacity: 0.8 }}>
-                {moedas.checkinHoje ? "✅" : "⏳"}
-              </span>
-              <span>
-                {moedas.checkinHoje ? "Check-in hoje" : "Check-in pendente"}
-              </span>
+              <button
+                type="button"
+                onClick={() => navigate("/missoes")}
+                className="btn-admin-header"
+                title="Ir para Missões"
+              >
+                Missões
+              </button>
+
+              <button
+                type="button"
+                onClick={() => navigate("/tiers")}
+                className="btn-admin-header"
+                title="Ir para Tiers"
+              >
+                Tiers
+              </button>
             </div>
           </div>
         )}

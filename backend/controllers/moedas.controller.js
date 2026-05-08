@@ -284,3 +284,91 @@ export async function fazerCheckinDiario(req, res, next) {
         next(error);
     }
 }
+
+function usuarioLogadoId(req) {
+    return req.user?.id || req.usuario?.id || req.auth?.user?.id || null;
+}
+
+export async function buscarTiersMoedas(req, res, next) {
+    try {
+        const userId = usuarioLogadoId(req);
+
+        if (!userId) {
+            return res.status(401).json({ error: "Usuário não autenticado." });
+        }
+
+        const [
+            { data: tiersFotos, error: errorFotos },
+            { data: tiersFestas, error: errorFestas },
+            { data: tiersDestaque, error: errorDestaque },
+            { count: fotosAprovadasCount, error: errorFotosResumo },
+            { count: festasRealizadasCount, error: errorFestasResumo },
+            { count: destaquesVencidosCount, error: errorDestaquesResumo },
+        ] = await Promise.all([
+            supabase
+                .from("moeda_tiers_fotos")
+                .select("id, tier_meta, recompensa, created_at")
+                .eq("usuario_id", userId)
+                .order("tier_meta", { ascending: true }),
+
+            supabase
+                .from("moeda_tiers_festas")
+                .select("id, tier_meta, recompensa, created_at")
+                .eq("usuario_id", userId)
+                .order("tier_meta", { ascending: true }),
+
+            supabase
+                .from("moeda_tiers_destaque")
+                .select("id, tier_meta, recompensa, created_at")
+                .eq("usuario_id", userId)
+                .order("tier_meta", { ascending: true }),
+
+            supabase
+                .from("fotos_festa_usuario")
+                .select("*", { count: "exact", head: true })
+                .eq("usuario_id", userId)
+                .eq("aprovada_para_coin", true),
+
+            supabase
+                .from("festas_usuario")
+                .select("*", { count: "exact", head: true })
+                .eq("usuario_id", userId)
+                .eq("realizada", true)
+                .eq("criado_pelo_site", true),
+
+            supabase
+                .from("fotos_destaque_mes")
+                .select("*", { count: "exact", head: true })
+                .eq("usuario_id", userId)
+                .eq("status", "vencedora"),
+        ]);
+
+        const erros = [
+            errorFotos,
+            errorFestas,
+            errorDestaque,
+            errorFotosResumo,
+            errorFestasResumo,
+            errorDestaquesResumo,
+        ].filter(Boolean);
+
+        if (erros.length > 0) {
+            return res.status(400).json({
+                error: erros[0]?.message || "Não foi possível carregar os tiers.",
+            });
+        }
+
+        res.json({
+            resumo: {
+                fotos_aprovadas_para_coin: fotosAprovadasCount || 0,
+                festas_realizadas_elegiveis: festasRealizadasCount || 0,
+                destaques_vencidos: destaquesVencidosCount || 0,
+            },
+            tiers_fotos: tiersFotos || [],
+            tiers_festas: tiersFestas || [],
+            tiers_destaque: tiersDestaque || [],
+        });
+    } catch (error) {
+        next(error);
+    }
+}

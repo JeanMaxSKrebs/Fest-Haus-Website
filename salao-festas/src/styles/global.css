@@ -152,7 +152,9 @@
 
 @import "./pages/perfil.css";
 @import "./pages/moedas.css";
+@import "./pages/missoes.css";
 @import "./pages/suporte.css";
+@import "./pages/tiers.css";
 @import "./pages/minhasfestas.css";
 
 @import "./pages/admin/layout.css";

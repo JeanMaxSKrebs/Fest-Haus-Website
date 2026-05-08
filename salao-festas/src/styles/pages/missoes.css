@@ -1,0 +1,111 @@
+.missoes-lista {
+    display: grid;
+    gap: 16px;
+}
+
+.missao-card {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--cor-borda);
+    border-radius: 18px;
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.missao-card__topo {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    align-items: flex-start;
+}
+
+.missao-card__titulo {
+    font-size: 18px;
+    margin-bottom: 6px;
+}
+
+.missao-card__descricao {
+    color: var(--cor-texto-secundario);
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.missao-card__coin {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.missao-card__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.missao-card__meta span {
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.06);
+    font-size: 12px;
+    color: var(--cor-texto-secundario);
+}
+
+.missao-card__progresso {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.missao-card__barra {
+    flex: 1;
+    height: 10px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.08);
+    overflow: hidden;
+}
+
+.missao-card__barra-fill {
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, #7c3aed, #cc9e3e);
+}
+
+.missao-card__progresso-texto {
+    min-width: 56px;
+    text-align: right;
+    font-size: 13px;
+    color: var(--cor-texto-secundario);
+}
+
+.missao-card__rodape {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.missao-card__status {
+    font-size: 13px;
+    color: var(--cor-texto-secundario);
+}
+
+@media (max-width: 640px) {
+    .missao-card__topo,
+    .missao-card__rodape {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .missao-card__progresso {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .missao-card__progresso-texto {
+        text-align: left;
+    }
+}

@@ -21,6 +21,8 @@ import festasRoutes from "./routes/festas.routes.js";
 import perfilRoutes from "./routes/perfil.routes.js";
 import moedasRoutes from "./routes/moedas.routes.js";
 
+import missoesRoutes from "./routes/missoes.routes.js";
+
 import { iniciarJobLimpezaUsuarios } from "./jobs/cleanup.job.js";
 import maintenanceRoutes from "./routes/maintenance.routes.js";
 import festasAdminRoutes from "./routes/festas-admin.routes.js";
@@ -86,6 +88,7 @@ app.use(fotosFestaRoutes);
 app.use(festasRoutes);
 app.use(perfilRoutes);
 app.use(moedasRoutes);
+app.use(missoesRoutes);
 
 app.use(notFoundHandler);
 app.use(errorHandler);
