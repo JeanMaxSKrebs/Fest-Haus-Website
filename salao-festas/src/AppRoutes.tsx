@@ -28,8 +28,8 @@ import VerVisitas from "./pages/admin/VerVisitas";
 import AjustarServicos from "./pages/admin/AjustarServicos";
 import AjustarGaleria from "./pages/admin/AjustarGaleria";
 
-import Missoes from "./pages/Missoes";
-import Tiers from "./pages/Tiers";
+// import Missoes from "./pages/Missoes";
+// import Tiers from "./pages/Tiers";
 
 import PoliticaPrivacidade from "./pages/PoliticaPrivacidade";
 import ExclusaoConta from "./pages/ExclusaoConta";
@@ -183,7 +183,7 @@ function AppRoutes() {
             )
           }
         />
-
+{/* 
         <Route
           path="/missoes"
           element={
@@ -195,9 +195,9 @@ function AppRoutes() {
               LoginRequired
             )
           }
-        />
+        /> */}
 
-        <Route
+        {/* <Route
           path="/tiers"
           element={
             user ? (
@@ -208,7 +208,7 @@ function AppRoutes() {
               LoginRequired
             )
           }
-        />
+        /> */}
 
 
         <Route
