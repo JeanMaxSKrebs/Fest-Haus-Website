@@ -219,6 +219,46 @@ body.modal-open {
     animation: girar 1s linear infinite;
 }
 
+.orcamento-status-select {
+    min-width: 155px;
+    border-radius: 999px;
+    border: 1px solid #d1d5db;
+    background-color: #e5e7eb;
+    color: #374151;
+    font-weight: 800;
+    padding: 0.45rem 0.8rem;
+}
+
+.orcamento-status-select--aprovada {
+    background-color: #d1d5db;
+    color: #14532d;
+    border-color: #9ca3af;
+}
+
+.orcamento-status-select--rejeitada {
+    background-color: #fee2e2;
+    color: #991b1b;
+    border-color: #fecaca;
+}
+
+.orcamento-status-select--convertida {
+    background-color: #e5e7eb;
+    color: #374151;
+    border-color: #9ca3af;
+}
+
+.orcamento-status-select--analise {
+    background-color: #fef3c7;
+    color: #92400e;
+    border-color: #fde68a;
+}
+
+.orcamento-status-select--pendente {
+    background-color: #e5e7eb;
+    color: #374151;
+    border-color: #d1d5db;
+}
+
 @keyframes girar {
     from {
         transform: rotate(0deg);

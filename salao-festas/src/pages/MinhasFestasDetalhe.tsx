@@ -95,6 +95,13 @@ export default function MinhasFestasDetalhe({ setPageTitle }: Props) {
     const [erro, setErro] = useState("");
     const [enviando, setEnviando] = useState(false);
     // const [enviandoDestaque, setEnviandoDestaque] = useState(false);
+
+    const [editandoFesta, setEditandoFesta] = useState(false);
+    const [salvandoFesta, setSalvandoFesta] = useState(false);
+    const [tituloFesta, setTituloFesta] = useState("");
+    const [dataFesta, setDataFesta] = useState("");
+    const [horaFesta, setHoraFesta] = useState("18:00");
+
     const [selecionadas, setSelecionadas] = useState<string[]>([]);
 
     const situacaoImagens = festa?.situacao_imagens ?? null;
@@ -139,6 +146,31 @@ export default function MinhasFestasDetalhe({ setPageTitle }: Props) {
             carregar();
         }
     }, [id, user, loading, setPageTitle]);
+
+    useEffect(() => {
+        if (!festa) return;
+
+        setTituloFesta(festa.titulo || "");
+
+        if (festa.data_festa) {
+            const data = new Date(festa.data_festa);
+
+            if (!Number.isNaN(data.getTime())) {
+                const ano = data.getFullYear();
+                const mes = String(data.getMonth() + 1).padStart(2, "0");
+                const dia = String(data.getDate()).padStart(2, "0");
+                const horas = String(data.getHours()).padStart(2, "0");
+                const minutos = String(data.getMinutes()).padStart(2, "0");
+
+                setDataFesta(`${ano}-${mes}-${dia}`);
+                setHoraFesta(`${horas}:${minutos}`);
+                return;
+            }
+        }
+
+        setDataFesta("");
+        setHoraFesta("18:00");
+    }, [festa]);
 
     useEffect(() => {
         return () => {
@@ -293,6 +325,43 @@ export default function MinhasFestasDetalhe({ setPageTitle }: Props) {
         );
     }
 
+    async function salvarDadosFesta() {
+        if (!festa) return;
+
+        if (!tituloFesta.trim()) {
+            alert("Informe o nome da festa.");
+            return;
+        }
+
+        if (!dataFesta) {
+            alert("Informe a data da festa.");
+            return;
+        }
+
+        try {
+            setSalvandoFesta(true);
+
+            const dataCompleta = `${dataFesta}T${horaFesta || "18:00"}:00`;
+
+            const atualizada = await apiFetch(`/api/festas/${festa.id}`, {
+                method: "PUT",
+                body: JSON.stringify({
+                    titulo: tituloFesta.trim(),
+                    data_festa: dataCompleta,
+                }),
+            });
+
+            setFesta(atualizada);
+            setEditandoFesta(false);
+            alert("Dados da festa atualizados com sucesso.");
+        } catch (error) {
+            console.error("Erro ao salvar dados da festa:", error);
+            alert("Não foi possível salvar os dados da festa.");
+        } finally {
+            setSalvandoFesta(false);
+        }
+    }
+
     return (
         <main className="minhas-festas-page">
             <div className="minhas-festas-container">
@@ -308,7 +377,77 @@ export default function MinhasFestasDetalhe({ setPageTitle }: Props) {
                     <article className="minhas-festas-card">
                         <div className="minhas-festas-card-content">
                             <h2 className="minhas-festas-card-title">Informações da Festa</h2>
+                            {(!festa.titulo || !festa.data_festa) && !editandoFesta && (
+                                <div className="minhas-festas-alerta-edicao">
+                                    <strong>Complete os dados da sua festa</strong>
+                                    <p>
+                                        Essa festa foi criada a partir de um orçamento aprovado. Informe o nome,
+                                        data e horário para continuar o agendamento.
+                                    </p>
 
+                                    <button
+                                        type="button"
+                                        className="minhas-festas-botao"
+                                        onClick={() => setEditandoFesta(true)}
+                                    >
+                                        Completar dados
+                                    </button>
+                                </div>
+                            )}
+
+                            {editandoFesta && (
+                                <div className="minhas-festas-form-edicao">
+                                    <div className="form-group">
+                                        <label>Nome da festa</label>
+                                        <input
+                                            className="input"
+                                            value={tituloFesta}
+                                            onChange={(e) => setTituloFesta(e.target.value)}
+                                            placeholder="Ex: Aniversário da Maria"
+                                        />
+                                    </div>
+
+                                    <div className="form-group">
+                                        <label>Data</label>
+                                        <input
+                                            type="date"
+                                            className="input"
+                                            value={dataFesta}
+                                            onChange={(e) => setDataFesta(e.target.value)}
+                                        />
+                                    </div>
+
+                                    <div className="form-group">
+                                        <label>Horário</label>
+                                        <input
+                                            type="time"
+                                            className="input"
+                                            value={horaFesta}
+                                            onChange={(e) => setHoraFesta(e.target.value)}
+                                        />
+                                    </div>
+
+                                    <div className="minhas-festas-form-acoes">
+                                        <button
+                                            type="button"
+                                            className="minhas-festas-botao"
+                                            onClick={salvarDadosFesta}
+                                            disabled={salvandoFesta}
+                                        >
+                                            {salvandoFesta ? "Salvando..." : "Salvar dados"}
+                                        </button>
+
+                                        <button
+                                            type="button"
+                                            className="minhas-festas-botao secundario"
+                                            onClick={() => setEditandoFesta(false)}
+                                            disabled={salvandoFesta}
+                                        >
+                                            Cancelar
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
                             <div className="minhas-festas-info">
                                 <p>
                                     <strong>Data:</strong> {formatarData(festa.data_festa)}
@@ -359,6 +498,14 @@ export default function MinhasFestasDetalhe({ setPageTitle }: Props) {
                             <span className="minhas-festas-card-action">
                                 Acompanhe suas outras festas
                             </span>
+
+                            <button
+                                type="button"
+                                className="minhas-festas-botao secundario"
+                                onClick={() => setEditandoFesta(true)}
+                            >
+                                Editar dados
+                            </button>
 
                             <button
                                 type="button"

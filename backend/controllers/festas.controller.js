@@ -1,7 +1,12 @@
 import { supabase } from "../config/supabase.js";
+import {
+    criarEventoFesta,
+    atualizarEventoFesta,
+    deletarEventoFesta,
+} from "../services/google-calendar.service.js";
 
 const FESTA_SELECT =
-    "id, usuario_id, agendamento_id, titulo, data_festa, criado_pelo_site, realizada, status, situacao_imagens, processar_automaticamente, created_at";
+    "id, usuario_id, agendamento_id, titulo, data_festa, google_event_id, criado_pelo_site, realizada, status, situacao_imagens, processar_automaticamente, created_at";
 
 function usuarioLogadoId(req) {
     return req.user?.id || req.usuario?.id || req.auth?.user?.id || null;
@@ -29,6 +34,66 @@ async function buscarFestaBase(id) {
         .single();
 
     return { data, error };
+}
+
+async function sincronizarFestaComGoogleCalendar(festa) {
+    if (!festa?.id || !festa?.data_festa) {
+        return festa;
+    }
+
+    // Festas vindas de agendamento já têm evento criado pelo fluxo de agendamento.
+    // Aqui sincronizamos apenas festas criadas por orçamento/manual.
+    if (festa.agendamento_id) {
+        return festa;
+    }
+
+    try {
+        let googleEvent = null;
+
+        if (festa.google_event_id) {
+            googleEvent = await atualizarEventoFesta({
+                googleEventId: festa.google_event_id,
+                titulo: festa.titulo,
+                data_festa: festa.data_festa,
+                descricao: `Festa do usuário ${festa.usuario_id}`,
+            });
+
+            return {
+                ...festa,
+                google_event_id: googleEvent?.id || festa.google_event_id,
+            };
+        }
+
+        googleEvent = await criarEventoFesta({
+            titulo: festa.titulo,
+            data_festa: festa.data_festa,
+            descricao: `Festa do usuário ${festa.usuario_id}`,
+        });
+
+        if (!googleEvent?.id) {
+            return festa;
+        }
+
+        const { data: festaAtualizada, error } = await supabase
+            .from("festas_usuario")
+            .update({ google_event_id: googleEvent.id })
+            .eq("id", festa.id)
+            .select(FESTA_SELECT)
+            .single();
+
+        if (error) {
+            console.error("Erro ao salvar google_event_id na festa:", error);
+            return {
+                ...festa,
+                google_event_id: googleEvent.id,
+            };
+        }
+
+        return festaAtualizada;
+    } catch (error) {
+        console.error("Erro ao sincronizar festa com Google Calendar:", error);
+        return festa;
+    }
 }
 
 async function montarFestasComResumoFotos(festas) {
@@ -289,6 +354,10 @@ export async function atualizarFesta(req, res, next) {
             }
         }
 
+        if ("data_festa" in payload && payload.data_festa) {
+            payload.data_festa = String(payload.data_festa).replace("Z", "");
+        }
+
         const { data, error } = await supabase
             .from("festas_usuario")
             .update(payload)
@@ -300,7 +369,9 @@ export async function atualizarFesta(req, res, next) {
             return res.status(400).json({ error: error.message });
         }
 
-        const [festaComResumo] = await montarFestasComResumoFotos([data]);
+        const festaSincronizada = await sincronizarFestaComGoogleCalendar(data);
+
+        const [festaComResumo] = await montarFestasComResumoFotos([festaSincronizada]);
 
         res.json(festaComResumo);
     } catch (error) {
@@ -319,7 +390,7 @@ export async function deletarFesta(req, res, next) {
 
         const { data: festaAtual, error: erroBusca } = await supabase
             .from("festas_usuario")
-            .select("id, usuario_id")
+            .select("id, usuario_id, google_event_id")
             .eq("id", id)
             .single();
 
@@ -331,6 +402,14 @@ export async function deletarFesta(req, res, next) {
 
         if (festaAtual.usuario_id !== userId && !isAdmin) {
             return res.status(403).json({ error: "Acesso negado" });
+        }
+
+        if (festaAtual.google_event_id) {
+            try {
+                await deletarEventoFesta(festaAtual.google_event_id);
+            } catch (calendarError) {
+                console.error("Erro ao deletar evento da festa no Google Calendar:", calendarError);
+            }
         }
 
         const { error } = await supabase

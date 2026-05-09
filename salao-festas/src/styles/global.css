@@ -149,6 +149,7 @@
 @import "./components/forms.css";
 @import "./components/shared.css";
 @import "./components/footer.css";
+@import "./components/notificacoes-popover.css";
 
 @import "./pages/perfil.css";
 @import "./pages/moedas.css";

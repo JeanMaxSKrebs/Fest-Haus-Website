@@ -102,10 +102,12 @@ export default function SolicitacoesOrcamento() {
   function classeStatus(status: string) {
     const valor = status?.toLowerCase();
 
-    if (valor === "aprovada") return "admin-role-badge aprovado";
-    if (valor === "rejeitada") return "admin-role-badge recusado";
-    if (valor === "convertida_modelo") return "admin-role-badge aprovado";
-    return "admin-role-badge pendente";
+    if (valor === "aprovada") return "orcamento-status-select--aprovada";
+    if (valor === "rejeitada") return "orcamento-status-select--rejeitada";
+    if (valor === "convertida_modelo") return "orcamento-status-select--convertida";
+    if (valor === "em_analise") return "orcamento-status-select--analise";
+
+    return "orcamento-status-select--pendente";
   }
 
   function formatarData(data: string) {
@@ -163,7 +165,7 @@ export default function SolicitacoesOrcamento() {
 
                     <td>
                       <select
-                        className={`admin-select ${classeStatus(item.status)}`}
+                        className={`admin-select orcamento-status-select ${classeStatus(item.status)}`}
                         value={item.status}
                         onChange={(e) => atualizarStatus(item.id, e.target.value)}
                       >

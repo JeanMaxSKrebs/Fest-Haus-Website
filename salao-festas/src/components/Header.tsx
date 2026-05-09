@@ -4,6 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import { apiFetch } from "../lib/api";
 import LoginModal from "./LoginModal";
 import FestCoin from "./coin/FestCoin";
+import { Bell, X } from "lucide-react";
 
 type ResumoMoedasApi = {
   saldo: number;
@@ -23,6 +24,27 @@ type PerfilApi = {
   created_at: string | null;
 };
 
+type Notificacao = {
+  id: string;
+  usuario_id: string;
+  tipo: string;
+  titulo: string;
+  mensagem: string;
+  link: string | null;
+  lida: boolean;
+  referencia_id: string | null;
+  created_at: string;
+};
+
+function formatarDataNotificacao(data: string) {
+  return new Date(data).toLocaleDateString("pt-BR", {
+    day: "2-digit",
+    month: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
 function Header() {
   const { user, signOut, isAdmin, loading } = useAuth();
   const [tema, setTema] = useState("");
@@ -34,8 +56,10 @@ function Header() {
     checkinHoje: false,
   });
   const [carregandoMoedas, setCarregandoMoedas] = useState(false);
-
-  const navigate = useNavigate();
+  const [notificacoesNaoLidas, setNotificacoesNaoLidas] = useState(0);
+  const [notificacoes, setNotificacoes] = useState<Notificacao[]>([]);
+  const [abrirNotificacoes, setAbrirNotificacoes] = useState(false);
+  const [carregandoNotificacoes, setCarregandoNotificacoes] = useState(false);  const navigate = useNavigate();
   const location = useLocation();
 
   useEffect(() => {
@@ -53,6 +77,7 @@ function Header() {
   useEffect(() => {
     carregarResumoMoedas();
     carregarNomeUsuario();
+    carregarNotificacoesNaoLidas();
   }, [user, location.pathname]);
 
   useEffect(() => {
@@ -72,6 +97,8 @@ function Header() {
       window.removeEventListener("perfil-atualizado", handlePerfilAtualizado);
     };
   }, [user]);
+
+
 
   async function carregarNomeUsuario() {
     if (!user) {
@@ -128,6 +155,100 @@ function Header() {
       });
     } finally {
       setCarregandoMoedas(false);
+    }
+  }
+
+  async function carregarNotificacoesNaoLidas() {
+    if (!user) {
+      setNotificacoesNaoLidas(0);
+      return;
+    }
+
+    try {
+      const data = await apiFetch("/api/notificacoes/minhas/nao-lidas");
+      setNotificacoesNaoLidas(Number(data?.nao_lidas || 0));
+    } catch (error) {
+      console.error("Erro ao carregar notificações:", error);
+      setNotificacoesNaoLidas(0);
+    }
+  }
+
+  async function carregarNotificacoes() {
+    if (!user) {
+      setNotificacoes([]);
+      return;
+    }
+
+    try {
+      setCarregandoNotificacoes(true);
+
+      const data = await apiFetch("/api/notificacoes/minhas");
+      setNotificacoes(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error("Erro ao carregar lista de notificações:", error);
+      setNotificacoes([]);
+    } finally {
+      setCarregandoNotificacoes(false);
+    }
+  }
+
+  async function toggleNotificacoes() {
+    const novoEstado = !abrirNotificacoes;
+    setAbrirNotificacoes(novoEstado);
+
+    if (novoEstado) {
+      await carregarNotificacoes();
+      await carregarNotificacoesNaoLidas();
+    }
+  }
+
+  async function abrirNotificacao(notificacao: Notificacao) {
+    try {
+      if (!notificacao.lida) {
+        await apiFetch(`/api/notificacoes/${notificacao.id}/lida`, {
+          method: "PUT",
+        });
+
+        setNotificacoes((prev) =>
+          prev.map((item) =>
+            item.id === notificacao.id ? { ...item, lida: true } : item
+          )
+        );
+
+        setNotificacoesNaoLidas((prev) => Math.max(prev - 1, 0));
+      }
+
+      setAbrirNotificacoes(false);
+
+      if (notificacao.link) {
+        navigate(notificacao.link);
+      }
+    } catch (error) {
+      console.error("Erro ao abrir notificação:", error);
+
+      if (notificacao.link) {
+        setAbrirNotificacoes(false);
+        navigate(notificacao.link);
+      }
+    }
+  }
+
+  async function marcarTodasComoLidas() {
+    try {
+      await apiFetch("/api/notificacoes/lidas/todas", {
+        method: "PUT",
+      });
+
+      setNotificacoes((prev) =>
+        prev.map((item) => ({
+          ...item,
+          lida: true,
+        }))
+      );
+
+      setNotificacoesNaoLidas(0);
+    } catch (error) {
+      console.error("Erro ao marcar todas como lidas:", error);
     }
   }
 
@@ -362,6 +483,91 @@ function Header() {
                 Olá, <strong>{nomeUsuario}</strong>
               </span>
 
+                <div className="header-notificacoes-wrapper">
+                  <button
+                    type="button"
+                    onClick={toggleNotificacoes}
+                    className="btn-admin-header header-notificacao"
+                    title="Notificações"
+                  >
+                    <Bell size={18} />
+                    <span>Notificações</span>
+
+                    {notificacoesNaoLidas > 0 && (
+                      <span className="header-notificacao__badge">
+                        {notificacoesNaoLidas > 9 ? "9+" : notificacoesNaoLidas}
+                      </span>
+                    )}
+                  </button>
+
+                  {abrirNotificacoes && (
+                    <div className="notificacoes-popover">
+                      <div className="notificacoes-popover__header">
+                        <div>
+                          <strong>Notificações</strong>
+                          <span>
+                            {notificacoesNaoLidas > 0
+                              ? `${notificacoesNaoLidas} não lida(s)`
+                              : "Tudo em dia"}
+                          </span>
+                        </div>
+
+                        <button
+                          type="button"
+                          className="notificacoes-popover__fechar"
+                          onClick={() => setAbrirNotificacoes(false)}
+                          title="Fechar"
+                        >
+                          <X size={16} />
+                        </button>
+                      </div>
+
+                      {notificacoesNaoLidas > 0 && (
+                        <button
+                          type="button"
+                          className="notificacoes-popover__marcar"
+                          onClick={marcarTodasComoLidas}
+                        >
+                          Marcar todas como lidas
+                        </button>
+                      )}
+
+                      <div className="notificacoes-popover__lista">
+                        {carregandoNotificacoes ? (
+                          <div className="notificacoes-popover__vazio">
+                            Carregando notificações...
+                          </div>
+                        ) : notificacoes.length === 0 ? (
+                          <div className="notificacoes-popover__vazio">
+                            Nenhuma notificação ainda.
+                          </div>
+                        ) : (
+                          notificacoes.map((notificacao) => (
+                            <button
+                              key={notificacao.id}
+                              type="button"
+                              className={`notificacoes-popover__item ${notificacao.lida ? "lida" : "nao-lida"
+                                }`}
+                              onClick={() => abrirNotificacao(notificacao)}
+                            >
+                              <div className="notificacoes-popover__item-topo">
+                                <strong>{notificacao.titulo}</strong>
+
+                                {!notificacao.lida && (
+                                  <span className="notificacoes-popover__novo">Nova</span>
+                                )}
+                              </div>
+
+                              <p>{notificacao.mensagem}</p>
+
+                              <small>{formatarDataNotificacao(notificacao.created_at)}</small>
+                            </button>
+                          ))
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
               <button
                 type="button"
                 onClick={() => navigate("/perfil")}

@@ -599,3 +599,44 @@
         width: 100%;
     }
 }
+
+.minhas-festas-alerta-edicao {
+    margin-bottom: 18px;
+    padding: 16px;
+    border-radius: 16px;
+    border: 1px solid rgba(204, 158, 62, 0.45);
+    background: rgba(204, 158, 62, 0.12);
+}
+
+.minhas-festas-alerta-edicao strong {
+    display: block;
+    margin-bottom: 6px;
+    color: #cc9e3e;
+}
+
+.minhas-festas-alerta-edicao p {
+    margin: 0 0 12px;
+    opacity: 0.85;
+}
+
+.minhas-festas-form-edicao {
+    display: grid;
+    gap: 14px;
+    margin-bottom: 18px;
+    padding: 16px;
+    border-radius: 16px;
+    border: 1px solid var(--cor-borda);
+    background: var(--cor-fundo-secundario);
+}
+
+.minhas-festas-form-acoes {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.minhas-festas-botao.secundario {
+    background: transparent;
+    border: 1px solid var(--cor-borda);
+    color: inherit;
+}

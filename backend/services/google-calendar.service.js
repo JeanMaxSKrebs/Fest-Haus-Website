@@ -73,11 +73,11 @@ export async function criarEventoAgendamento({
         summary: `Fest Haus - ${servico}`,
         description: mensagem || "",
         start: {
-            dateTime: inicio.toISOString(),
+            dateTime: inicioDateTime,
             timeZone: "America/Sao_Paulo",
         },
         end: {
-            dateTime: fim.toISOString(),
+            dateTime: fimDateTime,
             timeZone: "America/Sao_Paulo",
         },
     };
@@ -99,11 +99,11 @@ export async function criarEventoVisita({ data_visita, mensagem }) {
         summary: "Fest Haus - Visita",
         description: mensagem || "Visita solicitada pelo site",
         start: {
-            dateTime: inicio.toISOString(),
+            dateTime: inicioDateTime,
             timeZone: "America/Sao_Paulo",
         },
         end: {
-            dateTime: fim.toISOString(),
+            dateTime: fimDateTime,
             timeZone: "America/Sao_Paulo",
         },
     };
@@ -132,4 +132,98 @@ export async function deletarEventoVisita(googleEventId) {
         calendarId: process.env.GOOGLE_VISITAS_CALENDAR_ID,
         eventId: googleEventId,
     });
+}
+
+export async function criarEventoFesta({
+    titulo,
+    data_festa,
+    descricao,
+}) {
+    const inicioDateTime = montarDateTimeSaoPaulo(data_festa);
+
+    const inicio = new Date(inicioDateTime);
+    const fim = new Date(inicio);
+    fim.setHours(fim.getHours() + 4);
+
+    const fimDateTime = fim.toLocaleString("sv-SE", {
+        timeZone: "America/Sao_Paulo",
+    }).replace(" ", "T");
+
+    const event = {
+        summary: `Fest Haus - ${titulo || "Festa"}`,
+        description: descricao || "Festa criada pelo site Fest Haus",
+        start: {
+            dateTime: inicioDateTime,
+            timeZone: "America/Sao_Paulo",
+        },
+        end: {
+            dateTime: fimDateTime,
+            timeZone: "America/Sao_Paulo",
+        },
+    };
+
+    const googleResponse = await calendar.events.insert({
+        calendarId: process.env.GOOGLE_AGENDAMENTOS_CALENDAR_ID,
+        requestBody: event,
+    });
+
+    return googleResponse.data;
+}
+
+export async function atualizarEventoFesta({
+    googleEventId,
+    titulo,
+    data_festa,
+    descricao,
+}) {
+    if (!googleEventId) return null;
+
+    const inicioDateTime = montarDateTimeSaoPaulo(data_festa);
+
+    const inicio = new Date(inicioDateTime);
+    const fim = new Date(inicio);
+    fim.setHours(fim.getHours() + 4);
+
+    const fimDateTime = fim.toLocaleString("sv-SE", {
+        timeZone: "America/Sao_Paulo",
+    }).replace(" ", "T");
+
+    const event = {
+        summary: `Fest Haus - ${titulo || "Festa"}`,
+        description: descricao || "Festa atualizada pelo site Fest Haus",
+        start: {
+            dateTime: inicioDateTime,
+            timeZone: "America/Sao_Paulo",
+        },
+        end: {
+            dateTime: fimDateTime,
+            timeZone: "America/Sao_Paulo",
+        },
+    };
+
+    const googleResponse = await calendar.events.update({
+        calendarId: process.env.GOOGLE_AGENDAMENTOS_CALENDAR_ID,
+        eventId: googleEventId,
+        requestBody: event,
+    });
+
+    return googleResponse.data;
+}
+
+export async function deletarEventoFesta(googleEventId) {
+    if (!googleEventId) return;
+
+    await calendar.events.delete({
+        calendarId: process.env.GOOGLE_AGENDAMENTOS_CALENDAR_ID,
+        eventId: googleEventId,
+    });
+}
+
+function montarDateTimeSaoPaulo(data_festa) {
+    if (!data_festa) return null;
+
+    // Se vier "2026-05-10T18:00:00", mantém como horário local de São Paulo
+    const valor = String(data_festa).replace("Z", "");
+
+    return valor.length === 16 ? `${valor}:00` : valor;
 }
