@@ -94,7 +94,7 @@ export default function MinhasFestasDetalhe({ setPageTitle }: Props) {
     const [carregando, setCarregando] = useState(true);
     const [erro, setErro] = useState("");
     const [enviando, setEnviando] = useState(false);
-    const [enviandoDestaque, setEnviandoDestaque] = useState(false);
+    // const [enviandoDestaque, setEnviandoDestaque] = useState(false);
     const [selecionadas, setSelecionadas] = useState<string[]>([]);
 
     const situacaoImagens = festa?.situacao_imagens ?? null;
@@ -227,33 +227,33 @@ export default function MinhasFestasDetalhe({ setPageTitle }: Props) {
         });
     }
 
-    async function enviarDestaque() {
-        if (!id || selecionadas.length === 0) return;
+    // async function enviarDestaque() {
+    //     if (!id || selecionadas.length === 0) return;
 
-        try {
-            setEnviandoDestaque(true);
+    //     try {
+    //         setEnviandoDestaque(true);
 
-            await apiFetch("/api/fotos-festa/destaque", {
-                method: "POST",
-                body: JSON.stringify({
-                    festa_id: id,
-                    fotos_ids: selecionadas,
-                }),
-                headers: {
-                    "Content-Type": "application/json",
-                },
-            });
+    //         await apiFetch("/api/fotos-festa/destaque", {
+    //             method: "POST",
+    //             body: JSON.stringify({
+    //                 festa_id: id,
+    //                 fotos_ids: selecionadas,
+    //             }),
+    //             headers: {
+    //                 "Content-Type": "application/json",
+    //             },
+    //         });
 
-            alert("Fotos enviadas para destaque com sucesso.");
-            setSelecionadas([]);
-            await recarregarFotos();
-        } catch (err) {
-            console.error("Erro ao enviar destaque:", err);
-            alert("Não foi possível enviar as fotos para destaque.");
-        } finally {
-            setEnviandoDestaque(false);
-        }
-    }
+    //         alert("Fotos enviadas para destaque com sucesso.");
+    //         setSelecionadas([]);
+    //         await recarregarFotos();
+    //     } catch (err) {
+    //         console.error("Erro ao enviar destaque:", err);
+    //         alert("Não foi possível enviar as fotos para destaque.");
+    //     } finally {
+    //         setEnviandoDestaque(false);
+    //     }
+    // }
 
     if (loading || carregando) {
         return (
