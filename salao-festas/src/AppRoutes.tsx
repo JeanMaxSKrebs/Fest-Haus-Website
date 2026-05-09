@@ -32,6 +32,7 @@ import Missoes from "./pages/Missoes";
 import Tiers from "./pages/Tiers";
 
 import PoliticaPrivacidade from "./pages/PoliticaPrivacidade";
+import ExclusaoConta from "./pages/ExclusaoConta";
 
 type PageTitleProps = {
   title: string;
@@ -224,6 +225,15 @@ function AppRoutes() {
           element={
             <PageTitle title="Política de Privacidade | Fest Haus">
               <PoliticaPrivacidade />
+            </PageTitle>
+          }
+        />
+
+        <Route
+          path="/exclusao-de-conta"
+          element={
+            <PageTitle title="Exclusão de Conta | Fest Haus">
+              <ExclusaoConta />
             </PageTitle>
           }
         />
